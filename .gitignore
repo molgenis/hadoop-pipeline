@@ -1,5 +1,11 @@
 *.class
 
+# Mac custom folder attributes
+.DS_Store
+
+# Eclipse project settings folder
+.settings/
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
