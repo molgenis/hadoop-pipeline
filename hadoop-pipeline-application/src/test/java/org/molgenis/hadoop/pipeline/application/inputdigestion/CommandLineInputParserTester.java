@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CommandLineInputParserTester
@@ -37,6 +38,8 @@ public class CommandLineInputParserTester
 	Path bwaRefFastaFaiAsPath;
 	Path bwaRefFastaPacAsPath;
 	Path bwaRefFastaSaAsPath;
+
+	String[] args;
 
 	/**
 	 * Executes basic code needed for the tests.
@@ -76,10 +79,30 @@ public class CommandLineInputParserTester
 		bwaRefFastaFaiAsPath = new Path(bwaRefFastaFai);
 		bwaRefFastaPacAsPath = new Path(bwaRefFastaPac);
 		bwaRefFastaSaAsPath = new Path(bwaRefFastaSa);
+
+		// Create arguments string for the command line parser input.
+		args = new String[8];
 	}
 
 	/**
-	 * Test: If all input is correct.
+	 * Resets command line string to default before each test.
+	 */
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		// Defines the default command line input.
+		args[0] = "-t";
+		args[1] = tools;
+		args[2] = "-i";
+		args[3] = inputDir;
+		args[4] = "-o";
+		args[5] = outputDir;
+		args[6] = "-bwa";
+		args[7] = bwaRefFasta;
+	}
+
+	/**
+	 * Test: If all input is correct. If this test is valid, only the adjusted inputs need to be retested.
 	 * 
 	 * @throws ParseException
 	 * @throws IOException
@@ -87,17 +110,6 @@ public class CommandLineInputParserTester
 	@Test
 	public void allValidInput() throws ParseException, IOException
 	{
-		String[] args = new String[9];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = tools;
-		args[3] = "-i";
-		args[4] = inputDir;
-		args[5] = "-o";
-		args[6] = outputDir;
-		args[7] = "-bwa";
-		args[8] = bwaRefFasta;
-
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
 		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
@@ -122,14 +134,13 @@ public class CommandLineInputParserTester
 	@Test(expectedExceptions = MissingOptionException.class)
 	public void missingBwaIndexArgument() throws ParseException, IOException
 	{
-		String[] args = new String[7];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = tools;
-		args[3] = "-i";
-		args[4] = inputDir;
-		args[5] = "-o";
-		args[6] = outputDir;
+		String[] args = new String[6];
+		args[0] = "-t";
+		args[1] = tools;
+		args[2] = "-i";
+		args[3] = inputDir;
+		args[4] = "-o";
+		args[5] = outputDir;
 
 		new CommandLineInputParser(fileSys, args);
 	}
@@ -144,30 +155,11 @@ public class CommandLineInputParserTester
 	public void nonExistingToolsArchive() throws ParseException, IOException
 	{
 		String invalidTools = classLoader.getResource("").toString() + "non_existing.tar.gz";
-
-		String[] args = new String[9];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = invalidTools;
-		args[3] = "-i";
-		args[4] = inputDir;
-		args[5] = "-o";
-		args[6] = outputDir;
-		args[7] = "-bwa";
-		args[8] = bwaRefFasta;
+		args[1] = invalidTools;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
 		Assert.assertEquals(new Path(invalidTools), parser.getToolsArchiveLocation());
-		Assert.assertEquals(inputDirAsPath, parser.getInputDir());
-		Assert.assertEquals(outputDirAsPath, parser.getOutputDir());
-		Assert.assertEquals(bwaRefFastaAsPath, parser.getAlignmentReferenceFastaFile());
-		Assert.assertEquals(bwaRefFastaAmbAsPath, parser.getAlignmentReferenceFastaAmbFile());
-		Assert.assertEquals(bwaRefFastaAnnAsPath, parser.getAlignmentReferenceFastaAnnFile());
-		Assert.assertEquals(bwaRefFastaBwtAsPath, parser.getAlignmentReferenceFastaBwtFile());
-		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
-		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
-		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
 		Assert.assertEquals(false, parser.isContinueApplication());
 	}
 
@@ -181,30 +173,11 @@ public class CommandLineInputParserTester
 	public void nonExistingInputDir() throws ParseException, IOException
 	{
 		String invalidInputDir = classLoader.getResource("").toString() + "non_existing_input/";
-
-		String[] args = new String[9];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = tools;
-		args[3] = "-i";
-		args[4] = invalidInputDir;
-		args[5] = "-o";
-		args[6] = outputDir;
-		args[7] = "-bwa";
-		args[8] = bwaRefFasta;
+		args[3] = invalidInputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
 		Assert.assertEquals(new Path(invalidInputDir), parser.getInputDir());
-		Assert.assertEquals(outputDirAsPath, parser.getOutputDir());
-		Assert.assertEquals(bwaRefFastaAsPath, parser.getAlignmentReferenceFastaFile());
-		Assert.assertEquals(bwaRefFastaAmbAsPath, parser.getAlignmentReferenceFastaAmbFile());
-		Assert.assertEquals(bwaRefFastaAnnAsPath, parser.getAlignmentReferenceFastaAnnFile());
-		Assert.assertEquals(bwaRefFastaBwtAsPath, parser.getAlignmentReferenceFastaBwtFile());
-		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
-		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
-		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
 		Assert.assertEquals(false, parser.isContinueApplication());
 	}
 
@@ -218,17 +191,7 @@ public class CommandLineInputParserTester
 	public void nonExistingOutputParentDir() throws ParseException, IOException
 	{
 		String invalidOutputDir = classLoader.getResource("").toString() + "output/another_output/";
-
-		String[] args = new String[9];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = tools;
-		args[3] = "-i";
-		args[4] = inputDir;
-		args[5] = "-o";
-		args[6] = invalidOutputDir;
-		args[7] = "-bwa";
-		args[8] = bwaRefFasta;
+		args[5] = invalidOutputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
@@ -255,17 +218,7 @@ public class CommandLineInputParserTester
 	public void outputDirAlreadyExists() throws ParseException, IOException
 	{
 		String invalidOutputDir = classLoader.getResource("").toString();
-
-		String[] args = new String[9];
-		args[0] = ""; // main class
-		args[1] = "-t";
-		args[2] = tools;
-		args[3] = "-i";
-		args[4] = inputDir;
-		args[5] = "-o";
-		args[6] = invalidOutputDir;
-		args[7] = "-bwa";
-		args[8] = bwaRefFasta;
+		args[5] = invalidOutputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
