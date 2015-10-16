@@ -8,13 +8,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
+import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class CommandLineInputParserTester
+public class CommandLineInputParserTester extends Tester
 {
-	ClassLoader classLoader;
 	FileSystem fileSys;
 
 	String tools;
@@ -49,24 +49,20 @@ public class CommandLineInputParserTester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		classLoader = Thread.currentThread().getContextClassLoader();
-		// System.out.println(classLoader.getResource("").toString());
-		// Output: <path/to/dir>/hadoop-pipeline/hadoop-pipeline-application/target/test-classes/
-
 		Configuration conf = new Configuration();
 		fileSys = FileSystem.get(conf);
 
 		// String objects that function as input.
-		tools = classLoader.getResource("tools.tar.gz").toString();
-		inputDir = classLoader.getResource("").toString();
-		outputDir = classLoader.getResource("").toString() + "output/";
-		bwaRefFasta = classLoader.getResource("bwa_ref.fasta").toString();
-		bwaRefFastaAmb = classLoader.getResource("bwa_ref.fasta.amb").toString();
-		bwaRefFastaAnn = classLoader.getResource("bwa_ref.fasta.ann").toString();
-		bwaRefFastaBwt = classLoader.getResource("bwa_ref.fasta.bwt").toString();
-		bwaRefFastaFai = classLoader.getResource("bwa_ref.fasta.fai").toString();
-		bwaRefFastaPac = classLoader.getResource("bwa_ref.fasta.pac").toString();
-		bwaRefFastaSa = classLoader.getResource("bwa_ref.fasta.sa").toString();
+		tools = getClassLoader().getResource("tools.tar.gz").toString();
+		inputDir = getClassLoader().getResource("").toString();
+		outputDir = getClassLoader().getResource("").toString() + "output/";
+		bwaRefFasta = getClassLoader().getResource("bwa_ref.fasta").toString();
+		bwaRefFastaAmb = getClassLoader().getResource("bwa_ref.fasta.amb").toString();
+		bwaRefFastaAnn = getClassLoader().getResource("bwa_ref.fasta.ann").toString();
+		bwaRefFastaBwt = getClassLoader().getResource("bwa_ref.fasta.bwt").toString();
+		bwaRefFastaFai = getClassLoader().getResource("bwa_ref.fasta.fai").toString();
+		bwaRefFastaPac = getClassLoader().getResource("bwa_ref.fasta.pac").toString();
+		bwaRefFastaSa = getClassLoader().getResource("bwa_ref.fasta.sa").toString();
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);
@@ -154,7 +150,7 @@ public class CommandLineInputParserTester
 	@Test
 	public void nonExistingToolsArchive() throws ParseException, IOException
 	{
-		String invalidTools = classLoader.getResource("").toString() + "non_existing.tar.gz";
+		String invalidTools = getClassLoader().getResource("").toString() + "non_existing.tar.gz";
 		args[1] = invalidTools;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
@@ -172,7 +168,7 @@ public class CommandLineInputParserTester
 	@Test
 	public void nonExistingInputDir() throws ParseException, IOException
 	{
-		String invalidInputDir = classLoader.getResource("").toString() + "non_existing_input/";
+		String invalidInputDir = getClassLoader().getResource("").toString() + "non_existing_input/";
 		args[3] = invalidInputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
@@ -190,21 +186,12 @@ public class CommandLineInputParserTester
 	@Test
 	public void nonExistingOutputParentDir() throws ParseException, IOException
 	{
-		String invalidOutputDir = classLoader.getResource("").toString() + "output/another_output/";
+		String invalidOutputDir = getClassLoader().getResource("").toString() + "output/another_output/";
 		args[5] = invalidOutputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
-		Assert.assertEquals(inputDirAsPath, parser.getInputDir());
 		Assert.assertEquals(new Path(invalidOutputDir), parser.getOutputDir());
-		Assert.assertEquals(bwaRefFastaAsPath, parser.getAlignmentReferenceFastaFile());
-		Assert.assertEquals(bwaRefFastaAmbAsPath, parser.getAlignmentReferenceFastaAmbFile());
-		Assert.assertEquals(bwaRefFastaAnnAsPath, parser.getAlignmentReferenceFastaAnnFile());
-		Assert.assertEquals(bwaRefFastaBwtAsPath, parser.getAlignmentReferenceFastaBwtFile());
-		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
-		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
-		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
 		Assert.assertEquals(false, parser.isContinueApplication());
 	}
 
@@ -217,21 +204,12 @@ public class CommandLineInputParserTester
 	@Test
 	public void outputDirAlreadyExists() throws ParseException, IOException
 	{
-		String invalidOutputDir = classLoader.getResource("").toString();
+		String invalidOutputDir = getClassLoader().getResource("").toString();
 		args[5] = invalidOutputDir;
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
-		Assert.assertEquals(inputDirAsPath, parser.getInputDir());
 		Assert.assertEquals(new Path(invalidOutputDir), parser.getOutputDir());
-		Assert.assertEquals(bwaRefFastaAsPath, parser.getAlignmentReferenceFastaFile());
-		Assert.assertEquals(bwaRefFastaAmbAsPath, parser.getAlignmentReferenceFastaAmbFile());
-		Assert.assertEquals(bwaRefFastaAnnAsPath, parser.getAlignmentReferenceFastaAnnFile());
-		Assert.assertEquals(bwaRefFastaBwtAsPath, parser.getAlignmentReferenceFastaBwtFile());
-		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
-		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
-		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
 		Assert.assertEquals(false, parser.isContinueApplication());
 	}
 }

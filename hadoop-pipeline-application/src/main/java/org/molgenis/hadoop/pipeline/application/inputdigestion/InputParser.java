@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class InputParser
+public abstract class InputParser
 {
 	/**
 	 * File system for validating existence files given as input.
