@@ -6,11 +6,10 @@ package org.molgenis.hadoop.pipeline.application;
 public abstract class Tester
 {
 	/**
-	 * ClassLoader object to view files on disk for testing purposes.
+	 * ClassLoader object to view test resource files. Test files can be retrieved using {@code getResource()}, where an
+	 * empty {@link String} will refer to the folder {@code target/test-classes}.
 	 */
 	private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-	// System.out.println(classLoader.getResource("").toString());
-	// Output: <path/to/dir>/hadoop-pipeline/hadoop-pipeline-application/target/test-classes/
 
 	protected ClassLoader getClassLoader()
 	{
