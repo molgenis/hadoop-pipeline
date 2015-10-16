@@ -15,6 +15,9 @@ Before using the tool, be sure that the following has been done:
 	* `<bwa_reference_file_prefix>.fasta.sa`
 
 ### Creating a tools.tar.gz
+
+A `tools.tar.gz` is already supplied in the main directory. If this somehow does not work or is lost, please use the steps below to create a new one.
+
 1. Create a `tools` directory. to store the tools in.
 2. Add the following tools to the created directory:
 	* Burrows-Wheeler Aligner
@@ -30,7 +33,7 @@ The final hierachy of the created `tools.tar.gz` should look as follows:
 		|- tools/
 			|- bwa
 
-Note: The used tools folder/archive name is arbitrary, though they should have the same name. The rest of the structure should be left intact however!
+IMPORTANT: Be sure to use the exact naming as shown above!
 
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).
@@ -44,6 +47,8 @@ The needed file can be found at: `dist/HalvadeUploaderWithLibs.jar`
 2. From within the `hadoop-pipeline/hadoop-pipeline-application/` folder, use `mvn install` (Apache Maven) to create a jar file.
 
 The needed file can be found at: `target/HadoopPipelineApplicationWithDependencies.jar`
+
+Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests), please refer to its own [README](./hadoop-pipeline-application/README.md).
 
 ## Execution
 1. Upload the fastq files to HDFS using the halvade upload tool.
