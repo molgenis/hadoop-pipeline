@@ -59,12 +59,21 @@ public class BwaAlignerTester extends Tester
 		// Prepares and executes the alignment
 		BwaAligner bwaAlinger = new BwaAligner(getClassLoader().getResource("tools/bwa").getPath(),
 				new String(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").getPath()));
-		bwaAlinger.setInputData(inputData);
+		bwaAlinger.setProcessInputData(inputData);
 		String results = bwaAlinger.call();
 
 		// Splits the results for easier comparison with the expected results.
 		String[] resultSplits = results.split(System.lineSeparator());
 		String[] samPg = resultSplits[1].split("\\s+");
+
+		// Writes the first few lines from the bwa alignment to stdout (for manual inspection as no automated comparison
+		// has yet been implemented due to reads that can be assigned to multiple locations being assigned randomly
+		// every time).
+		System.out.println("### Bwa Aligner output (first few lines) ###");
+		for (int i = 0; i < 10; i++)
+		{
+			System.out.println(resultSplits[i]);
+		}
 
 		// Compares the @SQ line.
 		Assert.assertEquals("@SQ	SN:1:20000000-21000000	LN:1000001", resultSplits[0]);
@@ -76,14 +85,5 @@ public class BwaAlignerTester extends Tester
 		Assert.assertEquals("-p", samPg[6]);
 		Assert.assertEquals("-M", samPg[7]);
 		Assert.assertEquals("-", samPg[9]);
-
-		// Writes the first few lines from the bwa alignment to stdout (for manual inspection as no automated comparison
-		// has yet been implemented due to reads that can be assigned to multiple locations being assigned randomly
-		// every time).
-		System.out.println("### Bwa Aligner output (first few lines) ###");
-		for (int i = 0; i < 10; i++)
-		{
-			System.out.println(resultSplits[i]);
-		}
 	}
 }

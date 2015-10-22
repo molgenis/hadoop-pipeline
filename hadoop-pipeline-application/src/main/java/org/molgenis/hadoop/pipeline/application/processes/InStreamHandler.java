@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Handles the stream written to the process.
+ * Handles the streams retrieved from the process.
  */
 public class InStreamHandler extends StreamHandler
 {
@@ -17,22 +17,22 @@ public class InStreamHandler extends StreamHandler
 	/**
 	 * Object to which the output stream will be written to.
 	 */
-	StringContainer stringContainer;
+	InContainer inContainer;
 
 	/**
 	 * Initiates a new {@link InStreamHandler} instance that stores the required data.
 	 * 
 	 * @param outStream
-	 * @param inputData
+	 * @param inContainer
 	 */
-	InStreamHandler(InputStream processStream, StringContainer stringContainer)
+	InStreamHandler(InputStream processStream, InContainer inContainer)
 	{
 		this.processStream = processStream;
-		this.stringContainer = stringContainer;
+		this.inContainer = inContainer;
 	}
 
 	/**
-	 * Fills the {@link StringContainer} with the process output stream.
+	 * Fills the {@link StringInContainer} with the process output stream.
 	 */
 	@Override
 	public void run()
@@ -41,7 +41,7 @@ public class InStreamHandler extends StreamHandler
 
 		while (scanner.hasNext())
 		{
-			stringContainer.appendWithNewLine(scanner.nextLine());
+			inContainer.add(scanner.nextLine());
 		}
 		scanner.close();
 	}

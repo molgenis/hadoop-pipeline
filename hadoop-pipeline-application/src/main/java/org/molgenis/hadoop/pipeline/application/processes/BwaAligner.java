@@ -24,6 +24,7 @@ public class BwaAligner extends PipelineProcess
 	public BwaAligner(String bwaTool, String alignmentReferenceFastaFile)
 	{
 		buildArgumentList(bwaTool, alignmentReferenceFastaFile);
+		inContainerFactory = InContainerFactory.STRINGWITHLINESEPERATOR;
 	}
 
 	/**
@@ -54,6 +55,6 @@ public class BwaAligner extends PipelineProcess
 	public String call() throws IOException, InterruptedException
 	{
 		logger.info("executing bwa alignment");
-		return super.call();
+		return (String) super.call();
 	}
 }

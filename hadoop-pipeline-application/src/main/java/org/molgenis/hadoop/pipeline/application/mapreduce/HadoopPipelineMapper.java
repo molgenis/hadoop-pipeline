@@ -58,7 +58,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	public void map(NullWritable key, BytesWritable value, Context context) throws IOException, InterruptedException
 	{
 		logger.info("running mapper");
-		bwaAligner.setInputData(value.getBytes());
+		bwaAligner.setProcessInputData(value.getBytes());
 		String results = bwaAligner.call();
 
 		context.write(key, new Text(results));
