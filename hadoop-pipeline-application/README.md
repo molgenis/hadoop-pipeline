@@ -7,7 +7,7 @@ The Hadoop MapReduce job jar.
 3. Extract the `hadoop-pipeline.tar.gz` to the exact same location as the created git clone (so that the directories will overlap with each other and the files will be placed in the correct locations).
 4. Go to the  `hadoop-pipeline-application` directory.
 5. Use `mvn install`.
-6. Execute `sh TestNGPreprocessing.sh` so that the `tools.tar.gz` is copied and extracted to the `target/test-classes/` folder.
+6. Execute `sh TestNGPreprocessing.sh`.
 
 An executable jar is created and the TestNG tests can now be executed.
 
