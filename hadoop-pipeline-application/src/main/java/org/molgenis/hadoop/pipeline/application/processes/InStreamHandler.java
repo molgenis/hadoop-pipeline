@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -36,7 +37,7 @@ public class InStreamHandler extends StreamHandler
 	@Override
 	public void run()
 	{
-		Scanner scanner = new Scanner(processStream, "UTF-8");
+		Scanner scanner = new Scanner(processStream, StandardCharsets.UTF_8.name());
 
 		while (scanner.hasNext())
 		{
