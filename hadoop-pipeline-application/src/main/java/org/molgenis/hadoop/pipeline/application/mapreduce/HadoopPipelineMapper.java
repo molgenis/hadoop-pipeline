@@ -74,10 +74,11 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	 */
 	private void retrieveCache() throws IllegalArgumentException, IOException
 	{
-		// URI[] cacheArchives = context.getCacheArchives();
+		URI[] cacheArchives = context.getCacheArchives();
 		URI[] cacheFiles = context.getCacheFiles();
 
-		bwaTool = new String("./tools.tar.gz/tools/bwa");
+		bwaTool = new String("./" + retrieveFileName(cacheArchives[0]) + "/tools/bwa");
+		// bwaTool = new String("./tools.tar.gz/tools/bwa");
 
 		alignmentReferenceFastaFile = new String("./" + retrieveFileName(cacheFiles[0]));
 	}

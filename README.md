@@ -31,7 +31,9 @@ The needed file can be found at: `target/HadoopPipelineApplicationWithDependenci
 Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests), please refer to its own [README](./hadoop-pipeline-application/README.md).
 
 ### Creating a tools.tar.gz
-On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` file can be found containing several testing files and an already prepared `tools.tar.gz`. If this file does not work or is lost, please use the steps below to create a new one.
+On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux and Mac OS. If these tool archives do not work or the download link does not, please use the steps below to create a new one.
+
+IMPORTANT: When creating binaries, be sure to compile them on the same operating system as the Hadoop cluster uses. Furthermore, these created binaries need to be static!
 
 1. Create a `tools` directory. to store the tools in.
 2. Add the following tools to the created directory:
@@ -40,15 +42,15 @@ On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hado
 		2. Extract the archive.
 		3. From inside the extracted archive, use `make` (GNU Make) to create an executable file.
 		4. Copy the created executable file from the extracted archive to the tools directory.
-3. From the directory storing the tools folder, create a `.tar.gz` archive using `tar -zcf tools.tar.gz tools/`
+3. From the directory storing the tools folder, create a `.tar.gz` archive using `tar -zcf <archive_name>.tar.gz tools/`
 
-The final hierachy of the created `tools.tar.gz` should look as follows:
+The final hierachy of the created tools `.tar.gz` should look as follows:
 
-	tools.tar.gz
+	<archive_name>.tar.gz
 		|- tools/
 			|- bwa
 
-IMPORTANT: Be sure to use the exact naming as shown above!
+IMPORTANT: Be sure to use the exact naming as shown above! Onle the archive name itself does not matter.
 
 ## Execution
 1. Upload the fastq files to HDFS using the halvade upload tool.
