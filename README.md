@@ -31,7 +31,7 @@ The needed file can be found at: `target/HadoopPipelineApplicationWithDependenci
 Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests), please refer to its own [README](./hadoop-pipeline-application/README.md).
 
 ### Creating a tools.tar.gz
-On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux and Mac OS. If these tool archives do not work or the download link does not, please use the steps below to create a new one.
+On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux (tested on a Hadoop cluster running CentOS 6) and OS X (tested on v10.10.5). If these tool archives do not work or the download link does not, please use the steps below to create a new one.
 
 IMPORTANT: When creating binaries, be sure to compile them on the same operating system as the Hadoop cluster uses. Furthermore, these created binaries need to be static!
 

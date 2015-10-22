@@ -53,7 +53,7 @@ public class CommandLineInputParserTester extends Tester
 		fileSys = FileSystem.get(conf);
 
 		// String objects that function as input.
-		tools = getClassLoader().getResource("tools.tar.gz").toString();
+		tools = getClassLoader().getResource("linux_tools.tar.gz").toString();
 		inputDir = getClassLoader().getResource("").toString();
 		outputDir = getClassLoader().getResource("").toString() + "output/";
 		bwaRefFasta = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").toString();
