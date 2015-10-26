@@ -15,7 +15,7 @@ public abstract class InputParser
 	/**
 	 * Switch that only allows the MapReduce phase to start if all required files exist.
 	 */
-	protected boolean continueApplication;
+	protected boolean continueApplication = false;
 
 	/**
 	 * Location of the .tar.gz archive containing the required tools.
