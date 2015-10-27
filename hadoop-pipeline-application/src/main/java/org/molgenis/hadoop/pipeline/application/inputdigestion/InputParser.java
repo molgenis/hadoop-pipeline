@@ -10,62 +10,67 @@ public abstract class InputParser
 	/**
 	 * File system for validating existence files given as input.
 	 */
-	protected FileSystem fileSys;
+	private FileSystem fileSys;
 
 	/**
 	 * Switch that only allows the MapReduce phase to start if all required files exist.
 	 */
-	protected boolean continueApplication = false;
+	private boolean continueApplication = false;
 
 	/**
 	 * Location of the .tar.gz archive containing the required tools.
 	 */
-	protected Path toolsArchiveLocation;
+	private Path toolsArchiveLocation;
 
 	/**
 	 * Location with input files.
 	 */
-	protected Path inputDir;
+	private Path inputDir;
 
 	/**
 	 * Location results can be written to.
 	 */
-	protected Path outputDir;
+	private Path outputDir;
 
 	/**
 	 * Location BWA index .fasta file for alignment.
 	 */
-	protected Path alignmentReferenceFastaFile;
+	private Path alignmentReferenceFastaFile;
 
 	/**
 	 * Location BWA index .fasta.amb file for alignment.
 	 */
-	protected Path alignmentReferenceFastaAmbFile;
+	private Path alignmentReferenceFastaAmbFile;
 
 	/**
 	 * Location BWA index .fasta.ann file for alignment.
 	 */
-	protected Path alignmentReferenceFastaAnnFile;
+	private Path alignmentReferenceFastaAnnFile;
 
 	/**
 	 * Location BWA index .fasta.bwt file for alignment.
 	 */
-	protected Path alignmentReferenceFastaBwtFile;
+	private Path alignmentReferenceFastaBwtFile;
 
 	/**
 	 * Location BWA index .fasta.fai file for alignment.
 	 */
-	protected Path alignmentReferenceFastaFaiFile;
+	private Path alignmentReferenceFastaFaiFile;
 
 	/**
 	 * Location BWA index .fasta.pac file for alignment.
 	 */
-	protected Path alignmentReferenceFastaPacFile;
+	private Path alignmentReferenceFastaPacFile;
 
 	/**
 	 * Location BWA index .fasta.sa file for alignment.
 	 */
-	protected Path alignmentReferenceFastaSaFile;
+	private Path alignmentReferenceFastaSaFile;
+
+	protected void setFileSys(FileSystem fileSys)
+	{
+		this.fileSys = fileSys;
+	}
 
 	public boolean isContinueApplication()
 	{
@@ -77,9 +82,29 @@ public abstract class InputParser
 		return toolsArchiveLocation;
 	}
 
+	protected void setToolsArchiveLocation(Path toolsArchiveLocation)
+	{
+		this.toolsArchiveLocation = toolsArchiveLocation;
+	}
+
+	protected void setToolsArchiveLocation(String toolsArchiveLocation)
+	{
+		this.toolsArchiveLocation = new Path(toolsArchiveLocation);
+	}
+
 	public Path getInputDir()
 	{
 		return inputDir;
+	}
+
+	protected void setInputDir(Path inputDir)
+	{
+		this.inputDir = inputDir;
+	}
+
+	protected void setInputDir(String inputDir)
+	{
+		this.inputDir = new Path(inputDir);
 	}
 
 	public Path getOutputDir()
@@ -87,9 +112,54 @@ public abstract class InputParser
 		return outputDir;
 	}
 
+	protected void setOutputDir(Path outputDir)
+	{
+		this.outputDir = outputDir;
+	}
+
+	protected void setOutputDir(String outputDir)
+	{
+		this.outputDir = new Path(outputDir);
+	}
+
 	public Path getAlignmentReferenceFastaFile()
 	{
 		return alignmentReferenceFastaFile;
+	}
+
+	/**
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
+	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * 
+	 * @param alignmentReferenceFastaFile
+	 */
+	protected void setAlignmentReferenceFastaFiles(Path alignmentReferenceFastaFile)
+	{
+		String mainFastaFile = alignmentReferenceFastaFile.toString();
+		this.alignmentReferenceFastaFile = alignmentReferenceFastaFile;
+		alignmentReferenceFastaAmbFile = new Path(mainFastaFile + ".amb");
+		alignmentReferenceFastaAnnFile = new Path(mainFastaFile + ".ann");
+		alignmentReferenceFastaBwtFile = new Path(mainFastaFile + ".bwt");
+		alignmentReferenceFastaFaiFile = new Path(mainFastaFile + ".fai");
+		alignmentReferenceFastaPacFile = new Path(mainFastaFile + ".pac");
+		alignmentReferenceFastaSaFile = new Path(mainFastaFile + ".sa");
+	}
+
+	/**
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
+	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * 
+	 * @param alignmentReferenceFastaFile
+	 */
+	protected void setAlignmentReferenceFastaFiles(String alignmentReferenceFastaFile)
+	{
+		this.alignmentReferenceFastaFile = new Path(alignmentReferenceFastaFile);
+		alignmentReferenceFastaAmbFile = new Path(alignmentReferenceFastaFile + ".amb");
+		alignmentReferenceFastaAnnFile = new Path(alignmentReferenceFastaFile + ".ann");
+		alignmentReferenceFastaBwtFile = new Path(alignmentReferenceFastaFile + ".bwt");
+		alignmentReferenceFastaFaiFile = new Path(alignmentReferenceFastaFile + ".fai");
+		alignmentReferenceFastaPacFile = new Path(alignmentReferenceFastaFile + ".pac");
+		alignmentReferenceFastaSaFile = new Path(alignmentReferenceFastaFile + ".sa");
 	}
 
 	public Path getAlignmentReferenceFastaAmbFile()
