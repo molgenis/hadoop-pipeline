@@ -24,7 +24,9 @@ public class BwaAligner extends PipelineProcess
 	public BwaAligner(String bwaTool, String alignmentReferenceFastaFile)
 	{
 		buildArgumentList(bwaTool, alignmentReferenceFastaFile);
-		inContainerFactory = InContainerFactory.STRINGWITHLINESEPERATOR;
+
+		// Make sure the call method casts/returns the same format as defined in the PipelineInFactory enum!!!
+		pipelineInFactory = PipelineInFactory.SAM;
 	}
 
 	/**
@@ -52,9 +54,11 @@ public class BwaAligner extends PipelineProcess
 	 * @return {@link String}
 	 */
 	@Override
-	public String call() throws IOException, InterruptedException
+	public SamInContainer call() throws IOException, InterruptedException
 	{
 		logger.info("executing bwa alignment");
-		return (String) super.call();
+
+		// Make sure the call method casts/returns the same format as defined in the PipelineInFactory enum!!!
+		return (SamInContainer) super.call();
 	}
 }

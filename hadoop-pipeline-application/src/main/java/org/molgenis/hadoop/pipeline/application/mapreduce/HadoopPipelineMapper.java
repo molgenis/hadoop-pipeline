@@ -10,11 +10,14 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.processes.BwaAligner;
+import org.molgenis.hadoop.pipeline.application.processes.SamInContainer;
+
+import htsjdk.samtools.SAMRecord;
 
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, NullWritable, Text> // SAMRecordWritable
+public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, NullWritable, Text>
 {
 	/**
 	 * Logger to write information to.
@@ -24,21 +27,22 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	/**
 	 * Job context.
 	 */
-	Context context;
+	private Context context;
 
 	/**
 	 * BwaTool executable location.
 	 */
-	String bwaTool;
+	private String bwaTool;
+
 	/**
 	 * Alignment reference fasta file location (with index file having the same prefix and being in the same directory.
 	 */
-	String alignmentReferenceFastaFile;
+	private String alignmentReferenceFastaFile;
 
 	/**
 	 * BwaAligner instance to execute BWA alignment with.
 	 */
-	BwaAligner bwaAligner;
+	private BwaAligner bwaAligner;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -59,9 +63,12 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	{
 		logger.info("running mapper");
 		bwaAligner.setProcessInputData(value.getBytes());
-		String results = bwaAligner.call();
+		SamInContainer results = bwaAligner.call();
 
-		context.write(key, new Text(results));
+		for (SAMRecord record : results.get())
+		{
+			context.write(key, new Text(record.getSAMString().trim()));
+		}
 	}
 
 	/**
@@ -78,8 +85,6 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 		URI[] cacheFiles = context.getCacheFiles();
 
 		bwaTool = new String("./" + retrieveFileName(cacheArchives[0]) + "/tools/bwa");
-		// bwaTool = new String("./tools.tar.gz/tools/bwa");
-
 		alignmentReferenceFastaFile = new String("./" + retrieveFileName(cacheFiles[0]));
 	}
 

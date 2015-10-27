@@ -4,11 +4,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
+import org.apache.log4j.Logger;
+
 /**
  * Generic command line process using an executable, in stream, out stream and error stream.
  */
 public abstract class PipelineProcess implements Callable<Object>
 {
+	/**
+	 * Logger to write information to.
+	 */
+	private static final Logger logger = Logger.getLogger(BwaAligner.class);
+
 	/**
 	 * Contains the command line to be executed.
 	 */
@@ -21,7 +28,7 @@ public abstract class PipelineProcess implements Callable<Object>
 	/**
 	 * The container type which will be used to store the process output stream in.
 	 */
-	protected InContainerFactory inContainerFactory;
+	protected PipelineInFactory pipelineInFactory;
 
 	public byte[] getProcessInputData()
 	{
@@ -33,15 +40,10 @@ public abstract class PipelineProcess implements Callable<Object>
 		this.processInputData = inputData;
 	}
 
-	public InContainerFactory getInContainerType()
-	{
-		return inContainerFactory;
-	}
-
 	/**
 	 * Executes the process.
 	 */
-	public Object call() throws IOException, InterruptedException
+	public InContainer call() throws IOException, InterruptedException
 	{
 		ProcessBuilder builder = new ProcessBuilder(commandLineArguments);
 
@@ -51,16 +53,19 @@ public abstract class PipelineProcess implements Callable<Object>
 		new OutStreamHandler(process.getOutputStream(), processInputData).start();
 
 		// Create containers to store the error/output stream results into.
-		StringInContainer errContainer = new StringInContainer();
-		InContainer inContainer = inContainerFactory.getContainer();
+		LinesInContainer errContainer = new LinesInContainer();
+		InContainer inContainer = pipelineInFactory.getContainer();
 
 		// Create and start the reading of the error/output stream.
-		new InStreamHandler(process.getErrorStream(), errContainer).start();
-		new InStreamHandler(process.getInputStream(), inContainer).start();
+		new LinesInStreamHandler(process.getErrorStream(), errContainer).start();
+		pipelineInFactory.getInStreamHandler(process.getInputStream(), inContainer).start();
 
 		// Makes the application wait for the process to finish before continuing.
 		process.waitFor();
 
-		return inContainer.get();
+		// Prints any errors to the log.
+		logger.error(errContainer.toString());
+
+		return inContainer;
 	}
 }

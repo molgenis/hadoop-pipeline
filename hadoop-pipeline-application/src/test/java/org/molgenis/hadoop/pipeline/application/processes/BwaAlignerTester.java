@@ -1,17 +1,19 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
+import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import junit.framework.Assert;
+import htsjdk.samtools.SAMRecord;
 
 public class BwaAlignerTester extends Tester
 {
@@ -60,11 +62,11 @@ public class BwaAlignerTester extends Tester
 		BwaAligner bwaAlinger = new BwaAligner(getClassLoader().getResource("tools/bwa").getPath(),
 				new String(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").getPath()));
 		bwaAlinger.setProcessInputData(inputData);
-		String results = bwaAlinger.call();
+		SamInContainer results = bwaAlinger.call();
+		ArrayList<SAMRecord> records = results.get();
 
-		// Splits the results for easier comparison with the expected results.
-		String[] resultSplits = results.split(System.lineSeparator());
-		String[] samPg = resultSplits[1].split("\\s+");
+		System.out.println("### Command line stored in SamInContainer instance ###");
+		System.out.println(results.getHeader().getProgramRecords().get(0).getCommandLine());
 
 		// Writes the first few lines from the bwa alignment to stdout (for manual inspection as no automated comparison
 		// has yet been implemented due to reads that can be assigned to multiple locations being assigned randomly
@@ -72,18 +74,17 @@ public class BwaAlignerTester extends Tester
 		System.out.println("### Bwa Aligner output (first few lines) ###");
 		for (int i = 0; i < 10; i++)
 		{
-			System.out.println(resultSplits[i]);
+			System.out.println(records.get(i).getSAMString().trim());
 		}
 
 		// Compares the @SQ line.
-		Assert.assertEquals("@SQ	SN:1:20000000-21000000	LN:1000001", resultSplits[0]);
+		Assert.assertEquals("1:20000000-21000000",
+				results.getHeader().getSequenceDictionary().getSequence(0).getSequenceName());
+		Assert.assertEquals(1000001, results.getHeader().getSequenceDictionary().getSequence(0).getSequenceLength());
+
 		// Compares non-variable parts of the @PG line.
-		Assert.assertEquals("@PG", samPg[0]);
-		Assert.assertEquals("ID:bwa", samPg[1]);
-		Assert.assertEquals("PN:bwa", samPg[2]);
-		Assert.assertEquals("mem", samPg[5]);
-		Assert.assertEquals("-p", samPg[6]);
-		Assert.assertEquals("-M", samPg[7]);
-		Assert.assertEquals("-", samPg[9]);
+		Assert.assertEquals("bwa", results.getHeader().getProgramRecords().get(0).getId());
+		Assert.assertEquals("bwa", results.getHeader().getProgramRecords().get(0).getProgramName());
+		Assert.assertEquals("0.7.12-r1039", results.getHeader().getProgramRecords().get(0).getProgramVersion());
 	}
 }

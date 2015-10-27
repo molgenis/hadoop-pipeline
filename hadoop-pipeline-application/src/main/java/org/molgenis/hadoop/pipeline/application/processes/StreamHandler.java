@@ -17,10 +17,4 @@ public abstract class StreamHandler implements Runnable
 	{
 		thread.start();
 	}
-
-	@Override
-	public void run()
-	{
-	}
-
 }
