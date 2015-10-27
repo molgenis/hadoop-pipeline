@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 
 import org.apache.commons.cli.BasicParser;
@@ -34,7 +36,9 @@ public class CommandLineInputParser extends InputParser
 	 */
 	public CommandLineInputParser(FileSystem fileSys, String[] args) throws ParseException, IOException
 	{
-		this.fileSys = fileSys;
+		this.fileSys = requireNonNull(fileSys);
+		requireNonNull(args);
+
 		createOptions();
 		retrieveParser(args);
 		digestCommandLine();

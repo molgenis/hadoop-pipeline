@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -23,6 +25,9 @@ public class BwaAligner extends PipelineProcess
 	 */
 	public BwaAligner(String bwaTool, String alignmentReferenceFastaFile)
 	{
+		requireNonNull(bwaTool);
+		requireNonNull(alignmentReferenceFastaFile);
+
 		buildArgumentList(bwaTool, alignmentReferenceFastaFile);
 
 		// Make sure the call method casts/returns the same format as defined in the PipelineInFactory enum!!!

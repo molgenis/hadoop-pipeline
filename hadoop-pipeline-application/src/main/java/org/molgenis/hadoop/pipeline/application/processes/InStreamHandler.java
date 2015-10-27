@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.InputStream;
 
 /**
@@ -25,8 +27,8 @@ public abstract class InStreamHandler extends StreamHandler
 	 */
 	InStreamHandler(InputStream processStream, InContainer inContainer)
 	{
-		this.processStream = processStream;
-		this.inContainer = inContainer;
+		this.processStream = requireNonNull(processStream);
+		this.inContainer = requireNonNull(inContainer);
 	}
 
 	/**
@@ -36,6 +38,6 @@ public abstract class InStreamHandler extends StreamHandler
 	 */
 	InStreamHandler(InputStream processStream)
 	{
-		this.processStream = processStream;
+		this.processStream = requireNonNull(processStream);
 	}
 }

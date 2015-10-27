@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -33,8 +35,8 @@ public class OutStreamHandler extends StreamHandler
 	 */
 	OutStreamHandler(OutputStream outStream, byte[] inputData)
 	{
-		this.outStream = outStream;
-		this.inputData = inputData;
+		this.outStream = requireNonNull(outStream);
+		this.inputData = requireNonNull(inputData);
 	}
 
 	/**

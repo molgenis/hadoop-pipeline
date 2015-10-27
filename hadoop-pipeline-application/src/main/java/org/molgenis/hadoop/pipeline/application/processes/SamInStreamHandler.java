@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -35,7 +37,7 @@ public class SamInStreamHandler extends InStreamHandler
 	SamInStreamHandler(InputStream processStream, SamInContainer inContainer)
 	{
 		super(processStream);
-		this.inContainer = inContainer;
+		this.inContainer = requireNonNull(inContainer);
 	}
 
 	/**

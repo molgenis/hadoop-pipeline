@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -23,7 +25,7 @@ public class LinesInStreamHandler extends InStreamHandler
 	LinesInStreamHandler(InputStream processStream, LinesInContainer inContainer)
 	{
 		super(processStream);
-		this.inContainer = inContainer;
+		this.inContainer = requireNonNull(inContainer);
 	}
 
 	/**
