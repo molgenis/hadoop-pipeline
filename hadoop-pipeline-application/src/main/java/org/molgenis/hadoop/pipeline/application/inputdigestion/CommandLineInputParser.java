@@ -13,6 +13,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.fs.FileSystem;
 
+/**
+ * Parser to digest command line arguments.
+ */
 public class CommandLineInputParser extends InputParser
 {
 	/**

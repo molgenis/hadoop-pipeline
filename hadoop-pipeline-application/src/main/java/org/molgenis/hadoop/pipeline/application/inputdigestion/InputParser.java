@@ -5,6 +5,9 @@ import java.io.IOException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+/**
+ * Abstract parser for storing/validating information needed elsewhere in the application.
+ */
 public abstract class InputParser
 {
 	/**
