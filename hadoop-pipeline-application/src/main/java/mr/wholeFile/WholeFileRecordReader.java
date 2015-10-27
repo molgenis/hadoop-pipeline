@@ -27,6 +27,8 @@ package mr.wholeFile;
  * https://code.google.com/p/hadoop-course/source/list). As all commits
  * were made with the author name "dimamayteacher", this name was filled in
  * as copyright owner.
+ * 
+ * Furthermore, comments (line 106-109) have been added to the method getProgress().
  */
 
 import java.io.IOException;
@@ -101,6 +103,11 @@ public class WholeFileRecordReader extends RecordReader<NullWritable, BytesWrita
 	@Override
 	public float getProgress() throws IOException, InterruptedException
 	{
+		// Returns 0 as the input split (file) is processed by the mapper as a whole (instead of chunks from the split
+		// on which can be reported how many chunks of the total split has been processed). The split is either not
+		// processed or completely processed. If input split is completely processed, {@code nextKeyValue()} will return
+		// false.
+
 		// TODO Auto-generated method stub
 		return 0;
 	}
