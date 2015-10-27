@@ -8,7 +8,7 @@ public abstract class StreamHandler implements Runnable
 	/**
 	 * A new thread to execute the stream with.
 	 */
-	protected final Thread thread = new Thread(this);
+	private final Thread thread = new Thread(this);
 
 	/**
 	 * Initiates the stream writing (by calling {@code run()}).

@@ -12,23 +12,11 @@ public abstract class InStreamHandler extends StreamHandler
 	/**
 	 * Stores the write stream to be used.
 	 */
-	protected InputStream processStream;
+	private InputStream processStream;
 
-	/**
-	 * Object to which the output stream will be written to.
-	 */
-	protected InContainer inContainer;
-
-	/**
-	 * Initiates a new {@link InStreamHandler} instance.
-	 * 
-	 * @param processStream
-	 * @param inContainer
-	 */
-	InStreamHandler(InputStream processStream, InContainer inContainer)
+	protected InputStream getProcessStream()
 	{
-		this.processStream = requireNonNull(processStream);
-		this.inContainer = requireNonNull(inContainer);
+		return processStream;
 	}
 
 	/**

@@ -19,25 +19,30 @@ public abstract class PipelineProcess implements Callable<Object>
 	/**
 	 * Contains the command line to be executed.
 	 */
-	protected ArrayList<String> commandLineArguments;
+	private ArrayList<String> commandLineArguments;
 	/**
 	 * Contains the data to be written to the input stream of the process.
 	 */
-	protected byte[] processInputData;
+	private byte[] processInputData;
 
 	/**
 	 * The container type which will be used to store the process output stream in.
 	 */
-	protected PipelineInFactory pipelineInFactory;
+	private PipelineInFactory pipelineInFactory;
 
-	public byte[] getProcessInputData()
+	protected void setCommandLineArguments(ArrayList<String> commandLineArguments)
 	{
-		return processInputData;
+		this.commandLineArguments = commandLineArguments;
 	}
 
-	public void setProcessInputData(byte[] inputData)
+	public void setProcessInputData(byte[] processInputData)
 	{
-		this.processInputData = inputData;
+		this.processInputData = processInputData;
+	}
+
+	protected void setPipelineInFactory(PipelineInFactory pipelineInFactory)
+	{
+		this.pipelineInFactory = pipelineInFactory;
 	}
 
 	/**

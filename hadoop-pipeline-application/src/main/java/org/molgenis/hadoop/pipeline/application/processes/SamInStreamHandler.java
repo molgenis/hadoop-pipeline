@@ -48,7 +48,7 @@ public class SamInStreamHandler extends InStreamHandler
 	{
 		SamReaderFactory samReaderFactory = SamReaderFactory.makeDefault()
 				.validationStringency(ValidationStringency.LENIENT);
-		SamReader samReader = samReaderFactory.open(SamInputResource.of(processStream));
+		SamReader samReader = samReaderFactory.open(SamInputResource.of(getProcessStream()));
 		inContainer.setHeader(samReader.getFileHeader());
 		SAMRecordIterator samIterator = samReader.iterator();
 		while (samIterator.hasNext())

@@ -31,7 +31,7 @@ public class BwaAligner extends PipelineProcess
 		buildArgumentList(bwaTool, alignmentReferenceFastaFile);
 
 		// Make sure the call method casts/returns the same format as defined in the PipelineInFactory enum!!!
-		pipelineInFactory = PipelineInFactory.SAM;
+		setPipelineInFactory(PipelineInFactory.SAM);
 	}
 
 	/**
@@ -42,13 +42,14 @@ public class BwaAligner extends PipelineProcess
 	 */
 	private void buildArgumentList(String bwaTool, String alignmentReferenceFastaFile)
 	{
-		commandLineArguments = new ArrayList<String>();
+		ArrayList<String> commandLineArguments = new ArrayList<String>();
 		commandLineArguments.add(bwaTool);
 		commandLineArguments.add("mem");
 		commandLineArguments.add("-p");
 		commandLineArguments.add("-M");
 		commandLineArguments.add(alignmentReferenceFastaFile);
 		commandLineArguments.add("-");
+		setCommandLineArguments(commandLineArguments);
 
 		logger.debug("bwa process command line: " + commandLineArguments);
 	}

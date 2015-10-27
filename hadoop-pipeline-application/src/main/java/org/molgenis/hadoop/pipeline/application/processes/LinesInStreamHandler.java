@@ -34,7 +34,7 @@ public class LinesInStreamHandler extends InStreamHandler
 	@Override
 	public void run()
 	{
-		try (Scanner scanner = new Scanner(processStream, StandardCharsets.UTF_8.name()))
+		try (Scanner scanner = new Scanner(getProcessStream(), StandardCharsets.UTF_8.name()))
 		{
 			while (scanner.hasNext())
 			{
