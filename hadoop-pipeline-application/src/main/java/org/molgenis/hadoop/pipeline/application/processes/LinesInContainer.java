@@ -54,19 +54,17 @@ public class LinesInContainer implements InContainer
 	 */
 	public String getAsString(boolean newlineSeperator)
 	{
-		String string = "";
-		String endOfLine = "";
-
-		if (newlineSeperator)
-		{
-			endOfLine = System.lineSeparator();
-		}
+		StringBuilder sb = new StringBuilder();
 
 		for (String line : lines)
 		{
-			string += (line + endOfLine);
+			sb.append(line);
+			if (newlineSeperator)
+			{
+				sb.append(System.lineSeparator());
+			}
 		}
-		return string;
+		return sb.toString();
 	}
 
 	/**
