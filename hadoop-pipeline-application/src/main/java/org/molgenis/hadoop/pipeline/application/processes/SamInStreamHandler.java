@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import htsjdk.samtools.SAMRecordIterator;
@@ -64,6 +65,7 @@ public class SamInStreamHandler extends InStreamHandler
 		{
 			// If stream already closed, writes to error log.
 			logger.error("SamReader within SamInStreamHandler already closed when trying to close it.");
+			logger.debug(ExceptionUtils.getFullStackTrace(e));
 		}
 	}
 }
