@@ -3,7 +3,6 @@ package org.molgenis.hadoop.pipeline.application;
 import java.io.IOException;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.NullWritable;
@@ -51,13 +50,11 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			catch (Exception e) // Catches all internal errors.
 			{
 				logger.error(e.getMessage());
-				logger.debug(ExceptionUtils.getFullStackTrace(e));
 			}
 		}
 		catch (IOException e) // Catches errors caused by Hadoop's GenericOptionsParser.
 		{
 			logger.error(e.getMessage());
-			logger.debug(ExceptionUtils.getFullStackTrace(e));
 		}
 
 	}
