@@ -47,25 +47,30 @@ public class SamInStreamHandler extends InStreamHandler
 	@Override
 	public void run()
 	{
-		SamReaderFactory samReaderFactory = SamReaderFactory.makeDefault()
-				.validationStringency(ValidationStringency.LENIENT);
-		SamReader samReader = samReaderFactory.open(SamInputResource.of(getProcessStream()));
-		inContainer.setHeader(samReader.getFileHeader());
-		SAMRecordIterator samIterator = samReader.iterator();
-		while (samIterator.hasNext())
-		{
-			inContainer.add(samIterator.next());
-		}
-
+		SamReader samReader = null;
 		try
 		{
-			samReader.close();
+			SamReaderFactory samReaderFactory = SamReaderFactory.makeDefault()
+					.validationStringency(ValidationStringency.LENIENT);
+			samReader = samReaderFactory.open(SamInputResource.of(getProcessStream()));
+			inContainer.setHeader(samReader.getFileHeader());
+			SAMRecordIterator samIterator = samReader.iterator();
+			while (samIterator.hasNext())
+			{
+				inContainer.add(samIterator.next());
+			}
 		}
-		catch (IOException e)
+		finally
 		{
-			// If stream already closed, writes to error log.
-			logger.error("SamReader within SamInStreamHandler already closed when trying to close it.");
-			logger.debug(ExceptionUtils.getFullStackTrace(e));
+			try
+			{
+				samReader.close();
+			}
+			catch (IOException e)
+			{
+				logger.error("An error occured while trying to close the SamReader.");
+				logger.debug(ExceptionUtils.getFullStackTrace(e));
+			}
 		}
 	}
 }
