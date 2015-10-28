@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,6 +53,7 @@ public class OutStreamHandler extends StreamHandler
 		catch (IOException e)
 		{
 			logger.error("Error occured when trying to write to the OutputStream.");
+			logger.debug(ExceptionUtils.getFullStackTrace(e));
 		}
 		finally
 		{

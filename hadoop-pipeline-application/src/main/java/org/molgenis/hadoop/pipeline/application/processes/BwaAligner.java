@@ -62,7 +62,7 @@ public class BwaAligner extends PipelineProcess
 	@Override
 	public SamInContainer call() throws IOException, InterruptedException
 	{
-		logger.info("executing bwa alignment");
+		logger.info("Executing bwa alignment.");
 
 		// Make sure the call method casts/returns the same format as defined in the PipelineInFactory enum!!!
 		return (SamInContainer) super.call();
