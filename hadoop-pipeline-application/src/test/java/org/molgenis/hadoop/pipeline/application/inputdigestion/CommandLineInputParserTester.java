@@ -53,16 +53,16 @@ public class CommandLineInputParserTester extends Tester
 		fileSys = FileSystem.get(conf);
 
 		// String objects that function as input.
-		tools = getClassLoader().getResource("tools.tar.gz").toString();
+		tools = getClassLoader().getResource("linux_tools.tar.gz").toString();
 		inputDir = getClassLoader().getResource("").toString();
 		outputDir = getClassLoader().getResource("").toString() + "output/";
-		bwaRefFasta = getClassLoader().getResource("bwa_ref.fasta").toString();
-		bwaRefFastaAmb = getClassLoader().getResource("bwa_ref.fasta.amb").toString();
-		bwaRefFastaAnn = getClassLoader().getResource("bwa_ref.fasta.ann").toString();
-		bwaRefFastaBwt = getClassLoader().getResource("bwa_ref.fasta.bwt").toString();
-		bwaRefFastaFai = getClassLoader().getResource("bwa_ref.fasta.fai").toString();
-		bwaRefFastaPac = getClassLoader().getResource("bwa_ref.fasta.pac").toString();
-		bwaRefFastaSa = getClassLoader().getResource("bwa_ref.fasta.sa").toString();
+		bwaRefFasta = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").toString();
+		bwaRefFastaAmb = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.amb").toString();
+		bwaRefFastaAnn = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.ann").toString();
+		bwaRefFastaBwt = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.bwt").toString();
+		bwaRefFastaFai = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.fai").toString();
+		bwaRefFastaPac = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toString();
+		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);

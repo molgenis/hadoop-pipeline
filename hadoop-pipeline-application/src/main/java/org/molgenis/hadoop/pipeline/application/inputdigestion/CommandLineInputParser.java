@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 
 import org.apache.commons.cli.BasicParser;
@@ -10,8 +12,10 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
+/**
+ * Parser to digest command line arguments.
+ */
 public class CommandLineInputParser extends InputParser
 {
 	/**
@@ -34,7 +38,9 @@ public class CommandLineInputParser extends InputParser
 	 */
 	public CommandLineInputParser(FileSystem fileSys, String[] args) throws ParseException, IOException
 	{
-		this.fileSys = fileSys;
+		setFileSys(requireNonNull(fileSys));
+		requireNonNull(args);
+
 		createOptions();
 		retrieveParser(args);
 		digestCommandLine();
@@ -102,25 +108,19 @@ public class CommandLineInputParser extends InputParser
 	{
 		if (commandLine.hasOption("t"))
 		{
-			toolsArchiveLocation = new Path(commandLine.getOptionValue("t"));
+			setToolsArchiveLocation(commandLine.getOptionValue("t"));
 		}
 		if (commandLine.hasOption("i"))
 		{
-			inputDir = new Path(commandLine.getOptionValue("i"));
+			setInputDir(commandLine.getOptionValue("i"));
 		}
 		if (commandLine.hasOption("o"))
 		{
-			outputDir = new Path(commandLine.getOptionValue("o"));
+			setOutputDir(commandLine.getOptionValue("o"));
 		}
 		if (commandLine.hasOption("bwa"))
 		{
-			alignmentReferenceFastaFile = new Path(commandLine.getOptionValue("bwa"));
-			alignmentReferenceFastaAmbFile = new Path(commandLine.getOptionValue("bwa") + ".amb");
-			alignmentReferenceFastaAnnFile = new Path(commandLine.getOptionValue("bwa") + ".ann");
-			alignmentReferenceFastaBwtFile = new Path(commandLine.getOptionValue("bwa") + ".bwt");
-			alignmentReferenceFastaFaiFile = new Path(commandLine.getOptionValue("bwa") + ".fai");
-			alignmentReferenceFastaPacFile = new Path(commandLine.getOptionValue("bwa") + ".pac");
-			alignmentReferenceFastaSaFile = new Path(commandLine.getOptionValue("bwa") + ".sa");
+			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("bwa"));
 		}
 	}
 }
