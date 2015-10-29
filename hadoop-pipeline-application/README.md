@@ -11,4 +11,11 @@ The Hadoop MapReduce job jar.
 
 An executable jar is created and the TestNG tests can now be executed.
 
-IMPORTANT: Whenever doing `mvn clean`, follow the steps starting from step 5 before doing any TestNG tests!
+The `TestNGPreprocessing.sh` uses `uname` (without any arguments, so defaulting to `uname -s`) to look up the kernel name (as this is used to define which tools archive will be used).
+
+The following kernels are supported within the bash script:
+
+* Linux (implemented and working tools.tar.gz present, though this bash script hasn't been tested on a Linux system yet!)
+* Darwin
+
+IMPORTANT: Whenever doing `mvn clean`, follow the steps starting from step 5 before doing any TestNG tests again!

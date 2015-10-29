@@ -74,10 +74,10 @@ IMPORTANT: Be sure to use the exact naming as shown above! Only the archive name
 
 ## Troubleshooting
 
-Problem:
+__Problem:__
 The `-D` argument suggested below does not work.
 
-Solution:
+__Solution:__
 Be sure to place the `-D` argument right behind the `myapplication.jar` argument on the command line:
 
 	yarn jar myapplication.jar -D <key>=<value> <application-specific arguments here>
