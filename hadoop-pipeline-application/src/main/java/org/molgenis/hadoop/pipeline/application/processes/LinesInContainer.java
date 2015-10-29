@@ -8,29 +8,25 @@ import java.util.ArrayList;
 public class LinesInContainer implements InContainer
 {
 	/**
-	 * Registers if during adding items a {@link CLassCastException} occurred.
-	 */
-	private boolean classCastExceptionOccured = false;
-
-	/**
 	 * Stores individual lines.
 	 */
 	private ArrayList<String> lines = new ArrayList<String>();
 
 	/**
-	 * Add a line to the container. If {@code item} cannot be cast to a {@link String}, sets
-	 * {@code classCastExceptionOccured} to true.
+	 * Add a line to the container. If successful, returns true. If {@code item} could not be cast to a {@link String},
+	 * returns false instead.
 	 */
 	@Override
-	public void add(Object item)
+	public boolean add(Object item)
 	{
 		try
 		{
 			lines.add((String) item);
+			return true;
 		}
 		catch (ClassCastException e)
 		{
-			classCastExceptionOccured = true;
+			return false;
 		}
 	}
 
@@ -79,15 +75,8 @@ public class LinesInContainer implements InContainer
 	}
 
 	@Override
-	public boolean isClassCastExceptionOccured()
-	{
-		return classCastExceptionOccured;
-	}
-
-	@Override
 	public void clear()
 	{
 		lines.clear();
-		classCastExceptionOccured = false;
 	}
 }
