@@ -9,8 +9,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.processes.BwaAligner;
-import org.molgenis.hadoop.pipeline.application.processes.SamInContainer;
+import org.molgenis.hadoop.pipeline.application.processes.legacy.BwaAligner;
+import org.molgenis.hadoop.pipeline.application.processes.legacy.SamInContainer;
 
 import htsjdk.samtools.SAMRecord;
 
@@ -23,11 +23,6 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	 * Logger to write information to.
 	 */
 	private static final Logger logger = Logger.getLogger(HadoopPipelineMapper.class);
-
-	/**
-	 * Job context.
-	 */
-	private Context context;
 
 	/**
 	 * BwaTool executable location.
@@ -50,8 +45,8 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException
 	{
-		this.context = context;
-		retrieveCache();
+		retrieveCache(context);
+
 		bwaAligner = new BwaAligner(bwaTool, alignmentReferenceFastaFile);
 	}
 
@@ -62,6 +57,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	public void map(NullWritable key, BytesWritable value, Context context) throws IOException, InterruptedException
 	{
 		logger.info("running mapper");
+
 		bwaAligner.setProcessInputData(value.getBytes());
 		SamInContainer results = bwaAligner.call();
 
@@ -79,7 +75,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
-	private void retrieveCache() throws IllegalArgumentException, IOException
+	private void retrieveCache(Context context) throws IllegalArgumentException, IOException
 	{
 		URI[] cacheArchives = context.getCacheArchives();
 		URI[] cacheFiles = context.getCacheFiles();
