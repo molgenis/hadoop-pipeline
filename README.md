@@ -107,3 +107,11 @@ When running the HadoopPipelineApplication.jar, I get an error with exit code 25
 
 __Solution:__
 Try the solution above. If that does not solve the problem, please refer the the log files to find out what causes the error.
+
+---
+
+__Problem:__
+it seems like the application does nothing. It takes a lot longer than expected.
+
+__Solution:__
+This could be due to a lack of available memory to run the binary tools. If possible, try letting it run to see if it eventually throws a `java.lang.OutOfMemoryError: Java heap space` error/exit code 255. Alternatively, simply kill the job and initiate a new one with more memory (see solution above).
