@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 /**
  * Describes the storage objects used by {@link InStreamHandler}{@code s}.

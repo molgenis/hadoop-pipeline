@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 /**
  * Class containing generic code for streaming input/output using {@link Runnable}.

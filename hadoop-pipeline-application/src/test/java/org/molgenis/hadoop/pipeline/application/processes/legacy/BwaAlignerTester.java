@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
 import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.processes.legacy.BwaAligner;
+import org.molgenis.hadoop.pipeline.application.processes.legacy.SamInContainer;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

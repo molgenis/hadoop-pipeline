@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 import static java.util.Objects.requireNonNull;
 
@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.hadoop.pipeline.application.processes.legacy.StreamHandler;
 
 /**
  * Handles the stream writing to the process.
