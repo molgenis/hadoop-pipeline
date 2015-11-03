@@ -223,7 +223,7 @@ public class PipeRunnerTester extends Tester
 		};
 
 		// Runs the pipeline.
-		System.out.println("### SAMRecordSink bwa output ###");
+		System.out.println("### SamRecordSink bwa output ###");
 		PipeRunner.startPipeline(inputData, sink,
 				new ProcessBuilder(getClassLoader().getResource("tools/bwa").getPath(), "mem", "-p", "-M",
 						getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").getPath(), "-")
