@@ -14,7 +14,7 @@ A tools archive has already been created for the following kernels:
 * Linux (tested on CentOS 6.7)
 * Darwin (tested on OS X 10.10.5)
 
-If the created tool archives do not work properly, please view the general [README](../README.md) for information about how to create a tools archive.
+If the created tool archives do not work properly, please view the general [README](../README.md#creating-a-toolstargz) for information about how to create a tools archive.
 
 Within some TestNG tests a python script is used for testing the Process calling and input/output digestion. This is done by calling `python`, followed by the python script path and (where needed) some arguments. Note however that this python script has been tested to work with both Python v2.7.10 and Python v3.5.0, so it shouldn't matter whether the command `python` points to python2 or python3.
 
