@@ -10,7 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
 
 /**
- * Class for running a pipe of one or more processes.
+ * Class for running a pipe of one or more {@link Process}{@code es}.
  */
 public class PipeRunner implements Runnable
 {
@@ -98,7 +98,7 @@ public class PipeRunner implements Runnable
 		}
 		catch (IOException e)
 		{
-			throw new RuntimeException(e);
+			throw new ProcessPipeException(e);
 		}
 		finally
 		{

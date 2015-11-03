@@ -19,9 +19,9 @@ public abstract class Sink<T>
 	public abstract void handleInputStream(InputStream inputStream);
 
 	/**
-	 * Digests a single {@code <T>item} from the {@link InputStream} digested by {@code handleInputStream(inputStream)}.
-	 * This is done by calling {@code digestStreamItem(item)} from within {@code handleInputStream(inputStream)} for
-	 * each {@code <T>item} present in the {@link InputStream}.
+	 * Digests a single {@code <T>item} from the {@link InputStream} digested by {@link #handleInputStream(InputStream)}
+	 * . This is done by calling {@link #digestStreamItem(Object)} from within {@link #handleInputStream(InputStream)}
+	 * for each {@code <T>item} present in the {@link InputStream}.
 	 * 
 	 * @param item
 	 *            {@code <T>}
