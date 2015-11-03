@@ -197,7 +197,7 @@ public class PipeRunnerTester extends Tester
 		byte[] inputData = readFileAsByteArray("input_fastq/halvade_0_0.fq.gz");
 
 		// Describes the sink functionality (what has to be done for each record).
-		SAMRecordSink sink = new SAMRecordSink()
+		SamRecordSink sink = new SamRecordSink()
 		{
 			@Override
 			public void digestStreamItem(SAMRecord item)
