@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-import org.molgenis.hadoop.pipeline.application.processes.SAMRecordSink;
+import org.molgenis.hadoop.pipeline.application.processes.SamRecordSink;
 
 import htsjdk.samtools.SAMRecord;
 
@@ -53,7 +53,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	{
 		logger.info("running mapper");
 
-		SAMRecordSink sink = new SAMRecordSink()
+		SamRecordSink sink = new SamRecordSink()
 		{
 			@Override
 			public void digestStreamItem(SAMRecord item)

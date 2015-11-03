@@ -14,7 +14,7 @@ import htsjdk.samtools.ValidationStringency;
 /**
  * Sink for digesting SAM-formatted {@link InputStream}{@code s}.
  */
-public abstract class SAMRecordSink extends Sink<SAMRecord>
+public abstract class SamRecordSink extends Sink<SAMRecord>
 {
 	/**
 	 * Digests a SAM-formatted {@link InputStream}. For each {@link SAMRecord} present in the {@link InputStream},
