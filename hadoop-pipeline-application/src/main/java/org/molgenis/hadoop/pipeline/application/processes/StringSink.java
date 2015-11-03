@@ -8,8 +8,6 @@ import java.io.InputStreamReader;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
 
-import htsjdk.samtools.SAMRecord;
-
 /**
  * Sink for digesting input streams line-by-line.
  */
@@ -43,7 +41,7 @@ public abstract class StringSink extends Sink<String>
 	}
 
 	/**
-	 * Digests a single {@link SAMRecord}. Be sure to create a custom {@code @Override} implementation!
+	 * Digests a single line from the {@link InputStream}. Be sure to create a custom {@code @Override} implementation!
 	 * 
 	 * @param item
 	 *            {@link String}

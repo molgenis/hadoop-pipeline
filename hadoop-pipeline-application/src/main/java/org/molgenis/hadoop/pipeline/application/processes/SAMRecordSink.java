@@ -42,7 +42,8 @@ public abstract class SAMRecordSink extends Sink<SAMRecord>
 	}
 
 	/**
-	 * Digests a single {@link SAMRecord}. Be sure to create a custom {@code @Override} implementation!
+	 * Digests a single {@link SAMRecord} from the {@link InputStream}. Be sure to create a custom {@code @Override}
+	 * implementation!
 	 * 
 	 * @param item
 	 *            {@link SAMRecord}
