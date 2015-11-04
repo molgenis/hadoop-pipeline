@@ -74,10 +74,10 @@ IMPORTANT: Be sure to use the exact naming as shown above! Only the archive name
 
 ## Troubleshooting
 
-Problem:
+__Problem:__
 The `-D` argument suggested below does not work.
 
-Solution:
+__Solution:__
 Be sure to place the `-D` argument right behind the `myapplication.jar` argument on the command line:
 
 	yarn jar myapplication.jar -D <key>=<value> <application-specific arguments here>
@@ -107,3 +107,22 @@ When running the HadoopPipelineApplication.jar, I get an error with exit code 25
 
 __Solution:__
 Try the solution above. If that does not solve the problem, please refer the the log files to find out what causes the error.
+
+---
+
+__Problem:__
+it seems like the application does nothing. It takes a lot longer than expected.
+
+__Solution:__
+This could be due to a lack of available memory to run the binary tools. If possible, try letting it run to see if it eventually throws a `java.lang.OutOfMemoryError: Java heap space` error/exit code 255. Alternatively, simply kill the job and initiate a new one with more memory (see solution above).
+
+---
+
+__Problem:__
+I get an error similar to that shown below.
+
+	<year/month/day hours:minutes:seconds> INFO mapreduce.Job: Task Id : attempt_<attempt id>, Status : FAILED
+	AttemptID:attempt_<attempt id> Timed out after <number> secs
+
+__Solution:__
+Try increasing the time before Hadoop ends a mapper/reducer if it has not contacted the context yet. This can be done by increasing the `mapreduce.task.timeout` value (either in the cluster config files or by using `-D`).

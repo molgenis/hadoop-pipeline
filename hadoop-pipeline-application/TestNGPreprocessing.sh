@@ -38,7 +38,7 @@ function extractCorrectToolsArchive {
 	# Retrieve the operating system name.
 	unamestr=`uname`
 	
-	# Extract the correct 
+	# Extract the correct archive.
 	if [[ "$unamestr" == 'Linux' ]]; then
 		tar -zxvf linux_tools.tar.gz tools/
 	elif [[ "$unamestr" == 'Darwin' ]]; then

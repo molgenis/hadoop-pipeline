@@ -9,8 +9,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.processes.BwaAligner;
-import org.molgenis.hadoop.pipeline.application.processes.SamInContainer;
+import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
+import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
+import org.molgenis.hadoop.pipeline.application.processes.SamRecordSink;
 
 import htsjdk.samtools.SAMRecord;
 
@@ -25,11 +26,6 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	private static final Logger logger = Logger.getLogger(HadoopPipelineMapper.class);
 
 	/**
-	 * Job context.
-	 */
-	private Context context;
-
-	/**
 	 * BwaTool executable location.
 	 */
 	private String bwaTool;
@@ -40,35 +36,41 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	private String alignmentReferenceFastaFile;
 
 	/**
-	 * BwaAligner instance to execute BWA alignment with.
-	 */
-	private BwaAligner bwaAligner;
-
-	/**
 	 * Function called at the beginning of a task.
 	 */
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException
 	{
-		this.context = context;
-		retrieveCache();
-		bwaAligner = new BwaAligner(bwaTool, alignmentReferenceFastaFile);
+		retrieveCache(context);
 	}
 
 	/**
 	 * Function run on individual chunks of the data.
 	 */
 	@Override
-	public void map(NullWritable key, BytesWritable value, Context context) throws IOException, InterruptedException
+	public void map(final NullWritable key, BytesWritable value, final Context context)
+			throws IOException, InterruptedException
 	{
 		logger.info("running mapper");
-		bwaAligner.setProcessInputData(value.getBytes());
-		SamInContainer results = bwaAligner.call();
 
-		for (SAMRecord record : results.get())
+		SamRecordSink sink = new SamRecordSink()
 		{
-			context.write(key, new Text(record.getSAMString().trim()));
-		}
+			@Override
+			public void digestStreamItem(SAMRecord item)
+			{
+				try
+				{
+					context.write(key, new Text(item.getSAMString().trim()));
+				}
+				catch (IOException | InterruptedException e)
+				{
+					throw new ProcessPipeException(e);
+				}
+			}
+		};
+
+		PipeRunner.startPipeline(value.getBytes(), sink,
+				new ProcessBuilder(bwaTool, "mem", "-p", "-M", alignmentReferenceFastaFile, "-").start());
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
-	private void retrieveCache() throws IllegalArgumentException, IOException
+	private void retrieveCache(Context context) throws IllegalArgumentException, IOException
 	{
 		URI[] cacheArchives = context.getCacheArchives();
 		URI[] cacheFiles = context.getCacheFiles();

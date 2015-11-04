@@ -1,6 +1,7 @@
 bin/
 target/
 test-output/
-src/test/resources/
+src/test/resources/*
+!src/test/resources/*.py
 .classpath
 .project

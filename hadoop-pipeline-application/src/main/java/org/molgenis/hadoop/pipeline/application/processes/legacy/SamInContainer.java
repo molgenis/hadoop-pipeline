@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 import java.util.ArrayList;
 
@@ -11,11 +11,6 @@ import htsjdk.samtools.SAMRecord;
 public class SamInContainer implements InContainer
 {
 	/**
-	 * Registers if during adding items a {@link CLassCastException} occurred.
-	 */
-	boolean classCastExceptionOccured = false;
-
-	/**
 	 * Stores the {@link SAMFileHeader} (if present).
 	 */
 	private SAMFileHeader header = null;
@@ -26,21 +21,21 @@ public class SamInContainer implements InContainer
 	private ArrayList<SAMRecord> records = new ArrayList<SAMRecord>();
 
 	/**
-	 * Adds a {@link SAMRecord} to the container. If {@code item} cannot be cast to a {@link SAMRecord}, sets
-	 * {@code classCastExceptionOccured} to true.
+	 * Adds a {@link SAMRecord} to the container. If successful, returns true. If {@code item} could not be cast to a
+	 * {@link SAMRecord}, returns false instead.
 	 */
 	@Override
-	public void add(Object item)
+	public boolean add(Object item)
 	{
 		try
 		{
 			records.add((SAMRecord) item);
+			return true;
 		}
 		catch (ClassCastException e)
 		{
-			classCastExceptionOccured = true;
+			return false;
 		}
-
 	}
 
 	/**
@@ -75,16 +70,9 @@ public class SamInContainer implements InContainer
 	}
 
 	@Override
-	public boolean isClassCastExceptionOccured()
-	{
-		return classCastExceptionOccured;
-	}
-
-	@Override
 	public void clear()
 	{
 		header = null;
 		records.clear();
-		classCastExceptionOccured = false;
 	}
 }

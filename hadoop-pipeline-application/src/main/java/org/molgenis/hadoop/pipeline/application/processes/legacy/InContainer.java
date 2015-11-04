@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.processes.legacy;
 
 /**
  * Describes the storage objects used by {@link InStreamHandler}{@code s}.
@@ -6,11 +6,12 @@ package org.molgenis.hadoop.pipeline.application.processes;
 public interface InContainer
 {
 	/**
-	 * Adds an item to the container.
+	 * Adds an item to the container. Returns {@code true} if add was successful, otherwise returns {@code false}.
 	 * 
 	 * @param line
+	 * @return {@code boolean}
 	 */
-	public void add(Object item);
+	public boolean add(Object item);
 
 	/**
 	 * Returns an {@link Iterable} containing the individual pieces of data that were added.
@@ -18,13 +19,6 @@ public interface InContainer
 	 * @return {@link Iterable}
 	 */
 	public Iterable<?> get();
-
-	/**
-	 * Returns whether if during the addition of items a {@link ClassCastException} occurred.
-	 * 
-	 * @return {@code boolean}
-	 */
-	public boolean isClassCastExceptionOccured();
 
 	/**
 	 * Empties the container and sets all preset variables back to their defaults.
