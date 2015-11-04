@@ -47,7 +47,5 @@ public abstract class StringSink extends Sink<String>
 	 *            {@link String}
 	 */
 	@Override
-	protected void digestStreamItem(String item)
-	{
-	}
+	protected abstract void digestStreamItem(String item);
 }

@@ -49,8 +49,5 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	 *            {@link SAMRecord}
 	 */
 	@Override
-	protected void digestStreamItem(SAMRecord item)
-	{
-	}
-
+	protected abstract void digestStreamItem(SAMRecord item);
 }
