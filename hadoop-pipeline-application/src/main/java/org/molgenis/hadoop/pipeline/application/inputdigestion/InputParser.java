@@ -71,6 +71,11 @@ public abstract class InputParser
 	private Path alignmentReferenceFastaSaFile;
 
 	/**
+	 * Location of the dictionary belonging to the BWA index files for alignment.
+	 */
+	private Path alignmentReferenceDictFile;
+
+	/**
 	 * Location to the BED file containing the grouping for the SAM records.
 	 */
 	private Path bedFile;
@@ -151,6 +156,7 @@ public abstract class InputParser
 		alignmentReferenceFastaFaiFile = new Path(mainFastaFile + ".fai");
 		alignmentReferenceFastaPacFile = new Path(mainFastaFile + ".pac");
 		alignmentReferenceFastaSaFile = new Path(mainFastaFile + ".sa");
+		alignmentReferenceDictFile = new Path(mainFastaFile.replaceAll("\\.fa(sta)?$", "") + ".dict");
 	}
 
 	/**
@@ -168,6 +174,7 @@ public abstract class InputParser
 		alignmentReferenceFastaFaiFile = new Path(alignmentReferenceFastaFile + ".fai");
 		alignmentReferenceFastaPacFile = new Path(alignmentReferenceFastaFile + ".pac");
 		alignmentReferenceFastaSaFile = new Path(alignmentReferenceFastaFile + ".sa");
+		alignmentReferenceDictFile = new Path(alignmentReferenceFastaFile.replaceAll("\\.fa(sta)?$", "") + ".dict");
 	}
 
 	public Path getAlignmentReferenceFastaAmbFile()
@@ -198,6 +205,11 @@ public abstract class InputParser
 	public Path getAlignmentReferenceFastaSaFile()
 	{
 		return alignmentReferenceFastaSaFile;
+	}
+
+	public Path getAlignmentReferenceDictFile()
+	{
+		return alignmentReferenceDictFile;
 	}
 
 	public Path getBedFile()
@@ -259,17 +271,18 @@ public abstract class InputParser
 				|| !checkIfPathIsFile(alignmentReferenceFastaBwtFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaFaiFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaPacFile)
-				|| !checkIfPathIsFile(alignmentReferenceFastaSaFile))
+				|| !checkIfPathIsFile(alignmentReferenceFastaSaFile) || !checkIfPathIsFile(alignmentReferenceDictFile))
 		{
 			invalidInput = true;
 			System.err.println(
-					"Additional BWA index files are incomplete. Please be sure the following files are present as well: "
+					"Additional BWA index/dict files are incomplete. Please be sure the following files are present as well: "
 							+ System.lineSeparator() + getAlignmentReferenceFastaAmbFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaAnnFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaBwtFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaFaiFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaPacFile() + System.lineSeparator()
-							+ getAlignmentReferenceFastaSaFile());
+							+ getAlignmentReferenceFastaSaFile() + System.lineSeparator()
+							+ getAlignmentReferenceDictFile());
 		}
 		if (!checkIfPathIsFile(bedFile))
 		{

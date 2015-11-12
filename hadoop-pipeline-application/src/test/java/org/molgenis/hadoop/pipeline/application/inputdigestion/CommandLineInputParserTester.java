@@ -27,6 +27,7 @@ public class CommandLineInputParserTester extends Tester
 	String bwaRefFastaFai;
 	String bwaRefFastaPac;
 	String bwaRefFastaSa;
+	String bwaRefDict;
 	String bedFile;
 
 	Path toolsAsPath;
@@ -39,6 +40,7 @@ public class CommandLineInputParserTester extends Tester
 	Path bwaRefFastaFaiAsPath;
 	Path bwaRefFastaPacAsPath;
 	Path bwaRefFastaSaAsPath;
+	Path bwaRefDictAsPath;
 	Path bedFileAsPath;
 
 	String[] args;
@@ -65,6 +67,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaFai = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.fai").toString();
 		bwaRefFastaPac = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toString();
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
+		bwaRefDict = getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toString();
 		bedFile = getClassLoader().getResource("chr1_20000000-21000000.bed").toString();
 
 		// Path objects for comparison with expected output.
@@ -78,6 +81,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaFaiAsPath = new Path(bwaRefFastaFai);
 		bwaRefFastaPacAsPath = new Path(bwaRefFastaPac);
 		bwaRefFastaSaAsPath = new Path(bwaRefFastaSa);
+		bwaRefDictAsPath = new Path(bwaRefDict);
 		bedFileAsPath = new Path(bedFile);
 
 		// Create arguments string for the command line parser input.
@@ -104,7 +108,11 @@ public class CommandLineInputParserTester extends Tester
 	}
 
 	/**
-	 * Test: If all input is correct. If this test is valid, only the adjusted inputs need to be retested.
+	 * Test: If all input is correct. If this test is valid, only the adjusted inputs need to be retested. The dict path
+	 * is generated based upon the alignment reference fasta file. As this file can be both .fa and .fasta, regex was
+	 * used to generate the .dict file path. This regex (java regex version: "\\.fa(sta)?$") was tested on
+	 * http://www.regexplanet.com/advanced/java/index.html for validity with the following input file names: test.fa,
+	 * test.fasta, test.fq, test.fastq, test.afa, test.afasta, test.faq, test.fastaq
 	 * 
 	 * @throws ParseException
 	 * @throws IOException
@@ -125,6 +133,7 @@ public class CommandLineInputParserTester extends Tester
 		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
 		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
 		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
+		Assert.assertEquals(bwaRefDictAsPath, parser.getAlignmentReferenceDictFile());
 		Assert.assertEquals(bedFileAsPath, parser.getBedFile());
 		Assert.assertEquals(true, parser.isContinueApplication());
 	}
