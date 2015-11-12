@@ -52,13 +52,12 @@ public class CommandLineInputParser extends InputParser
 	 */
 	public void printHelpMessage()
 	{
-		String helpHeader = "example: hadoop-pipeline-application -t /path/to/tools.tar.gz -i /path/to/inputDir/ -o /path/to/outputDir/ -bwa /path/to/bwa_reference_file.fasta";
+		String cmdSyntax = "HadoopPipelineApplicationWithDependencies.jar";
+		String helpHeader = System.lineSeparator() + System.lineSeparator();
 		String helpFooter = "Molgenis-hadoop";
 
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(80,
-				"hadoop-pipeline-application -t <hdfs location tools tar.gz archive> -i <hdfs dir with interlieved pair-ended fasta files> -o <hdfs output dir> -bwa <hdfs location BWA alignment reference fasta file>",
-				helpHeader, this.options, helpFooter, false);
+		formatter.printHelp(80, cmdSyntax, helpHeader, this.options, helpFooter, true);
 	}
 
 	/**
@@ -84,6 +83,11 @@ public class CommandLineInputParser extends InputParser
 				.withDescription(
 						"BWA reference fasta file. Other BWA index file should be present as well using the same prefix.")
 				.create("bwa"));
+
+		options.addOption(OptionBuilder.withArgName("bed").hasArg().isRequired(true)
+				.withDescription(
+						"BED formatted file describing how to group the aligned SAMRecords during the shuffle/sort phase.")
+				.create("bed"));
 	}
 
 	/**
@@ -121,6 +125,10 @@ public class CommandLineInputParser extends InputParser
 		if (commandLine.hasOption("bwa"))
 		{
 			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("bwa"));
+		}
+		if (commandLine.hasOption("bed"))
+		{
+			setBedFile(commandLine.getOptionValue("bed"));
 		}
 	}
 }

@@ -27,6 +27,7 @@ public class CommandLineInputParserTester extends Tester
 	String bwaRefFastaFai;
 	String bwaRefFastaPac;
 	String bwaRefFastaSa;
+	String bedFile;
 
 	Path toolsAsPath;
 	Path inputDirAsPath;
@@ -38,6 +39,7 @@ public class CommandLineInputParserTester extends Tester
 	Path bwaRefFastaFaiAsPath;
 	Path bwaRefFastaPacAsPath;
 	Path bwaRefFastaSaAsPath;
+	Path bedFileAsPath;
 
 	String[] args;
 
@@ -53,7 +55,7 @@ public class CommandLineInputParserTester extends Tester
 		fileSys = FileSystem.get(conf);
 
 		// String objects that function as input.
-		tools = getClassLoader().getResource("linux_tools.tar.gz").toString();
+		tools = getClassLoader().getResource("tools.tar.gz").toString();
 		inputDir = getClassLoader().getResource("").toString();
 		outputDir = getClassLoader().getResource("").toString() + "output/";
 		bwaRefFasta = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").toString();
@@ -63,6 +65,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaFai = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.fai").toString();
 		bwaRefFastaPac = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toString();
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
+		bedFile = getClassLoader().getResource("chr1_20000000-21000000.bed").toString();
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);
@@ -75,9 +78,10 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaFaiAsPath = new Path(bwaRefFastaFai);
 		bwaRefFastaPacAsPath = new Path(bwaRefFastaPac);
 		bwaRefFastaSaAsPath = new Path(bwaRefFastaSa);
+		bedFileAsPath = new Path(bedFile);
 
 		// Create arguments string for the command line parser input.
-		args = new String[8];
+		args = new String[10];
 	}
 
 	/**
@@ -95,6 +99,8 @@ public class CommandLineInputParserTester extends Tester
 		args[5] = outputDir;
 		args[6] = "-bwa";
 		args[7] = bwaRefFasta;
+		args[8] = "-bed";
+		args[9] = bedFile;
 	}
 
 	/**
@@ -106,7 +112,9 @@ public class CommandLineInputParserTester extends Tester
 	@Test
 	public void allValidInput() throws ParseException, IOException
 	{
+		System.out.println(args[9]);
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
+		parser.printHelpMessage();
 
 		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
 		Assert.assertEquals(inputDirAsPath, parser.getInputDir());
@@ -118,6 +126,7 @@ public class CommandLineInputParserTester extends Tester
 		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
 		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
 		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
+		Assert.assertEquals(bedFileAsPath, parser.getBedFile());
 		Assert.assertEquals(true, parser.isContinueApplication());
 	}
 
@@ -130,13 +139,15 @@ public class CommandLineInputParserTester extends Tester
 	@Test(expectedExceptions = MissingOptionException.class)
 	public void missingBwaIndexArgument() throws ParseException, IOException
 	{
-		String[] args = new String[6];
+		String[] args = new String[8];
 		args[0] = "-t";
 		args[1] = tools;
 		args[2] = "-i";
 		args[3] = inputDir;
 		args[4] = "-o";
 		args[5] = outputDir;
+		args[6] = "-bed";
+		args[7] = bedFile;
 
 		new CommandLineInputParser(fileSys, args);
 	}

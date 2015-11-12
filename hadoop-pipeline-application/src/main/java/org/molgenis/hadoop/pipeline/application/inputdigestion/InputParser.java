@@ -70,6 +70,11 @@ public abstract class InputParser
 	 */
 	private Path alignmentReferenceFastaSaFile;
 
+	/**
+	 * Location to the BED file containing the grouping for the SAM records.
+	 */
+	private Path bedFile;
+
 	protected void setFileSys(FileSystem fileSys)
 	{
 		this.fileSys = fileSys;
@@ -195,6 +200,21 @@ public abstract class InputParser
 		return alignmentReferenceFastaSaFile;
 	}
 
+	public Path getBedFile()
+	{
+		return bedFile;
+	}
+
+	protected void setBedFile(Path bedFile)
+	{
+		this.bedFile = bedFile;
+	}
+
+	protected void setBedFile(String bedFile)
+	{
+		this.bedFile = new Path(bedFile);
+	}
+
 	/**
 	 * Checks whether all required files exist. If one of the required files could not be found, a print statement to
 	 * stderr is given regarding the missing file(s). If all required files are present, {@code isContinueApplication()}
@@ -250,6 +270,11 @@ public abstract class InputParser
 							+ getAlignmentReferenceFastaFaiFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaPacFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaSaFile());
+		}
+		if (!checkIfPathIsFile(bedFile))
+		{
+			invalidInput = true;
+			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
 
 		// If no invalid input is found, continueApplication is set to true.
