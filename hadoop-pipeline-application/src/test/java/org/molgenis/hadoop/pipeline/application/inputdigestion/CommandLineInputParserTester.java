@@ -112,7 +112,6 @@ public class CommandLineInputParserTester extends Tester
 	@Test
 	public void allValidInput() throws ParseException, IOException
 	{
-		System.out.println(args[9]);
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 		parser.printHelpMessage();
 
