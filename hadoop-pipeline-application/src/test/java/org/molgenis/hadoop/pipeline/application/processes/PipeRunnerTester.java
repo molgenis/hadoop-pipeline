@@ -116,7 +116,7 @@ public class PipeRunnerTester extends Tester
 	}
 
 	/**
-	 * Tests the {@link PipeRunner} using the bwa binary and the {@link LinesSink}. The header information is compared
+	 * Tests the {@link PipeRunner} using the bwa binary and the {@link StringSink}. The header information is compared
 	 * for each record, but as a bwa alignment aligns reads randomly if a read can be aligned to multiple locations,
 	 * reads aligning to the first 100 bases of the reference are printed for manual checking.
 	 *

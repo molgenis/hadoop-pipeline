@@ -94,7 +94,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			job.setJobName("HadoopPipelineApplication");
 
 			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-			job.addCacheArchive(parser.getToolsArchiveLocation().toUri()); // map
+			job.addCacheArchive(parser.getToolsArchiveLocation().toUri());
 
 			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
 			job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri());
