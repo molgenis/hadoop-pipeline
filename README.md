@@ -19,6 +19,9 @@ Before using the tool, be sure that the following has been done:
 	* `<bwa_reference_file_prefix>.fasta.fai`
 	* `<bwa_reference_file_prefix>.fasta.pac`
 	* `<bwa_reference_file_prefix>.fasta.sa`
+	* `<bwa_reference_file_prefix>.dict`
+
+* A `.bed` file containing the grouping regions for the SAM records after BWA alignment. If a record fits into multiple groups, an individual record will be added to all the groups it has a (partial) overlap in.
 
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).

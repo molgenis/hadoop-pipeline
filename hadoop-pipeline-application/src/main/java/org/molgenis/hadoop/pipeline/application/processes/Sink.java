@@ -1,5 +1,6 @@
 package org.molgenis.hadoop.pipeline.application.processes;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -26,5 +27,5 @@ public abstract class Sink<T>
 	 * @param item
 	 *            {@code <T>}
 	 */
-	protected abstract void digestStreamItem(T item);
+	protected abstract void digestStreamItem(T item) throws IOException;
 }

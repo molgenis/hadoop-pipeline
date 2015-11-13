@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
+import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
 
 /**
  * Sink for digesting input streams line-by-line.
@@ -32,7 +32,7 @@ public abstract class StringSink extends Sink<String>
 		}
 		catch (IOException e)
 		{
-			throw new ProcessPipeException(e);
+			throw new SinkIOException(e);
 		}
 		finally
 		{
@@ -47,5 +47,5 @@ public abstract class StringSink extends Sink<String>
 	 *            {@link String}
 	 */
 	@Override
-	protected abstract void digestStreamItem(String item);
+	protected abstract void digestStreamItem(String item) throws IOException;
 }

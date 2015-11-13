@@ -1,7 +1,6 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -9,16 +8,19 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
+import org.molgenis.hadoop.pipeline.application.exceptions.SinkException;
+import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 import org.molgenis.hadoop.pipeline.application.processes.SamRecordSink;
+import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
 
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, NullWritable, Text>
+public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Text, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -41,7 +43,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException
 	{
-		retrieveCache(context);
+		digestCache(context);
 	}
 
 	/**
@@ -60,45 +62,39 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Nu
 			{
 				try
 				{
-					context.write(key, new Text(item.getSAMString().trim()));
+					SAMRecordWritable samWritable = new SAMRecordWritable();
+					samWritable.set(item);
+					context.write(new Text("key"), samWritable);
 				}
-				catch (IOException | InterruptedException e)
+				catch (IOException e)
 				{
-					throw new ProcessPipeException(e);
+					throw new SinkIOException(e);
+				}
+				catch (InterruptedException e)
+				{
+					throw new SinkException(e);
 				}
 			}
 		};
 
+		// Adjust the generated @PG tag in the HadoopPipeLineReducer accordingly!!!
 		PipeRunner.startPipeline(value.getBytes(), sink,
 				new ProcessBuilder(bwaTool, "mem", "-p", "-M", alignmentReferenceFastaFile, "-").start());
+
 	}
 
 	/**
-	 * Retrieves the cache files.
+	 * Digests the cache files that are needed into the required formats.
 	 * 
 	 * IMPORTANT: Be sure the exact same array order is used as defined in {@link HadoopPipelineApplication}!
 	 * 
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
-	private void retrieveCache(Context context) throws IllegalArgumentException, IOException
+	private void digestCache(Context context) throws IllegalArgumentException, IOException
 	{
-		URI[] cacheArchives = context.getCacheArchives();
-		URI[] cacheFiles = context.getCacheFiles();
-
-		bwaTool = new String("./" + retrieveFileName(cacheArchives[0]) + "/tools/bwa");
-		alignmentReferenceFastaFile = new String("./" + retrieveFileName(cacheFiles[0]));
+		bwaTool = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0])) + "/tools/bwa";
+		alignmentReferenceFastaFile = HdfsFileMetaDataHandler.retrieveFileName(context.getCacheFiles()[0]);
 	}
 
-	/**
-	 * Retrieves the file name without the path before it.
-	 * 
-	 * @param filePath
-	 * @return {@link String}
-	 */
-	private String retrieveFileName(URI filePath)
-	{
-		String[] pathFragments = filePath.toString().split("/");
-		return pathFragments[pathFragments.length - 1];
-	}
 }

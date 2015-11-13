@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
+import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
 
 /**
  * Class for running a pipe of one or more {@link Process}{@code es}.
@@ -18,6 +18,7 @@ public class PipeRunner implements Runnable
 	 * Stream containing data from a process.
 	 */
 	private final InputStream inputStream;
+
 	/**
 	 * Stream to write to a process.
 	 */
@@ -82,7 +83,7 @@ public class PipeRunner implements Runnable
 		}
 		catch (InterruptedException e)
 		{
-			throw new ProcessPipeException(e);
+			throw new SinkIOException(e);
 		}
 	}
 
@@ -98,7 +99,7 @@ public class PipeRunner implements Runnable
 		}
 		catch (IOException e)
 		{
-			throw new ProcessPipeException(e);
+			throw new SinkIOException(e);
 		}
 		finally
 		{
