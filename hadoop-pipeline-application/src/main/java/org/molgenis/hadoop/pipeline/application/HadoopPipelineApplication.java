@@ -16,7 +16,9 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
+import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPilelineReducer;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
+import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
 
@@ -92,16 +94,18 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			job.setJobName("HadoopPipelineApplication");
 
 			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-			job.addCacheArchive(parser.getToolsArchiveLocation().toUri()); // archive [0]
+			job.addCacheArchive(parser.getToolsArchiveLocation().toUri()); // map
 
 			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-			job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri()); // file [0]
+			job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaBwtFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaFaiFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaPacFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceFastaSaFile().toUri());
+			job.addCacheFile(parser.getAlignmentReferenceDictFile().toUri());
+			job.addCacheFile(parser.getBedFile().toUri());
 
 			// Sets input/output paths.
 			FileInputFormat.addInputPath(job, parser.getInputDir());
@@ -109,15 +113,22 @@ public class HadoopPipelineApplication extends Configured implements Tool
 
 			// Sets and configures Mapper/Reducer.
 			job.setMapperClass(HadoopPipelineMapper.class);
-			job.setNumReduceTasks(0);
+			// job.setNumReduceTasks(0);
+			job.setReducerClass(HadoopPilelineReducer.class);
 
 			// Sets input/output formats.
 			job.setInputFormatClass(WholeFileInputFormat.class);
+			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(SAMRecordWritable.class);
 			job.setOutputKeyClass(NullWritable.class);
 			job.setOutputValueClass(Text.class);
 
 			// Returns 0 if job completed successfully. If not, returns 1.
 			return job.waitForCompletion(true) ? 0 : 1;
+		}
+		else
+		{
+			parser.printHelpMessage();
 		}
 
 		// Returns exit code 1 if no job was executed.

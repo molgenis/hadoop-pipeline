@@ -5,7 +5,7 @@ package org.molgenis.hadoop.pipeline.application.exceptions;
 
 /**
  * An <em>unchecked exception</em> thrown to indicate something went wrong during the execution of a pipeline containing
- * 1 or more {@link Process}{@code '}.
+ * 1 or more {@link Process}{@code es}.
  */
 public class ProcessPipeException extends RuntimeException
 {

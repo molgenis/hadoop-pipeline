@@ -26,7 +26,7 @@ public class PipeOutHandler<T> implements Runnable
 	 * @param sink
 	 *            {@link Sink}{@code <T>}
 	 */
-	public PipeOutHandler(InputStream inputStream, Sink<T> sink)
+	PipeOutHandler(InputStream inputStream, Sink<T> sink)
 	{
 		this.inputStream = requireNonNull(inputStream);
 		this.sink = requireNonNull(sink);

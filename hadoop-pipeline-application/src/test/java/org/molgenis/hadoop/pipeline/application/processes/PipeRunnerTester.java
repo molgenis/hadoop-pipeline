@@ -8,7 +8,6 @@ import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,11 +19,6 @@ public class PipeRunnerTester extends Tester
 	StringWriter stringWriter;
 	String bwaTool;
 	String referenceData;
-
-	@AfterClass
-	public void afterClass()
-	{
-	}
 
 	/**
 	 * Creates an empty {@link StringWriter} to which logger information can be written to.
@@ -122,7 +116,7 @@ public class PipeRunnerTester extends Tester
 	}
 
 	/**
-	 * Tests the {@link PipeRunner} using the bwa binary and the {@link StringSink}. The header information is compared
+	 * Tests the {@link PipeRunner} using the bwa binary and the {@link LinesSink}. The header information is compared
 	 * for each record, but as a bwa alignment aligns reads randomly if a read can be aligned to multiple locations,
 	 * reads aligning to the first 100 bases of the reference are printed for manual checking.
 	 *

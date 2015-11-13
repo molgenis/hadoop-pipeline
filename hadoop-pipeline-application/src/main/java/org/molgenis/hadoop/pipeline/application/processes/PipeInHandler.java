@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
+import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
 
 /**
  * Writes the data stored in a {@code byte[]} to the {@link OutputStream}.
@@ -47,7 +47,7 @@ public class PipeInHandler implements Runnable
 		}
 		catch (IOException e)
 		{
-			throw new SinkIOException(e);
+			throw new ProcessPipeException(e);
 		}
 		finally
 		{
