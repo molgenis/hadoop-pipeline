@@ -1,8 +1,14 @@
+# Tools directory (is a separate download)
 hadoop-pipeline-tools/
+
+# Class files
 *.class
 
 # Mac custom folder attributes
 .DS_Store
+
+# PyCharm project files
+.idea
 
 # Eclipse project settings folder
 .settings/
