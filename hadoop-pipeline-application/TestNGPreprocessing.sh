@@ -5,13 +5,13 @@
 #Function: Automation script to copy, extract and add correct rights to #
 #          tool binaries used for TestNG tests.                         #
 #                                                                       #
-#Usage: ExpressionSitesLocatorHadoop.sh                                 #
+#Usage:    TestNGPreprocessing.sh                                       #
 #########################################################################
 
 
 #########################################################################
 #Name:     main                                                         #
-#Function: Executes the script functionalites                           #
+#Function: Executes the script functionalities                          #
 #########################################################################
 function main {
 	# Go to the goal folder.
