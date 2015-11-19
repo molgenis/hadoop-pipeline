@@ -91,19 +91,23 @@ function checkIfVariableFilled {
 #           does not write to stdout.                                   #
 #########################################################################
 function generateReadGroupLine {
-	# echo: prints everything after the last '/' (forward slash)
-	# awk:  reads the fields seperated by a _ and rearanges these fields to match with the samplesheet
-	fastqFileFieldsToCompare=$(echo ${fastqFile##*\/} | awk -F '_' '{print $2"_"$1"_"$3"_"$4"_"$5}')
+	# echo: removes anything before (and including) the last '/' (forward slash)
+	# echo: removes anything after (and including) the first '.' (dot)
+	# awk:  reads the fields seperated by a _ and returns only the fields needed for comparison
+	fastqFileFieldsToCompare=$(echo ${fastqFile##*\/})
+	fastqFileFieldsToCompare=$(echo ${fastqFileFieldsToCompare%%.*} | awk -F '_' '{print $1"_"$2"_"$3"_"$4"_"$5}')
+	
+	echo $fastqFileFieldsToCompare
 	
 	readGroupLine=$(
 	# Skips the first line.
 	tail +2 $samplesheet | while read line
 	do
 		# echo: prints the line
-		# cut:  retrieves only the needed fields, seperated by ',' (comma)
-		# tr:   replaces , with space
-		# sed:  adds an 'L' before the single number in the last field from the line.
-		sampleSheetFieldsToCompare=$(echo $line | cut -d ',' -f4 -f10 -f11 -f12 -f13 | tr ',' '_' | sed 's/\(_\)\([0-9]\)$/\1L\2/')
+		# awk:  reads the fields seperated by a _, rearanges it for comparison and returns only the needed fields
+		#       for comparison (with field 5 starting with an L)
+		sampleSheetFieldsToCompare=$(echo $line | awk -F ',' '{print $10"_"$4"_"$11"_"$12"_L"$13}')
+		echo $sampleSheetFieldsToCompare
 		
 		# If a match is found, prints a readgroupline and stops looking for any other matching lines.
 		if [ "$fastqFileFieldsToCompare" == "$sampleSheetFieldsToCompare" ]
