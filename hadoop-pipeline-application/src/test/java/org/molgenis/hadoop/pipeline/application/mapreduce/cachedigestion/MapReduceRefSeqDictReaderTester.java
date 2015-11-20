@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import htsjdk.samtools.SAMSequenceDictionary;
@@ -27,11 +26,6 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 	public void beforeClass() throws IOException
 	{
 		reader = new MapReduceRefSeqDictReader(FileSystem.get(new Configuration()));
-	}
-
-	@BeforeTest
-	public void beforeTest()
-	{
 	}
 
 	@Test
