@@ -26,11 +26,6 @@ public class WorkDirSymLinkManagerTester extends Tester
 	private Path bwaRefFastaAmb;
 	private Path bwaRefFastaAnn;
 
-	// Test line to show a SymlinkAlreadyExistsException is thrown when a symlink is added twice (be sure to only
-	// enable for testing the testing code and when using it on testing code that has at least 4 files added to the
-	// cache).
-	// WorkDirSymlinkManager.createSymlinkInCurrentWorkDirToPath(DistributedCache.getLocalCacheFiles(conf)[3]);
-
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
@@ -53,6 +48,11 @@ public class WorkDirSymLinkManagerTester extends Tester
 		WorkDirSymlinkManager.removeSymlinksInWorkDir();
 	}
 
+	/**
+	 * Tests the creation of a single symlink.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testSingleSymlinkCreation() throws IOException
 	{
@@ -64,6 +64,11 @@ public class WorkDirSymLinkManagerTester extends Tester
 		}
 	}
 
+	/**
+	 * Tests the creation of multiple symlinks.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testMultipleSymlinkCreation() throws IOException
 	{
@@ -76,6 +81,12 @@ public class WorkDirSymLinkManagerTester extends Tester
 		}
 	}
 
+	/**
+	 * Tests whether a {@link SymlinkAlreadyExistsException} is thrown when an attempt is made to create a symlink while
+	 * a symlink with that name was already created before.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = SymlinkAlreadyExistsException.class)
 	public void testSameSymlinkCreatedMultipleTimes() throws IOException
 	{
@@ -85,6 +96,13 @@ public class WorkDirSymLinkManagerTester extends Tester
 		WorkDirSymlinkManager.createSymlinkInCurrentWorkDirToPath(bwaRefFastaAmb);
 	}
 
+	/**
+	 * Tests whether a {@link FileAlreadyExistsException} is thrown when an attempt is made to create a symlink when a
+	 * file was already present with that name (but that file is not a symlink that was created using
+	 * {@link WorkDirSymlinkManager#createSymlinkInCurrentWorkDirToPath(Path)}.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = FileAlreadyExistsException.class)
 	public void testSameFileWithIDenticalNameAlreadyExists() throws IOException
 	{
