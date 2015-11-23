@@ -21,12 +21,12 @@ import htsjdk.samtools.SAMSequenceRecord;
 /**
  * Hadoop MapReduce Job reducer.
  */
-public class HadoopPilelineReducer extends Reducer<Text, SAMRecordWritable, NullWritable, Text>
+public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, NullWritable, Text>
 {
 	/**
 	 * Logger to write information to.
 	 */
-	private static final Logger logger = Logger.getLogger(HadoopPilelineReducer.class);
+	private static final Logger logger = Logger.getLogger(HadoopPipelineReducer.class);
 
 	/**
 	 * Stores the generated {@link SAMFileHeader}.

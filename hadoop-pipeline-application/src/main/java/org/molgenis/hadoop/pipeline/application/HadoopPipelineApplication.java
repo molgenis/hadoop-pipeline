@@ -16,7 +16,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
-import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPilelineReducer;
+import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
@@ -120,7 +120,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			// Sets and configures Mapper/Reducer.
 			job.setMapperClass(HadoopPipelineMapper.class);
 			// job.setNumReduceTasks(0);
-			job.setReducerClass(HadoopPilelineReducer.class);
+			job.setReducerClass(HadoopPipelineReducer.class);
 
 			// Sets input/output formats.
 			job.setInputFormatClass(WholeFileInputFormat.class);
