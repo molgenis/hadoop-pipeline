@@ -58,14 +58,14 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		for (SAMSequenceRecord samSeq : samFileHeader.getSequenceDictionary().getSequences())
 		{
 			context.write(NullWritable.get(),
-					new Text("@SQ\t" + samSeq.getSequenceName() + "\t" + samSeq.getSequenceLength()));
+					new Text("@SQ\tSN:" + samSeq.getSequenceName() + "\tLN:" + samSeq.getSequenceLength()));
 		}
 
 		// Writes the @RG tag to context, if it is present.
-		// if (readGroupLine != null)
-		// {
-		// context.write(NullWritable.get(), new Text(readGroupLine));
-		// }
+		if (readGroupLine != null)
+		{
+			context.write(NullWritable.get(), new Text(readGroupLine));
+		}
 
 		// Writes the aligned SAMRecord data to context.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
@@ -96,6 +96,6 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the @RG tag String, if present.
-		// readGroupLine = context.getConfiguration().get("input_readgroupline");
+		readGroupLine = context.getConfiguration().get("input_readgroupline");
 	}
 }

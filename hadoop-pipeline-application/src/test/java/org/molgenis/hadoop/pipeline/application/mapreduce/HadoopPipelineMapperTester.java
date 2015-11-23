@@ -3,15 +3,14 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
-import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
@@ -19,18 +18,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.SAMSequenceDictionary;
-import htsjdk.samtools.SAMSequenceRecord;
 
-public class HadoopPipelineMapperTester extends Tester
+public class HadoopPipelineMapperTester extends HadoopPipelineTester
 {
-	/**
-	 * The mapper to be used for testing.
-	 */
-	private HadoopPipelineMapper mapper;
-
 	/**
 	 * A mrunit MapDriver allowing the mapper to be tested.
 	 */
@@ -42,27 +33,6 @@ public class HadoopPipelineMapperTester extends Tester
 	private byte[] fastqData;
 
 	/**
-	 * Expected results bwa can be generated with a terminal using: {@code bwa mem -p -M
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/input_fastq/mini_halvade_0_0.fq.gz}
-	 */
-	private ArrayList<SAMRecord> bwaResults;
-
-	/**
-	 * Expected results bwa can be generated with a terminal using:
-	 * {@code bwa mem -p -M -R "@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3"
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/input_fastq/mini_halvade_0_0.fq.gz}
-	 */
-	private ArrayList<SAMRecord> bwaResultsWithReadGroupLine;
-
-	/**
-	 * {@link SAMFileHeader} for storing sequence information so that {@link SAMRecord#getSAMString()} can be used
-	 * (after {@link SAMRecord#setHeader(SAMFileHeader)} is used).
-	 */
-	private SAMFileHeader samFileHeader;
-
-	/**
 	 * Loads/generates general data needed for testing.
 	 * 
 	 * @throws IOException
@@ -70,16 +40,8 @@ public class HadoopPipelineMapperTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
+		super.beforeClass();
 		fastqData = readFileAsByteArray("input_fastq_mini/mini_halvade_0_0.fq.gz");
-		bwaResults = readSamFile("mini_halvade_0_0-bwa_results.sam");
-		bwaResultsWithReadGroupLine = readSamFile("mini_halvade_0_0-bwa_results_withreadlinegroup.sam");
-
-		samFileHeader = new SAMFileHeader();
-
-		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
-		// @SQ\tSN:1:20000000-21000000\tLN:1000001
-		samFileHeader.setSequenceDictionary(
-				new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1:20000000-21000000", 1000001))));
 	}
 
 	/**
@@ -90,10 +52,11 @@ public class HadoopPipelineMapperTester extends Tester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		mapper = new HadoopPipelineMapper();
+		Mapper<NullWritable, BytesWritable, Text, SAMRecordWritable> mapper = new HadoopPipelineMapper();
 		mDriver = new FileCacheSymlinkMapDriver<NullWritable, BytesWritable, Text, SAMRecordWritable>(mapper);
+		setDriver(mDriver);
 
-		addCacheToMapDriver();
+		super.beforeMethod();
 	}
 
 	/**
@@ -107,7 +70,7 @@ public class HadoopPipelineMapperTester extends Tester
 		mDriver.withInput(NullWritable.get(), new BytesWritable(fastqData));
 
 		List<Pair<Text, SAMRecordWritable>> output = mDriver.run();
-		compareSamRecordFields(output, bwaResults);
+		compareSamRecordFields(output, getBwaResults());
 	}
 
 	/**
@@ -123,7 +86,7 @@ public class HadoopPipelineMapperTester extends Tester
 				"@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3");
 
 		List<Pair<Text, SAMRecordWritable>> output = mDriver.run();
-		compareSamRecordFields(output, bwaResultsWithReadGroupLine);
+		compareSamRecordFields(output, getBwaResultsWithReadGroupLine());
 	}
 
 	/**
@@ -145,7 +108,7 @@ public class HadoopPipelineMapperTester extends Tester
 			// If line below is removed, testMapperWithoutReadGroupLine FAILS due to a
 			// "java.lang.IllegalArgumentException: Reference index 0 not found in sequence dictionary."
 			// error but testMapperWithReadGroupLine still passes.
-			actualSam.setHeader(samFileHeader);
+			actualSam.setHeader(getSamFileHeader());
 
 			SAMRecord expectedSam = expectedResults.get(i);
 
@@ -177,27 +140,4 @@ public class HadoopPipelineMapperTester extends Tester
 			}
 		}
 	}
-
-	/**
-	 * Adds needed files to the {@link MapDriver} chache.
-	 * 
-	 * @throws URISyntaxException
-	 */
-	private void addCacheToMapDriver() throws URISyntaxException
-	{
-		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-		mDriver.addCacheArchive(getClassLoader().getResource("tools.tar.gz").toURI());
-
-		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.amb").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.ann").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.bwt").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.fai").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toURI());
-		mDriver.addCacheFile(getClassLoader().getResource("chr1_20000000-21000000.bed").toURI());
-	}
-
 }
