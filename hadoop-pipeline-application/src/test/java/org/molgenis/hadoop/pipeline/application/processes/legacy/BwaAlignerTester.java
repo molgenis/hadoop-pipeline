@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
-import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -78,13 +78,13 @@ public class BwaAlignerTester extends Tester
 		}
 
 		// Compares the @SQ line.
-		Assert.assertEquals("1:20000000-21000000",
-				results.getHeader().getSequenceDictionary().getSequence(0).getSequenceName());
+		Assert.assertEquals(results.getHeader().getSequenceDictionary().getSequence(0).getSequenceName(),
+				"1:20000000-21000000");
 		Assert.assertEquals(1000001, results.getHeader().getSequenceDictionary().getSequence(0).getSequenceLength());
 
 		// Compares non-variable parts of the @PG line.
-		Assert.assertEquals("bwa", results.getHeader().getProgramRecords().get(0).getId());
-		Assert.assertEquals("bwa", results.getHeader().getProgramRecords().get(0).getProgramName());
-		Assert.assertEquals("0.7.12-r1039", results.getHeader().getProgramRecords().get(0).getProgramVersion());
+		Assert.assertEquals(results.getHeader().getProgramRecords().get(0).getId(), "bwa");
+		Assert.assertEquals(results.getHeader().getProgramRecords().get(0).getProgramName(), "bwa");
+		Assert.assertEquals(results.getHeader().getProgramRecords().get(0).getProgramVersion(), "0.7.12-r1039");
 	}
 }

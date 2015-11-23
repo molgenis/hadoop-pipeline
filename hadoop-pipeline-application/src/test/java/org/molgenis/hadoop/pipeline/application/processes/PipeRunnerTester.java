@@ -201,15 +201,15 @@ public class PipeRunnerTester extends Tester
 			public void digestStreamItem(SAMRecord item)
 			{
 				// Compares the @SQ line.
-				Assert.assertEquals("1:20000000-21000000",
-						item.getHeader().getSequenceDictionary().getSequence(0).getSequenceName());
-				Assert.assertEquals(1000001,
-						item.getHeader().getSequenceDictionary().getSequence(0).getSequenceLength());
+				Assert.assertEquals(item.getHeader().getSequenceDictionary().getSequence(0).getSequenceName(),
+						"1:20000000-21000000");
+				Assert.assertEquals(item.getHeader().getSequenceDictionary().getSequence(0).getSequenceLength(),
+						1000001);
 
 				// Compares the @PG line (excluded "CL:" as this is defined outside the PipeRunner class itself).
-				Assert.assertEquals("bwa", item.getHeader().getProgramRecords().get(0).getId());
-				Assert.assertEquals("bwa", item.getHeader().getProgramRecords().get(0).getProgramName());
-				Assert.assertEquals("0.7.12-r1039", item.getHeader().getProgramRecords().get(0).getProgramVersion());
+				Assert.assertEquals(item.getHeader().getProgramRecords().get(0).getId(), "bwa");
+				Assert.assertEquals(item.getHeader().getProgramRecords().get(0).getProgramName(), "bwa");
+				Assert.assertEquals(item.getHeader().getProgramRecords().get(0).getProgramVersion(), "0.7.12-r1039");
 
 				// Writes the records to stdout that align to the first 100 nucleotides of the reference genome.
 				// IMPORTANT: getAlignmentStart() is 1-based inclusive!

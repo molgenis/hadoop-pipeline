@@ -8,8 +8,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -133,20 +133,20 @@ public class CommandLineInputParserTester extends Tester
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 		parser.printHelpMessage();
 
-		Assert.assertEquals(toolsAsPath, parser.getToolsArchiveLocation());
-		Assert.assertEquals(inputDirAsPath, parser.getInputDir());
-		Assert.assertEquals(outputDirAsPath, parser.getOutputDir());
-		Assert.assertEquals(bwaRefFastaAsPath, parser.getAlignmentReferenceFastaFile());
-		Assert.assertEquals(bwaRefFastaAmbAsPath, parser.getAlignmentReferenceFastaAmbFile());
-		Assert.assertEquals(bwaRefFastaAnnAsPath, parser.getAlignmentReferenceFastaAnnFile());
-		Assert.assertEquals(bwaRefFastaBwtAsPath, parser.getAlignmentReferenceFastaBwtFile());
-		Assert.assertEquals(bwaRefFastaFaiAsPath, parser.getAlignmentReferenceFastaFaiFile());
-		Assert.assertEquals(bwaRefFastaPacAsPath, parser.getAlignmentReferenceFastaPacFile());
-		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
-		Assert.assertEquals(bwaRefDictAsPath, parser.getAlignmentReferenceDictFile());
-		Assert.assertEquals(bedFileAsPath, parser.getBedFile());
-		Assert.assertEquals(null, parser.getReadGroupLine()); // Is null as parameter was not set.
-		Assert.assertEquals(true, parser.isContinueApplication());
+		Assert.assertEquals(parser.getToolsArchiveLocation(), toolsAsPath);
+		Assert.assertEquals(parser.getInputDir(), inputDirAsPath);
+		Assert.assertEquals(parser.getOutputDir(), outputDirAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaFile(), bwaRefFastaAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaAmbFile(), bwaRefFastaAmbAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaAnnFile(), bwaRefFastaAnnAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaBwtFile(), bwaRefFastaBwtAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaFaiFile(), bwaRefFastaFaiAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaPacFile(), bwaRefFastaPacAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceFastaSaFile(), bwaRefFastaSaAsPath);
+		Assert.assertEquals(parser.getAlignmentReferenceDictFile(), bwaRefDictAsPath);
+		Assert.assertEquals(parser.getBedFile(), bedFileAsPath);
+		Assert.assertEquals(parser.getReadGroupLine(), null); // Is null as parameter was not set.
+		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -185,8 +185,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(new Path(invalidTools), parser.getToolsArchiveLocation());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getToolsArchiveLocation(), new Path(invalidTools));
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -203,8 +203,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(new Path(invalidInputDir), parser.getInputDir());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getInputDir(), new Path(invalidInputDir));
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -221,8 +221,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(new Path(invalidOutputDir), parser.getOutputDir());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getOutputDir(), new Path(invalidOutputDir));
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -239,8 +239,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		Assert.assertEquals(new Path(invalidOutputDir), parser.getOutputDir());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getOutputDir(), new Path(invalidOutputDir));
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -254,9 +254,8 @@ public class CommandLineInputParserTester extends Tester
 	{
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(validReadGroup, parser.getReadGroupLine());
-		System.out.println(parser.getReadGroupLine());
-		Assert.assertEquals(true, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), validReadGroup);
+		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -272,8 +271,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(true, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -289,8 +288,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(true, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -306,8 +305,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(true, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -323,8 +322,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -340,8 +339,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -357,8 +356,8 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 
 	/**
@@ -374,7 +373,7 @@ public class CommandLineInputParserTester extends Tester
 
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
 
-		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
-		Assert.assertEquals(false, parser.isContinueApplication());
+		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
+		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 }

@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.junit.Assert;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,7 +38,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		SAMSequenceDictionary actualSeqDict = reader
 				.readFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").getFile());
 
-		assertEqualsSamSequenceDictionaries(expectedSeqDict, actualSeqDict);
+		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
 
 	@Test(expectedExceptions = SinkIOException.class)
@@ -61,22 +61,22 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		SAMSequenceDictionary actualSeqDict = reader
 				.readFile(getClassLoader().getResource("extra_dict_files/no_sq_tag.dict").getFile());
 
-		assertEqualsSamSequenceDictionaries(expectedSeqDict, actualSeqDict);
+		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
 
-	private void assertEqualsSamSequenceDictionaries(SAMSequenceDictionary expectedSeqDict,
-			SAMSequenceDictionary actualSeqDict)
+	private void assertEqualsSamSequenceDictionaries(SAMSequenceDictionary actualSeqDict,
+			SAMSequenceDictionary expectedSeqDict)
 	{
 		// Asserts whether the number of SAMSequenceRecord is equal.
-		Assert.assertEquals(expectedSeqDict.size(), actualSeqDict.size());
+		Assert.assertEquals(actualSeqDict.size(), expectedSeqDict.size());
 
 		// Asserts whether the expected name and length are the actual name and length.
 		for (int i = 0; i < actualSeqDict.size(); i++)
 		{
-			Assert.assertEquals(expectedSeqDict.getSequence(i).getSequenceName(),
-					actualSeqDict.getSequence(i).getSequenceName());
-			Assert.assertEquals(expectedSeqDict.getSequence(i).getSequenceLength(),
-					actualSeqDict.getSequence(i).getSequenceLength());
+			Assert.assertEquals(actualSeqDict.getSequence(i).getSequenceName(),
+					expectedSeqDict.getSequence(i).getSequenceName());
+			Assert.assertEquals(actualSeqDict.getSequence(i).getSequenceLength(),
+					expectedSeqDict.getSequence(i).getSequenceLength());
 		}
 	}
 
