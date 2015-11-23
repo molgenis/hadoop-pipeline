@@ -38,6 +38,11 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 	private String alignmentReferenceFastaFile;
 
 	/**
+	 * Stores the read group line that should be added to the bwa alignment, if present.
+	 */
+	private String readGroupLine;
+
+	/**
 	 * Function called at the beginning of a task.
 	 */
 	@Override
@@ -77,10 +82,19 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 			}
 		};
 
-		// Adjust the generated @PG tag in the HadoopPipeLineReducer accordingly!!!
-		PipeRunner.startPipeline(value.getBytes(), sink,
-				new ProcessBuilder(bwaTool, "mem", "-p", "-M", alignmentReferenceFastaFile, "-").start());
-
+		// Executes bwa alignment. If a read group line is available, it is used as well.
+		if (readGroupLine != null)
+		{
+			logger.debug("Executing pipeline with readGroupLine: " + readGroupLine);
+			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R \"",
+					readGroupLine, "\"", alignmentReferenceFastaFile, "-").start());
+		}
+		else
+		{
+			logger.debug("Executing pipeline without readGroupLine.");
+			PipeRunner.startPipeline(value.getBytes(), sink,
+					new ProcessBuilder(bwaTool, "mem", "-p", "-M", alignmentReferenceFastaFile, "-").start());
+		}
 	}
 
 	/**
@@ -95,6 +109,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 	{
 		bwaTool = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0])) + "/tools/bwa";
 		alignmentReferenceFastaFile = HdfsFileMetaDataHandler.retrieveFileName(context.getCacheFiles()[0]);
+		readGroupLine = context.getConfiguration().get("input_readgroupline");
 	}
 
 }

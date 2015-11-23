@@ -66,8 +66,9 @@ public class PipeRunnerTester extends Tester
 
 		// Runs the pipeline.
 		PipeRunner.startPipeline(inputData, sink,
-				new ProcessBuilder("python", getClassLoader().getResource("CharacterReplacer.py").getPath(), "1", "a")
-						.start());
+				new ProcessBuilder("python",
+						getClassLoader().getResource("character_replacer/CharacterReplacer.py").getPath(), "1", "a")
+								.start());
 
 		// Splits the StringBuilder results into a String array with each line being one element.
 		String[] lines = sb.toString().split(System.lineSeparator());
@@ -102,12 +103,15 @@ public class PipeRunnerTester extends Tester
 
 		// Runs the pipeline.
 		PipeRunner.startPipeline(inputData, sink,
-				new ProcessBuilder("python", getClassLoader().getResource("CharacterReplacer.py").getPath(), "?", ".")
-						.start(),
-				new ProcessBuilder("python", getClassLoader().getResource("CharacterReplacer.py").getPath(), "1", "a")
-						.start(),
-				new ProcessBuilder("python", getClassLoader().getResource("CharacterReplacer.py").getPath(), "!", ".")
-						.start());
+				new ProcessBuilder("python",
+						getClassLoader().getResource("character_replacer/CharacterReplacer.py").getPath(), "?", ".")
+								.start(),
+				new ProcessBuilder("python",
+						getClassLoader().getResource("character_replacer/CharacterReplacer.py").getPath(), "1", "a")
+								.start(),
+				new ProcessBuilder("python",
+						getClassLoader().getResource("character_replacer/CharacterReplacer.py").getPath(), "!", ".")
+								.start());
 
 		// Splits the StringBuilder results into a String array with each line being one element.
 		String[] lines = sb.toString().split(System.lineSeparator());

@@ -88,6 +88,12 @@ public class CommandLineInputParser extends InputParser
 				.withDescription(
 						"BED formatted file describing how to group the aligned SAMRecords during the shuffle/sort phase.")
 				.create("bed"));
+
+		options.addOption(OptionBuilder.withArgName("readgroup").hasArg()
+				.withDescription(
+						"The read group line that should be added to generated alignment sam data. This line should adhere to the following regex format: "
+								+ "@RG\tID:[0-9]+\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\tSM:[a-zA-Z0-9]+")
+				.create("rg"));
 	}
 
 	/**
@@ -129,6 +135,10 @@ public class CommandLineInputParser extends InputParser
 		if (commandLine.hasOption("bed"))
 		{
 			setBedFile(commandLine.getOptionValue("bed"));
+		}
+		if (commandLine.hasOption("rg"))
+		{
+			setReadGroupLine(commandLine.getOptionValue("rg"));
 		}
 	}
 }

@@ -80,6 +80,11 @@ public abstract class InputParser
 	 */
 	private Path bedFile;
 
+	/**
+	 * The read group line that should be added to generated alignment SAM files.
+	 */
+	private String readGroupLine;
+
 	protected void setFileSys(FileSystem fileSys)
 	{
 		this.fileSys = fileSys;
@@ -227,6 +232,16 @@ public abstract class InputParser
 		this.bedFile = new Path(bedFile);
 	}
 
+	public String getReadGroupLine()
+	{
+		return readGroupLine;
+	}
+
+	protected void setReadGroupLine(String readGroupLine)
+	{
+		this.readGroupLine = readGroupLine;
+	}
+
 	/**
 	 * Checks whether all required files exist. If one of the required files could not be found, a print statement to
 	 * stderr is given regarding the missing file(s). If all required files are present, {@code isContinueApplication()}
@@ -289,6 +304,12 @@ public abstract class InputParser
 			invalidInput = true;
 			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
+		// Checks for a valid read group line only if a read group line was given.
+		if (readGroupLine != null && !checkReadGroupLineFormat(readGroupLine))
+		{
+			invalidInput = true;
+			System.err.println("The readgroupline String is invalid: " + readGroupLine);
+		}
 
 		// If no invalid input is found, continueApplication is set to true.
 		if (!invalidInput)
@@ -332,5 +353,23 @@ public abstract class InputParser
 	{
 		return fileSys.exists(fileLocation.getParent())
 				&& fileSys.getFileStatus(fileLocation.getParent()).isDirectory();
+	}
+
+	/**
+	 * Checks whether the given read group line {@link String} matches the expected pattern. This pattern is:
+	 * 
+	 * <pre>
+	 * {@code @RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+}
+	 * </pre>
+	 * 
+	 * (above is a Java compatible regex, so characters such as an extra exclusion backslash are present)
+	 * 
+	 * @param readGroupLine
+	 * @return boolean
+	 */
+	private boolean checkReadGroupLineFormat(String readGroupLine)
+	{
+		String pattern = "@RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+";
+		return readGroupLine.matches(pattern);
 	}
 }

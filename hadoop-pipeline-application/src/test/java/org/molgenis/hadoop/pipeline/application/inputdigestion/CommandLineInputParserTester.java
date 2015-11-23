@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.ParseException;
@@ -29,6 +30,7 @@ public class CommandLineInputParserTester extends Tester
 	String bwaRefFastaSa;
 	String bwaRefDict;
 	String bedFile;
+	String validReadGroup;
 
 	Path toolsAsPath;
 	Path inputDirAsPath;
@@ -44,6 +46,7 @@ public class CommandLineInputParserTester extends Tester
 	Path bedFileAsPath;
 
 	String[] args;
+	String[] argsWithReadGroupLine;
 
 	/**
 	 * Executes basic code needed for the tests.
@@ -69,6 +72,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
 		bwaRefDict = getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toString();
 		bedFile = getClassLoader().getResource("chr1_20000000-21000000.bed").toString();
+		validReadGroup = "@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);
@@ -86,6 +90,7 @@ public class CommandLineInputParserTester extends Tester
 
 		// Create arguments string for the command line parser input.
 		args = new String[10];
+		argsWithReadGroupLine = new String[12];
 	}
 
 	/**
@@ -105,6 +110,11 @@ public class CommandLineInputParserTester extends Tester
 		args[7] = bwaRefFasta;
 		args[8] = "-bed";
 		args[9] = bedFile;
+
+		// Defines the default command line input when a read group line is also given.
+		argsWithReadGroupLine = Arrays.copyOf(args, args.length + 2);
+		argsWithReadGroupLine[10] = "-rg";
+		argsWithReadGroupLine[11] = validReadGroup;
 	}
 
 	/**
@@ -135,6 +145,7 @@ public class CommandLineInputParserTester extends Tester
 		Assert.assertEquals(bwaRefFastaSaAsPath, parser.getAlignmentReferenceFastaSaFile());
 		Assert.assertEquals(bwaRefDictAsPath, parser.getAlignmentReferenceDictFile());
 		Assert.assertEquals(bedFileAsPath, parser.getBedFile());
+		Assert.assertEquals(null, parser.getReadGroupLine()); // Is null as parameter was not set.
 		Assert.assertEquals(true, parser.isContinueApplication());
 	}
 
@@ -215,7 +226,7 @@ public class CommandLineInputParserTester extends Tester
 	}
 
 	/**
-	 * Test: if output directory itself already exists.
+	 * Test: If output directory itself already exists.
 	 * 
 	 * @throws ParseException
 	 * @throws IOException
@@ -229,6 +240,141 @@ public class CommandLineInputParserTester extends Tester
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
 		Assert.assertEquals(new Path(invalidOutputDir), parser.getOutputDir());
+		Assert.assertEquals(false, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test: If a read group line is also given.
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withValidReadGroupPgNameIlluminaLowerCase() throws ParseException, IOException
+	{
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(validReadGroup, parser.getReadGroupLine());
+		System.out.println(parser.getReadGroupLine());
+		Assert.assertEquals(true, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test:
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withValidReadGroupPgNameIlluminaCapitalCase() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:Illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(true, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test:
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withValidReadGroupPgNameIlluminaUpperCase() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:ILLUMINA\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(true, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test:
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withValidReadGroupPgNameHelicos() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:ILLUMINA\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(true, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test:
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withInValidReadGroupPgNameKobol() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:kobol\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(false, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test: If a read group line is also given but misses the {@code @RG} tag.
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withInvalidReadGroupNoStartTag() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "ID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(false, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test: If a read group line is also given but misses a field.
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withInvalidReadGroupMissingField() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
+		Assert.assertEquals(false, parser.isContinueApplication());
+	}
+
+	/**
+	 * Test: If a read group line is also given but the field order differs.
+	 * 
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	@Test
+	public void withInvalidReadGroupDifferentFieldOrder() throws ParseException, IOException
+	{
+		argsWithReadGroupLine[11] = "@RG\tID:5\tLB:150702_SN163_0649_BHJYNKADXX_L5\tPL:illumina\tSM:sample3";
+
+		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
+
+		Assert.assertEquals(argsWithReadGroupLine[11], parser.getReadGroupLine());
 		Assert.assertEquals(false, parser.isContinueApplication());
 	}
 }
