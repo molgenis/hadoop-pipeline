@@ -18,7 +18,7 @@ import htsjdk.samtools.SAMSequenceRecord;
 public class MapReduceRefSeqDictReader extends MapReduceFileReader<SAMSequenceDictionary>
 {
 	/**
-	 * Create a new {@link SamFileHeaderGenerator} instance.
+	 * Create a new {@link MapReduceRefSeqDictReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
