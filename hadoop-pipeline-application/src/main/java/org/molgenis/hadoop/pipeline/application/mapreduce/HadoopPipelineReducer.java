@@ -92,7 +92,7 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		// Adds @SQ tags data to the SAMFileHeader.
 		String alignmentReferenceDictFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[7]));
 		SAMSequenceDictionary seqDict = new MapReduceRefSeqDictReader(FileSystem.get(context.getConfiguration()))
-				.readFile(alignmentReferenceDictFile);
+				.read(alignmentReferenceDictFile);
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the @RG tag String, if present.

@@ -38,7 +38,7 @@ public class MapReduceRefSeqDictReader extends MapReduceFileReader<SAMSequenceDi
 	 * @return {@link SAMSequenceDictionary}
 	 */
 	@Override
-	public SAMSequenceDictionary readInputStream(InputStream inputStream) throws IOException
+	public SAMSequenceDictionary read(InputStream inputStream) throws IOException
 	{
 		final SAMSequenceDictionary samSeqDict = new SAMSequenceDictionary();
 

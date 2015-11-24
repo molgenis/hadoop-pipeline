@@ -41,29 +41,29 @@ public abstract class MapReduceFileReader<T>
 	}
 
 	/**
-	 * Wrapper for {@link #readInputStream(InputStream)}.
+	 * Wrapper for {@link #read(InputStream)}.
 	 * 
 	 * @param file
 	 *            {@link File}
 	 * @return {@code T}
 	 * @throws IOException
 	 */
-	public T readFile(File file) throws IOException
+	public T read(File file) throws IOException
 	{
-		return readInputStream(FileUtils.openInputStream(file));
+		return read(FileUtils.openInputStream(file));
 	}
 
 	/**
-	 * Wrapper for {@link #readFile(File)}.
+	 * Wrapper for {@link #read(File)}.
 	 * 
 	 * @param path
 	 *            {@link String}
 	 * @return {@code T}
 	 * @throws IOException
 	 */
-	public T readFile(String path) throws IOException
+	public T read(String path) throws IOException
 	{
-		return readFile(new File(path));
+		return read(new File(path));
 	}
 
 	/**
@@ -74,5 +74,5 @@ public abstract class MapReduceFileReader<T>
 	 * @return {@code T}
 	 * @throws IOException
 	 */
-	public abstract T readInputStream(InputStream inputStream) throws IOException;
+	public abstract T read(InputStream inputStream) throws IOException;
 }

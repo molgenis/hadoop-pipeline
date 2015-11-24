@@ -36,7 +36,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		expectedSeqDict.addSequence(new SAMSequenceRecord("1:20000000-21000000", 1000001));
 
 		SAMSequenceDictionary actualSeqDict = reader
-				.readFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").getFile());
+				.read(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").getFile());
 
 		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
@@ -44,13 +44,13 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 	@Test(expectedExceptions = SinkIOException.class)
 	public void testRefSeqDictReadingSeqWithoutName() throws IOException
 	{
-		reader.readFile(getClassLoader().getResource("extra_dict_files/no_name_field.dict").getFile());
+		reader.read(getClassLoader().getResource("extra_dict_files/no_name_field.dict").getFile());
 	}
 
 	@Test(expectedExceptions = SinkIOException.class)
 	public void testRefSeqDictReadingSeqWithoutLength() throws IOException
 	{
-		reader.readFile(getClassLoader().getResource("extra_dict_files/no_length_field.dict").getFile());
+		reader.read(getClassLoader().getResource("extra_dict_files/no_length_field.dict").getFile());
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		SAMSequenceDictionary expectedSeqDict = new SAMSequenceDictionary();
 
 		SAMSequenceDictionary actualSeqDict = reader
-				.readFile(getClassLoader().getResource("extra_dict_files/no_sq_tag.dict").getFile());
+				.read(getClassLoader().getResource("extra_dict_files/no_sq_tag.dict").getFile());
 
 		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
