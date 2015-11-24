@@ -28,6 +28,11 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		reader = new MapReduceRefSeqDictReader(FileSystem.get(new Configuration()));
 	}
 
+	/**
+	 * Tests the digestion of a valid .dict file.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testRefSeqDictReadingValidInput() throws IOException
 	{
@@ -41,18 +46,33 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
 
+	/**
+	 * Tests the digestion of a .dict file missing a name ("SN:") field.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = SinkIOException.class)
 	public void testRefSeqDictReadingSeqWithoutName() throws IOException
 	{
 		reader.read(getClassLoader().getResource("extra_dict_files/no_name_field.dict").getFile());
 	}
 
+	/**
+	 * Tests a .dict file that misses a length ("LN:") field.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = SinkIOException.class)
 	public void testRefSeqDictReadingSeqWithoutLength() throws IOException
 	{
 		reader.read(getClassLoader().getResource("extra_dict_files/no_length_field.dict").getFile());
 	}
 
+	/**
+	 * Tests a .dict file that misses a a sequence tag ("@SQ") at the start of the line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testRefSeqDictReadingSeqWithoutSqTag() throws IOException
 	{
@@ -64,6 +84,15 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 		assertEqualsSamSequenceDictionaries(actualSeqDict, expectedSeqDict);
 	}
 
+	/**
+	 * Compares a {@link SAMSequenceDictionary} containing the digested data with a {@link SAMSequenceDictionary}
+	 * containing the expected data.
+	 * 
+	 * @param actualSeqDict
+	 *            {@link SAMSequenceDictionary}
+	 * @param expectedSeqDict
+	 *            {@link SAMSequenceDictionary}
+	 */
 	private void assertEqualsSamSequenceDictionaries(SAMSequenceDictionary actualSeqDict,
 			SAMSequenceDictionary expectedSeqDict)
 	{
