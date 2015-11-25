@@ -1,5 +1,3 @@
-package mr.wholeFile;
-
 /**
  * Copyright 2014, dimamayteacher
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +26,8 @@ package mr.wholeFile;
  * were made with the author name "dimamayteacher", this name was filled in
  * as copyright owner.
  */
+
+package mr.wholeFile;
 
 import java.io.IOException;
 

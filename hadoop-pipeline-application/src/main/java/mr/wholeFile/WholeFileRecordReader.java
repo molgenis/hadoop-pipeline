@@ -1,5 +1,3 @@
-package mr.wholeFile;
-
 /**
  * Copyright 2014, dimamayteacher
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +28,8 @@ package mr.wholeFile;
  * 
  * Furthermore, comments (line 106-109) have been added to the method getProgress().
  */
+
+package mr.wholeFile;
 
 import java.io.IOException;
 
