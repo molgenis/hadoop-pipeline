@@ -1,6 +1,7 @@
 /**
  * The Javadoc from Oracle's java.lang.RuntimeException was used to create the Javadoc present in this file.
  */
+
 package org.molgenis.hadoop.pipeline.application.exceptions;
 
 /**

@@ -1,6 +1,7 @@
 /**
  * The Javadoc from Oracle's java.nio.file.FileAlreadyExistsException was used to create the Javadoc present in this file.
  */
+
 package org.molgenis.hadoop.pipeline.application.exceptions;
 
 import java.nio.file.FileAlreadyExistsException;
