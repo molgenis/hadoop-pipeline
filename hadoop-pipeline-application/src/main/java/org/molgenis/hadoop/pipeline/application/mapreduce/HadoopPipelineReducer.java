@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -41,7 +42,11 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 	 */
 	private String readGroupLine;
 
-	private Tool bwaTool;
+	/**
+	 * Stores the tools that have been used in this Job and that should be added as {@code @PG} tags to the
+	 * SAM-formatted file.
+	 */
+	private ArrayList<Tool> usedTools;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -72,8 +77,11 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 			context.write(NullWritable.get(), new Text(readGroupLine));
 		}
 
-		// Writes @PG tag.
-		context.write(NullWritable.get(), new Text(bwaTool.getSamString()));
+		// Writes @PG tags.
+		for (Tool usedTool : usedTools)
+		{
+			context.write(NullWritable.get(), new Text(usedTool.getSamString()));
+		}
 
 		// Writes the aligned SAMRecord data to context.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
@@ -106,11 +114,14 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		// Retrieves the @RG tag String, if present.
 		readGroupLine = context.getConfiguration().get("input_readgroupline");
 
-		// Retrieves the tools to be used for the @PG tag.
+		// Retrieves the tools data stored in the tools archive info.xml file.
 		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
 				+ "/tools/info.xml";
 		HashMap<String, Tool> tools = new MapReduceToolsXmlReader(FileSystem.get(context.getConfiguration()))
 				.read(toolsArchiveInfoXml);
-		bwaTool = tools.get("bwa");
+
+		// Filters the tools present in the tools archive info.xml file for the used tools by this Job.
+		usedTools = new ArrayList<Tool>();
+		usedTools.add(tools.get("bwa"));
 	}
 }
