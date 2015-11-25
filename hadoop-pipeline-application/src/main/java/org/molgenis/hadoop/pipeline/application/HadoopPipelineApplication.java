@@ -16,8 +16,8 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
-import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
+import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -141,5 +141,4 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		// Returns exit code 1 if no job was executed.
 		return 1;
 	}
-
 }

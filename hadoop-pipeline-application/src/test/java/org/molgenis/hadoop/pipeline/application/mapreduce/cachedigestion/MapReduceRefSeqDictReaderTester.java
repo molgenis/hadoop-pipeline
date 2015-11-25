@@ -15,6 +15,9 @@ import htsjdk.samtools.SAMSequenceRecord;
 
 public class MapReduceRefSeqDictReaderTester extends Tester
 {
+	/**
+	 * The reader that is being tested.
+	 */
 	private MapReduceRefSeqDictReader reader;
 
 	/**

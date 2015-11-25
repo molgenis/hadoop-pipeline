@@ -86,8 +86,8 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 		if (readGroupLine != null)
 		{
 			logger.debug("Executing pipeline with readGroupLine: " + readGroupLine);
-			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R \"",
-					readGroupLine, "\"", alignmentReferenceFastaFile, "-").start());
+			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
+					readGroupLine, alignmentReferenceFastaFile, "-").start());
 		}
 		else
 		{
@@ -109,7 +109,11 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 	{
 		bwaTool = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0])) + "/tools/bwa";
 		alignmentReferenceFastaFile = HdfsFileMetaDataHandler.retrieveFileName(context.getCacheFiles()[0]);
-		readGroupLine = context.getConfiguration().get("input_readgroupline");
+
+		// Reads the readgroupline and adds an extra backslash for correct interpretation by the ProcessBuilder. When
+		// formatted wrongly, can result in an empty Job output while still saying the Job finished successfully. This
+		// should however not be possible as the readgroupline format is checked during the input digestion.
+		readGroupLine = context.getConfiguration().get("input_readgroupline").replace("\\t", "\\\\t");
 	}
 
 }

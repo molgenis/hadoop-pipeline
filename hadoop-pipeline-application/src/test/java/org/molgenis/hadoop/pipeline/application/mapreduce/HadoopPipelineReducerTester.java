@@ -56,8 +56,9 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 				+ header.getSequence(0).getSequenceLength();
 		String expectedPgTag = "@PG\tID:" + header.getProgramRecords().get(0).getId() + "\tPN:"
 				+ header.getProgramRecords().get(0).getProgramName() + "\tVN:"
-				+ header.getProgramRecords().get(0).getProgramVersion() + "\tCL:"
-				+ header.getProgramRecords().get(0).getCommandLine();
+				+ header.getProgramRecords().get(0).getProgramVersion();
+				// Does not compare header.getProgramRecords().get(0).getCommandLine() as this would be different anyhow
+				// due to paths to files that can differ and alike.
 
 		// Defines input.
 		ArrayList<SAMRecordWritable> input = new ArrayList<SAMRecordWritable>();
@@ -78,7 +79,7 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 		Assert.assertEquals(output.get(1).getSecond().toString(), expectedPgTag);
 		for (int i = 2; i < getBwaResults().size() + 2; i++)
 		{
-			Assert.assertEquals(output.get(i).getSecond().toString(), getBwaResults().get(i - 2).getSAMString());
+			Assert.assertEquals(output.get(i).getSecond().toString(), getBwaResults().get(i - 2).getSAMString().trim());
 		}
 	}
 
@@ -99,8 +100,9 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 				+ "\tSN:" + header.getReadGroups().get(0).getSample();
 		String expectedPgTag = "@PG\tID:" + header.getProgramRecords().get(0).getId() + "\tPN:"
 				+ header.getProgramRecords().get(0).getProgramName() + "\tVN:"
-				+ header.getProgramRecords().get(0).getProgramVersion() + "\tCL:"
-				+ header.getProgramRecords().get(0).getCommandLine();
+				+ header.getProgramRecords().get(0).getProgramVersion();
+				// Does not compare header.getProgramRecords().get(0).getCommandLine() as this would be different anyhow
+				// due to paths to files that can differ and alike.
 
 		// Defines input.
 		ArrayList<SAMRecordWritable> input = new ArrayList<SAMRecordWritable>();
@@ -124,7 +126,8 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 		Assert.assertEquals(output.get(2).getSecond().toString(), expectedPgTag);
 		for (int i = 3; i < getBwaResults().size() + 3; i++)
 		{
-			Assert.assertEquals(output.get(i).getSecond().toString(), getBwaResults().get(i - 3).getSAMString());
+			Assert.assertEquals(output.get(i).getSecond().toString(),
+					getBwaResultsWithReadGroupLine().get(i - 3).getSAMString().trim());
 		}
 	}
 }

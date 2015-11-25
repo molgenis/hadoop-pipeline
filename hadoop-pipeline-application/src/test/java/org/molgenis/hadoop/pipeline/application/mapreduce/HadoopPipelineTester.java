@@ -82,7 +82,6 @@ public class HadoopPipelineTester extends Tester
 		bwaResultsWithReadGroupLine = readSamFile("mini_halvade_0_0-bwa_results_withreadlinegroup.sam");
 
 		samFileHeader = new SAMFileHeader();
-
 		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
 		// @SQ\tSN:1:20000000-21000000\tLN:1000001
 		samFileHeader.setSequenceDictionary(

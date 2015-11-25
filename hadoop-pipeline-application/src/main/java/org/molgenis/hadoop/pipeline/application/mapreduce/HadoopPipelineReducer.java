@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -11,6 +12,8 @@ import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceRefSeqDictReader;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceToolsXmlReader;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Tool;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
@@ -37,6 +40,8 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 	 * Stores the read group line that should be added to the bwa alignment, if present.
 	 */
 	private String readGroupLine;
+
+	private Tool bwaTool;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -66,6 +71,9 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		{
 			context.write(NullWritable.get(), new Text(readGroupLine));
 		}
+
+		// Writes @PG tag.
+		context.write(NullWritable.get(), new Text(bwaTool.getSamString()));
 
 		// Writes the aligned SAMRecord data to context.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
@@ -97,5 +105,12 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 
 		// Retrieves the @RG tag String, if present.
 		readGroupLine = context.getConfiguration().get("input_readgroupline");
+
+		// Retrieves the tools to be used for the @PG tag.
+		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
+				+ "/tools/info.xml";
+		HashMap<String, Tool> tools = new MapReduceToolsXmlReader(FileSystem.get(context.getConfiguration()))
+				.read(toolsArchiveInfoXml);
+		bwaTool = tools.get("bwa");
 	}
 }
