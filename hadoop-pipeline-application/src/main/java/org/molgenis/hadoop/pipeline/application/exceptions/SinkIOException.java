@@ -15,7 +15,7 @@ public class SinkIOException extends SinkException
 	private static final long serialVersionUID = -3951771900588889532L;
 
 	/**
-	 * Constructs a sink IO exception with the specified cause and a detail message of
+	 * Constructs a {@link SinkIOException} with the specified cause and a detail message of
 	 * <tt>(cause==null ? null : cause.toString())</tt> (which typically contains the class and detail message of
 	 * <tt>cause</tt>).
 	 *

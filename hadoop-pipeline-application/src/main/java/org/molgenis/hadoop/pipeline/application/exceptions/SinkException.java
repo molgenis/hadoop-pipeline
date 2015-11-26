@@ -12,7 +12,7 @@ public class SinkException extends RuntimeException
 	private static final long serialVersionUID = -2403385136204061767L;
 
 	/**
-	 * Constructs a sink exception with the specified cause and a detail message of
+	 * Constructs a {@link SinkException} with the specified cause and a detail message of
 	 * <tt>(cause==null ? null : cause.toString())</tt> (which typically contains the class and detail message of
 	 * <tt>cause</tt>).
 	 *

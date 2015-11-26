@@ -13,7 +13,7 @@ public class ProcessPipeException extends RuntimeException
 	private static final long serialVersionUID = -2907512825676654876L;
 
 	/**
-	 * Constructs a process pipe exception with the specified cause and a detail message of
+	 * Constructs a {@link ProcessPipeException} with the specified cause and a detail message of
 	 * <tt>(cause==null ? null : cause.toString())</tt> (which typically contains the class and detail message of
 	 * <tt>cause</tt>).
 	 *
