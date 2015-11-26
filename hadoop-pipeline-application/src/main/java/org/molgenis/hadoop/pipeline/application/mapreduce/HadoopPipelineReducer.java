@@ -67,8 +67,8 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		// Writes the @SQ tags to the context.
 		for (SAMSequenceRecord samSeq : samFileHeader.getSequenceDictionary().getSequences())
 		{
-			context.write(NullWritable.get(),
-					new Text("@SQ\tSN:" + samSeq.getSequenceName() + "\tLN:" + samSeq.getSequenceLength()));
+			String SqString = new String("@SQ\tSN:" + samSeq.getSequenceName() + "\tLN:" + samSeq.getSequenceLength());
+			context.write(NullWritable.get(), new Text(SqString));
 		}
 
 		// Writes the @RG tag to context, if it is present.

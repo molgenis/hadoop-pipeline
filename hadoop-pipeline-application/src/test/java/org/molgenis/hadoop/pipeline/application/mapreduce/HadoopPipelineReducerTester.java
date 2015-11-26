@@ -75,11 +75,12 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 		List<Pair<NullWritable, Text>> output = rDriver.run();
 
 		// Validates output.
-		Assert.assertEquals(output.get(0).getSecond().toString(), expectedSqTag);
-		Assert.assertEquals(output.get(1).getSecond().toString(), expectedPgTag);
+		Assert.assertEquals(getValueAsStringFromOutput(output, 0), expectedSqTag);
+		Assert.assertEquals(getValueAsStringFromOutput(output, 1), expectedPgTag);
 		for (int i = 2; i < getBwaResults().size() + 2; i++)
 		{
-			Assert.assertEquals(output.get(i).getSecond().toString(), getBwaResults().get(i - 2).getSAMString().trim());
+			Assert.assertEquals(getValueAsStringFromOutput(output, i),
+					getBwaResults().get(i - 2).getSAMString().trim());
 		}
 	}
 
@@ -121,13 +122,31 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 		List<Pair<NullWritable, Text>> output = rDriver.run();
 
 		// Validates output.
-		Assert.assertEquals(output.get(0).getSecond().toString(), expectedSqTag);
-		Assert.assertEquals(output.get(1).getSecond().toString(), expectedRgTag);
-		Assert.assertEquals(output.get(2).getSecond().toString(), expectedPgTag);
+		Assert.assertEquals(getValueAsStringFromOutput(output, 0), expectedSqTag);
+		Assert.assertEquals(getValueAsStringFromOutput(output, 1), expectedRgTag);
+		Assert.assertEquals(getValueAsStringFromOutput(output, 2), expectedPgTag);
 		for (int i = 3; i < getBwaResults().size() + 3; i++)
 		{
-			Assert.assertEquals(output.get(i).getSecond().toString(),
+			Assert.assertEquals(getValueAsStringFromOutput(output, i),
 					getBwaResultsWithReadGroupLine().get(i - 3).getSAMString().trim());
 		}
+	}
+
+	/**
+	 * Retrieve a single value as {@link String} from the output created by a Test. Use {@code index} to define the
+	 * position from the {@code output} {@link List} which should be retrieved.
+	 * 
+	 * @param output
+	 *            {@link List}{@code <}{@link NullWritable}{@code ,}{@link Text}{@code >>}
+	 * @param index
+	 *            {@code int}
+	 * @return {@link String}
+	 * @throws IOException
+	 * @throws IndexOutOfBoundsException
+	 */
+	private String getValueAsStringFromOutput(List<Pair<NullWritable, Text>> output, int index)
+			throws IOException, IndexOutOfBoundsException
+	{
+		return output.get(index).getSecond().toString();
 	}
 }
