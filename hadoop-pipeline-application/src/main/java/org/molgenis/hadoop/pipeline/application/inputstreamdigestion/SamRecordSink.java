@@ -1,5 +1,6 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.inputstreamdigestion;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -19,9 +20,11 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	/**
 	 * Digests a SAM-formatted {@link InputStream}. For each {@link SAMRecord} present in the {@link InputStream},
 	 * {@link #digestStreamItem(SAMRecord)} is called.
+	 * 
+	 * @throws IOException
 	 */
 	@Override
-	public void handleInputStream(InputStream inputStream)
+	public void handleInputStream(InputStream inputStream) throws IOException
 	{
 		SamReader samReader = null;
 		try
@@ -47,7 +50,8 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	 * 
 	 * @param item
 	 *            {@link SAMRecord}
+	 * @throws IOException
 	 */
 	@Override
-	protected abstract void digestStreamItem(SAMRecord item);
+	protected abstract void digestStreamItem(SAMRecord item) throws IOException;
 }

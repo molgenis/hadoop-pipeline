@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.molgenis.hadoop.pipeline.application.processes.StringSink;
+import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;

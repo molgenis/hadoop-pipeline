@@ -8,11 +8,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.exceptions.SinkException;
-import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
+import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-import org.molgenis.hadoop.pipeline.application.processes.SamRecordSink;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
@@ -63,7 +61,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 		SamRecordSink sink = new SamRecordSink()
 		{
 			@Override
-			public void digestStreamItem(SAMRecord item)
+			public void digestStreamItem(SAMRecord item) throws IOException
 			{
 				try
 				{
@@ -71,13 +69,9 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 					samWritable.set(item);
 					context.write(new Text("key"), samWritable);
 				}
-				catch (IOException e)
-				{
-					throw new SinkIOException(e);
-				}
 				catch (InterruptedException e)
 				{
-					throw new SinkException(e);
+					throw new RuntimeException(e);
 				}
 			}
 		};

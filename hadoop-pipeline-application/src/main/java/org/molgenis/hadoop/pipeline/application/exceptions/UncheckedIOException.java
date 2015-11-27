@@ -5,22 +5,23 @@
 package org.molgenis.hadoop.pipeline.application.exceptions;
 
 /**
- * An <em>unchecked exception</em> thrown to indicate something went wrong during the usage of a {@link Sink}.
+ * 
  */
-public class SinkException extends RuntimeException
+public class UncheckedIOException extends RuntimeException
 {
-	private static final long serialVersionUID = -2403385136204061767L;
+	private static final long serialVersionUID = -7594698103814441216L;
 
 	/**
-	 * Constructs a {@link SinkException} with the specified cause and a detail message of
+	 * Constructs a new {@link UncheckedIOException} with the specified cause and a detail message of
 	 * <tt>(cause==null ? null : cause.toString())</tt> (which typically contains the class and detail message of
-	 * <tt>cause</tt>).
+	 * <tt>cause</tt>). This constructor is useful for runtime exceptions that are little more than wrappers for other
+	 * throwables.
 	 *
 	 * @param cause
 	 *            the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
 	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
-	public SinkException(Throwable cause)
+	public UncheckedIOException(Throwable cause)
 	{
 		super(cause);
 	}

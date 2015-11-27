@@ -2,7 +2,11 @@ package org.molgenis.hadoop.pipeline.application.processes;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.io.InputStream;
+
+import org.molgenis.hadoop.pipeline.application.exceptions.UncheckedIOException;
+import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.Sink;
 
 /**
  * Digests a {@link InputStream} using a {@link Sink}{@code <T>}.
@@ -38,7 +42,14 @@ public class PipeOutHandler<T> implements Runnable
 	@Override
 	public void run()
 	{
-		sink.handleInputStream(inputStream);
+		try
+		{
+			sink.handleInputStream(inputStream);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
 	}
 
 }

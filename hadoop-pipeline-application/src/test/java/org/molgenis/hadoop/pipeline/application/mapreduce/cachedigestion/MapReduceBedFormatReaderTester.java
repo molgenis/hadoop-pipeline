@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -101,14 +100,14 @@ public class MapReduceBedFormatReaderTester extends Tester
 		compareActualBedWithExpectedBed(actualBed, expectedBedNoEndValueForFourthLine);
 	}
 
-	@Test(expectedExceptions = SinkIOException.class)
+	@Test(expectedExceptions = IOException.class)
 	public void testBedFileWithLineThatOnlyHasContig() throws IOException
 	{
 		// Runs file reader.
 		reader.read(getClassLoader().getResource("bed_files/line_contig_normal-end.bed").getFile());
 	}
 
-	@Test(expectedExceptions = SinkIOException.class)
+	@Test(expectedExceptions = IOException.class)
 	public void testBedFileWithLineThatOnlyHasContigAndEndsWithATab() throws IOException
 	{
 		// Runs file reader.

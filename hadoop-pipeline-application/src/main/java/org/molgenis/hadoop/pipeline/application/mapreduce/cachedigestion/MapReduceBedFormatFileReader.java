@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.apache.hadoop.fs.FileSystem;
-import org.molgenis.hadoop.pipeline.application.processes.StringSink;
+import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
 import htsjdk.tribble.bed.BEDCodec;
 import htsjdk.tribble.bed.BEDCodec.StartOffset;

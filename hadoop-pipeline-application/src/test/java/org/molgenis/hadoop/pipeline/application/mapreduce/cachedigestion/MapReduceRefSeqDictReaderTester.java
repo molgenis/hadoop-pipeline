@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.exceptions.SinkIOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -54,7 +53,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 	 * 
 	 * @throws IOException
 	 */
-	@Test(expectedExceptions = SinkIOException.class)
+	@Test(expectedExceptions = IOException.class)
 	public void testRefSeqDictReadingSeqWithoutName() throws IOException
 	{
 		reader.read(getClassLoader().getResource("extra_dict_files/no_name_field.dict").getFile());
@@ -65,7 +64,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 	 * 
 	 * @throws IOException
 	 */
-	@Test(expectedExceptions = SinkIOException.class)
+	@Test(expectedExceptions = IOException.class)
 	public void testRefSeqDictReadingSeqWithoutLength() throws IOException
 	{
 		reader.read(getClassLoader().getResource("extra_dict_files/no_length_field.dict").getFile());
