@@ -118,6 +118,6 @@ public class HadoopPipelineTester extends Tester
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toURI());
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toURI());
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toURI());
-		driver.addCacheFile(getClassLoader().getResource("chr1_20000000-21000000.bed").toURI());
+		driver.addCacheFile(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toURI());
 	}
 }

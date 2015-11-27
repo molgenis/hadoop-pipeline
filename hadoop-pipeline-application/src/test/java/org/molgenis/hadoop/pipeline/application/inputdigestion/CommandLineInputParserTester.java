@@ -71,7 +71,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaPac = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.pac").toString();
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
 		bwaRefDict = getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toString();
-		bedFile = getClassLoader().getResource("chr1_20000000-21000000.bed").toString();
+		bedFile = getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toString();
 		validReadGroup = "@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
 
 		// Path objects for comparison with expected output.
