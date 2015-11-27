@@ -4,8 +4,10 @@
 
 package org.molgenis.hadoop.pipeline.application.exceptions;
 
+import java.io.IOException;
+
 /**
- * 
+ * An <em>unchecked exception</em> thrown to indicate an {@link IOException} occured.
  */
 public class UncheckedIOException extends RuntimeException
 {
