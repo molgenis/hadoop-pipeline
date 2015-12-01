@@ -92,7 +92,7 @@ public abstract class MapReduceXmlReader<T> extends MapReduceFileReader<T>
 	Document generateParsedXmlDocument(InputStream inputStream, Schema schema)
 			throws ParserConfigurationException, SAXException, IOException
 	{
-		return generateParsedXmlDocument(inputStream, null, new XmlReaderStrictErrorHandler());
+		return generateParsedXmlDocument(inputStream, schema, new XmlReaderStrictErrorHandler());
 	}
 
 	/**
