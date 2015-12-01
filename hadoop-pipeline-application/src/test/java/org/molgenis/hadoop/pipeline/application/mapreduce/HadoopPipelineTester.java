@@ -78,8 +78,9 @@ public class HadoopPipelineTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		bwaResults = readSamFile("mini_halvade_0_0-bwa_results.sam");
-		bwaResultsWithReadGroupLine = readSamFile("mini_halvade_0_0-bwa_results_withreadlinegroup.sam");
+		bwaResults = readSamFile("expected_mini_outputs/mini_halvade_0_0-bwa_results.sam");
+		bwaResultsWithReadGroupLine = readSamFile(
+				"expected_mini_outputs/mini_halvade_0_0-bwa_results_withreadlinegroup.sam");
 
 		samFileHeader = new SAMFileHeader();
 		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:

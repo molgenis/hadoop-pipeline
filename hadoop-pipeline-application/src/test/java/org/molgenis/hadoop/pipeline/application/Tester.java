@@ -1,11 +1,14 @@
 package org.molgenis.hadoop.pipeline.application;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.hadoop.io.IOUtils;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceBedFormatFileReader;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -13,6 +16,8 @@ import htsjdk.samtools.SamInputResource;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
+import htsjdk.tribble.bed.BEDFeature;
+import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
  * Superclass for the TestNG tests containing general code.
@@ -45,12 +50,12 @@ public abstract class Tester
 		{
 			in = getClassLoader().getResource(fileName).openStream();
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			IOUtils.copyBytes(in, baos, 10240);
+			IOUtils.copy(in, baos);
 			return baos.toByteArray();
 		}
 		finally
 		{
-			IOUtils.closeStream(in);
+			IOUtils.closeQuietly(in);
 		}
 	}
 
@@ -81,7 +86,45 @@ public abstract class Tester
 		}
 		finally
 		{
-			IOUtils.closeStream(samReader);
+			IOUtils.closeQuietly(samReader);
 		}
+	}
+
+	/**
+	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link SAMRecord}{@code >}. Conversion from 0-based
+	 * bed-formatted file with an exclusive end to 1-based {@link BEDFeature} with an inclusive end is implemented by
+	 * adding 1 to the {@link BEDFeature#getStart()}. For more information about the difference between a bed-formatted
+	 * file and a {@link BEDFeature}, please view the Javadoc from
+	 * {@link MapReduceBedFormatFileReader#read(java.io.File)}.
+	 * 
+	 * @param fileName
+	 *            {@link String}
+	 * @return {@code byte[]}
+	 * @throws IOException
+	 * 
+	 * @see {@link MapReduceBedFormatFileReader#read(java.io.File)}
+	 */
+	protected ArrayList<BEDFeature> readBedFile(String fileName) throws IOException
+	{
+		ArrayList<BEDFeature> groups = new ArrayList<BEDFeature>();
+		BufferedReader reader = null;
+		try
+		{
+			reader = new BufferedReader(new FileReader(getClassLoader().getResource(fileName).getFile()));
+
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				String[] splits = line.split("\\t");
+				// +1 for start: From 0-based exclusive end to 1-based inclusive end. See
+				groups.add(new FullBEDFeature(splits[0], Integer.parseInt(splits[1]) + 1, Integer.parseInt(splits[2])));
+			}
+		}
+		finally
+		{
+			IOUtils.closeQuietly(reader);
+		}
+
+		return groups;
 	}
 }

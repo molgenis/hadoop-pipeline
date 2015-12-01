@@ -5,15 +5,14 @@ import java.util.ArrayList;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.molgenis.hadoop.pipeline.application.Tester;
-import org.testng.Assert;
+import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
 
-public class MapReduceBedFormatReaderTester extends Tester
+public class MapReduceBedFormatReaderTester extends BedFeatureTester
 {
 	private MapReduceBedFormatFileReader reader;
 	private ArrayList<BEDFeature> expectedValidBed;
@@ -136,17 +135,4 @@ public class MapReduceBedFormatReaderTester extends Tester
 		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
 
 	}
-
-	private void compareActualBedWithExpectedBed(ArrayList<BEDFeature> actualBed, ArrayList<BEDFeature> expectedBed)
-	{
-		// Compares expected data with actual data.
-		Assert.assertEquals(actualBed.size(), expectedBed.size());
-		for (int i = 0; i < actualBed.size(); i++)
-		{
-			Assert.assertEquals(actualBed.get(i).getContig(), expectedBed.get(i).getContig());
-			Assert.assertEquals(actualBed.get(i).getStart(), expectedBed.get(i).getStart());
-			Assert.assertEquals(actualBed.get(i).getEnd(), expectedBed.get(i).getEnd());
-		}
-	}
-
 }
