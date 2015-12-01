@@ -99,9 +99,11 @@ public class SamRecordGroupsRetriever
 	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(final Integer recordStart, List<BEDFeature> list,
 			int low, int high)
 	{
-		// Retrieves data for further usage.
+		// Retrieves basic information for further usage.
 		int middle = (low + high) / 2; // Middle index, middle right if length is even.
-		int size = high - low;
+		int size = high - low; // Size of remaining list area to be looked at.
+
+		// Retrieves end value of the group present in the middle of the list.
 		int middleGroupEnd = list.get(middle).getEnd();
 
 		// If middle is lower than 1, the remaining List only contains 1 remaining BEDFeature. Ignores comparisons using
@@ -125,21 +127,19 @@ public class SamRecordGroupsRetriever
 			{
 				return middle;
 			}
-			// If the middle position has a lower end position than the record start, creates a new sublist starting
-			// from the middle position till the end of the list and use a recursive call.
-			// returned a null, return this null.
+			// If the middle position has a lower end position than the record start, makes a recursive call with the
+			// middle position as lowest index and the end of the list as highest index. Returns results directly
+			// afterwards.
 			else if (middleGroupEnd < recordStart)
 			{
-				// Recursive call and returns results.
 				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, middle, list.size());
 			}
 			// If the position before the middle position has a higher or equal end value than the record start
-			// position, creates a new sublist containing everything BEFORE the middle position and use a recursive
-			// call.
+			// position, makes a recursive call with the start of the list as the lowest index and the middle position
+			// as the highest index. Returns results directly afterwards.
 			// Should be equal to: MiddleMinusOneGroupEnd >= recordStart
 			else
 			{
-				// Recursive call and returns results.
 				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, 0, middle);
 			}
 		}
