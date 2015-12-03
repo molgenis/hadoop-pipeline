@@ -36,7 +36,7 @@ The needed file can be found at: `dist/HalvadeUploaderWithLibs.jar`
 
 The needed file can be found at: `target/HadoopPipelineApplicationWithDependencies.jar`
 
-Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests), please refer to its own [README](./hadoop-pipeline-application/README.md).
+Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests and updating), please refer to its own [README](./hadoop-pipeline-application/README.md).
 
 ### Creating a tools.tar.gz
 On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux (tested on a Hadoop cluster running CentOS 6.7) and OS X (tested on v10.10.5). If these tool archives do not work or the download link does not, please use the steps below to create a new one.
@@ -57,8 +57,11 @@ The final hierachy of the created tools `.tar.gz` should look as follows:
 	<archive_name>.tar.gz
 		|- tools/
 			|- bwa
+			|- info.xml
 
 IMPORTANT: Be sure to use the exact naming as shown above! Only the archive name itself does not matter.
+
+The `info.xml` file contains information of all tools present in the archive and should adhere to [this](./hadoop-pipeline-application/src/main/resources/tools_archive_info.xsd) Schema. An example of a correct `info.xml` file can be found within the tools archives present in the `.tar.gz` which can be downloaded from the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/).
 
 ## Execution
 1. Upload the fastq files to HDFS using the halvade upload tool:
