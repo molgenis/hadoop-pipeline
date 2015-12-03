@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
@@ -14,6 +13,7 @@ import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSi
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
@@ -22,7 +22,7 @@ import htsjdk.tribble.bed.BEDFeature;
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Text, SAMRecordWritable>
+public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -85,8 +85,7 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Te
 					// Writes a key-value pair for each key found that matched with the SAMRecord alignment position.
 					for (BEDFeature key : groups)
 					{
-						String keyName = new String(key.getContig() + "-" + key.getStart() + "-" + key.getEnd());
-						context.write(new Text(keyName), samWritable);
+						context.write(new BedFeatureWritable(key), samWritable);
 					}
 				}
 				catch (InterruptedException e)

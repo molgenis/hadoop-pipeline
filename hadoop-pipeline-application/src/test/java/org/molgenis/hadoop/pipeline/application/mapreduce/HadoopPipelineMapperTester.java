@@ -9,11 +9,11 @@ import java.util.List;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +28,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapDriver allowing the mapper to be tested.
 	 */
-	private MapDriver<NullWritable, BytesWritable, Text, SAMRecordWritable> mDriver;
+	private MapDriver<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable> mDriver;
 
 	/**
 	 * Stores the fastq file as byte array to be used.
@@ -38,12 +38,12 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	/**
 	 * The expected mapper output when no readgroupline was used.
 	 */
-	private List<Pair<Text, SAMRecordWritable>> expectedMapperResults;
+	private List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedMapperResults;
 
 	/**
 	 * The expected mapper output when a readgroupline was used.
 	 */
-	private List<Pair<Text, SAMRecordWritable>> expectedMapperResultsWithReadGroupLine;
+	private List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedMapperResultsWithReadGroupLine;
 
 	/**
 	 * Loads/generates general data needed for testing.
@@ -68,8 +68,9 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		Mapper<NullWritable, BytesWritable, Text, SAMRecordWritable> mapper = new HadoopPipelineMapper();
-		mDriver = new FileCacheSymlinkMapDriver<NullWritable, BytesWritable, Text, SAMRecordWritable>(mapper);
+		Mapper<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
+		mDriver = new FileCacheSymlinkMapDriver<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable>(
+				mapper);
 		setDriver(mDriver);
 
 		super.beforeMethod();
@@ -85,7 +86,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	{
 		mDriver.withInput(NullWritable.get(), new BytesWritable(fastqData));
 
-		List<Pair<Text, SAMRecordWritable>> output = mDriver.run();
+		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
 		sortMapperOutput(output);
 		validateOutput(output, expectedMapperResults);
 	}
@@ -103,7 +104,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		mDriver.getConfiguration().set("input_readgroupline",
 				"@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3");
 
-		List<Pair<Text, SAMRecordWritable>> output = mDriver.run();
+		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
 		sortMapperOutput(output);
 		validateOutput(output, expectedMapperResultsWithReadGroupLine);
 	}
@@ -115,12 +116,13 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 *            {@link ArrayList}{@code <}{@link SAMRecord}{@code >} bwa output used to base expected output on.
 	 * @param groups
 	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >} groups used for defining keys.
-	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link Text}{@code , }{@link SAMRecordWritable}{@code >>}
+	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureWritable}{@code , }{@link SAMRecordWritable}
+	 *         {@code >>}
 	 */
-	private List<Pair<Text, SAMRecordWritable>> generateExpectedMapperOutput(ArrayList<SAMRecord> bwaOutput,
-			ArrayList<BEDFeature> groups)
+	private List<Pair<BedFeatureWritable, SAMRecordWritable>> generateExpectedMapperOutput(
+			ArrayList<SAMRecord> bwaOutput, ArrayList<BEDFeature> groups)
 	{
-		List<Pair<Text, SAMRecordWritable>> expectedMapperOutput = new ArrayList<Pair<Text, SAMRecordWritable>>();
+		List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<Pair<BedFeatureWritable, SAMRecordWritable>>();
 
 		for (SAMRecord record : bwaOutput)
 		{
@@ -129,10 +131,10 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 				if ((record.getStart() >= group.getStart() && record.getStart() <= group.getEnd())
 						|| (record.getStart() >= group.getStart() && record.getStart() <= group.getEnd()))
 				{
-					Text keyName = new Text(group.getContig() + "-" + group.getStart() + "-" + group.getEnd());
 					SAMRecordWritable writable = new SAMRecordWritable();
 					writable.set(record);
-					expectedMapperOutput.add(new Pair<Text, SAMRecordWritable>(keyName, writable));
+					expectedMapperOutput.add(
+							new Pair<BedFeatureWritable, SAMRecordWritable>(new BedFeatureWritable(group), writable));
 				}
 			}
 		}
@@ -147,27 +149,27 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * easier comparison.
 	 * 
 	 * @param mapperData
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link Text}{@code , }{@link SAMRecordWritable}{@code >>}
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
 	 */
-	private void sortMapperOutput(List<Pair<Text, SAMRecordWritable>> mapperData)
+	private void sortMapperOutput(List<Pair<BedFeatureWritable, SAMRecordWritable>> mapperData)
 	{
-		Collections.sort(mapperData, new Comparator<Pair<Text, SAMRecordWritable>>()
+		Collections.sort(mapperData, new Comparator<Pair<BedFeatureWritable, SAMRecordWritable>>()
 		{
 			@Override
-			public int compare(Pair<Text, SAMRecordWritable> o1, Pair<Text, SAMRecordWritable> o2)
+			public int compare(Pair<BedFeatureWritable, SAMRecordWritable> o1,
+					Pair<BedFeatureWritable, SAMRecordWritable> o2)
 			{
-				// Sorts on the Key String first.
-				int c = o1.getFirst().compareTo(o2.getFirst());
+				// Sorts on the key contig name first.
+				int c = o1.getFirst().getName().compareTo(o2.getFirst().getName());
+				// If there is no difference, uses the key start position to sort.
+				if (c == 0) c = o1.getFirst().getStart() - o2.getFirst().getStart();
+				// If there is no difference, uses the key end position to sort.
+				if (c == 0) c = o1.getFirst().getEnd() - o2.getFirst().getEnd();
 				// If there is no difference in key String, uses the SAMRecord start value to sort.
-				if (c == 0)
-				{
-					c = o1.getSecond().get().getStart() - o2.getSecond().get().getStart();
-				}
+				if (c == 0) c = o1.getSecond().get().getStart() - o2.getSecond().get().getStart();
 				// If above comparisons do not differ, uses the SAMRecord end value to sort.
-				if (c == 0)
-				{
-					c = o1.getSecond().get().getEnd() - o2.getSecond().get().getEnd();
-				}
+				if (c == 0) c = o1.getSecond().get().getEnd() - o2.getSecond().get().getEnd();
 				return c;
 			}
 		});
@@ -177,19 +179,21 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * Compares the output from the driver with the expected output.
 	 * 
 	 * @param output
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link Text}{@code , }{@link SAMRecordWritable}{@code >>}
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param expectedResults
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link Text}{@code , }{@link SAMRecordWritable}{@code >>}
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
 	 */
-	private void validateOutput(List<Pair<Text, SAMRecordWritable>> output,
-			List<Pair<Text, SAMRecordWritable>> expectedResults)
+	private void validateOutput(List<Pair<BedFeatureWritable, SAMRecordWritable>> output,
+			List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedResults)
 	{
 		Assert.assertEquals(output.size(), expectedResults.size());
 
 		// Compares the actual output data with the expected output data.
 		for (int i = 0; i < output.size(); i++)
 		{
-			validateKeyString(output.get(i).getFirst().toString(), expectedResults.get(i).getFirst().toString());
+			validateKeyString(output.get(i).getFirst(), expectedResults.get(i).getFirst());
 			validateSamRecordFields(output.get(i).getSecond().get(), expectedResults.get(i).getSecond().get());
 		}
 	}
@@ -198,13 +202,15 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * Compares the key of a single mapper output item with its expected key.
 	 * 
 	 * @param actualKey
-	 *            {@link String}
+	 *            {@link BedFeatureWritable}
 	 * @param expectedKey
-	 *            {@link String}
+	 *            {@link BedFeatureWritable}
 	 */
-	private void validateKeyString(String actualKey, String expectedKey)
+	private void validateKeyString(BedFeatureWritable actualKey, BedFeatureWritable expectedKey)
 	{
-		Assert.assertEquals(actualKey, expectedKey);
+		Assert.assertEquals(actualKey.getName(), expectedKey.getName());
+		Assert.assertEquals(actualKey.getStart(), expectedKey.getStart());
+		Assert.assertEquals(actualKey.getEnd(), expectedKey.getEnd());
 	}
 
 	/**
