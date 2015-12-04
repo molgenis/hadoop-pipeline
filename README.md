@@ -9,9 +9,9 @@ Before using the tool, be sure that the following has been done:
 * The needed bwa index files are uploaded to HDFS. This can be done using:
 
 		hdfs dfs -put /local/fileORfolder/to/upload /hdfs/folder/to/upload/data/to/
-	
+
 	Note that these files should be in the same directory and have the same prefix. The required files are:
-	
+
 	* `<bwa_reference_file_prefix>.fasta`
 	* `<bwa_reference_file_prefix>.fasta.amb`
 	* `<bwa_reference_file_prefix>.fasta.ann`
@@ -21,7 +21,9 @@ Before using the tool, be sure that the following has been done:
 	* `<bwa_reference_file_prefix>.fasta.sa`
 	* `<bwa_reference_file_prefix>.dict`
 
-* A `.bed` file containing the grouping regions for the SAM records after BWA alignment. If a record fits into multiple groups, an individual record will be added to all the groups it has a (partial) overlap in.
+* A `.bed` file containing the grouping regions for the SAM records after BWA alignment. If a record fits into multiple groups, an individual record will be added to all the groups it has a (partial) overlap in. For more information about the bed-format, see [this](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) page.
+
+	* IMPORTANT: The bed file shoulde be UTF-8 compliant!
 
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).

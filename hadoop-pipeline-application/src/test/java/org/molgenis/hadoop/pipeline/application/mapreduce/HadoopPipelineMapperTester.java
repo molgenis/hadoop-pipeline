@@ -161,11 +161,11 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 					Pair<BedFeatureWritable, SAMRecordWritable> o2)
 			{
 				// Sorts on the key contig name first.
-				int c = o1.getFirst().getName().compareTo(o2.getFirst().getName());
+				int c = o1.getFirst().get().getName().compareTo(o2.getFirst().get().getName());
 				// If there is no difference, uses the key start position to sort.
-				if (c == 0) c = o1.getFirst().getStart() - o2.getFirst().getStart();
+				if (c == 0) c = o1.getFirst().get().getStart() - o2.getFirst().get().getStart();
 				// If there is no difference, uses the key end position to sort.
-				if (c == 0) c = o1.getFirst().getEnd() - o2.getFirst().getEnd();
+				if (c == 0) c = o1.getFirst().get().getEnd() - o2.getFirst().get().getEnd();
 				// If there is no difference in key String, uses the SAMRecord start value to sort.
 				if (c == 0) c = o1.getSecond().get().getStart() - o2.getSecond().get().getStart();
 				// If above comparisons do not differ, uses the SAMRecord end value to sort.
@@ -193,7 +193,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		// Compares the actual output data with the expected output data.
 		for (int i = 0; i < output.size(); i++)
 		{
-			validateKeyString(output.get(i).getFirst(), expectedResults.get(i).getFirst());
+			validateKeyString(output.get(i).getFirst().get(), expectedResults.get(i).getFirst().get());
 			validateSamRecordFields(output.get(i).getSecond().get(), expectedResults.get(i).getSecond().get());
 		}
 	}
@@ -202,11 +202,11 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * Compares the key of a single mapper output item with its expected key.
 	 * 
 	 * @param actualKey
-	 *            {@link BedFeatureWritable}
+	 *            {@link BEDFeature}
 	 * @param expectedKey
-	 *            {@link BedFeatureWritable}
+	 *            {@link BEDFeature}
 	 */
-	private void validateKeyString(BedFeatureWritable actualKey, BedFeatureWritable expectedKey)
+	private void validateKeyString(BEDFeature actualKey, BEDFeature expectedKey)
 	{
 		Assert.assertEquals(actualKey.getName(), expectedKey.getName());
 		Assert.assertEquals(actualKey.getStart(), expectedKey.getStart());

@@ -6,9 +6,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
@@ -16,101 +15,78 @@ import htsjdk.tribble.bed.FullBEDFeature;
 /**
  * Writable storing the most vital fields of an {@link BEDFeature} that are needed for rebuilding it.
  */
-public class BedFeatureWritable implements Writable
+public class BedFeatureWritable implements WritableComparable<BedFeatureWritable>
 {
 	/**
-	 * Represents {@link BEDFeature#getContig()}.
+	 * Stores the {@link BEDFeature}.
 	 */
-	private Text name;
+	private BEDFeature bedFeature;
 
-	/**
-	 * Represents {@link BEDFeature#getStart()}.
-	 */
-	private IntWritable start;
-
-	/**
-	 * Represents {@link BEDFeature#getEnd()}.
-	 */
-	private IntWritable end;
-
-	public String getName()
+	public BEDFeature get()
 	{
-		return name.toString();
-	}
-
-	public int getStart()
-	{
-		return start.get();
-	}
-
-	public int getEnd()
-	{
-		return end.get();
+		return bedFeature;
 	}
 
 	/**
-	 * Digests the stored fields to generate a {@link BEDFeature} instance.
+	 * Create an empty {@link BedFeatureWritable} instance. Otherwise a Hadoop job will throw the following
+	 * {@link Exception}:
 	 * 
-	 * @return {@link BEDFeature}
-	 */
-	public BEDFeature getBedFeature()
-	{
-		return new FullBEDFeature(name.toString(), start.get(), end.get());
-	}
-
-	/**
-	 * Create an empty {@link BedFeatureWritable} instance.
+	 * <pre>
+	 * java.lang.NoSuchMethodException: org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable.&lt;init&gt;()
+	 * </pre>
 	 */
 	public BedFeatureWritable()
 	{
-		name = new Text();
-		start = new IntWritable();
-		end = new IntWritable();
 	}
 
 	/**
-	 * Create a new {@link BedFeatureWritable} instance that represents a {@link BEDFeature} using the given fields.
+	 * Store a {@link BEDFeature} as {@link Writable}.
 	 * 
-	 * @param name
-	 *            {@link String}
-	 * @param start
-	 *            {@code int}
-	 * @param end
-	 *            {@code int}
-	 */
-	public BedFeatureWritable(String name, int start, int end)
-	{
-		this.name = new Text(requireNonNull(name));
-		this.start = new IntWritable(requireNonNull(start));
-		this.end = new IntWritable(requireNonNull(end));
-	}
-
-	/**
-	 * Create a new {@link BedFeatureWritable} instance.
-	 * 
-	 * @param feature
+	 * @param bedFeature
 	 *            {@link BEDFeature}
 	 */
-	public BedFeatureWritable(BEDFeature feature)
+	public BedFeatureWritable(BEDFeature bedFeature)
 	{
-		this.name = new Text(requireNonNull(feature.getName()));
-		this.start = new IntWritable(requireNonNull(feature.getStart()));
-		this.end = new IntWritable(requireNonNull(feature.getEnd()));
+		requireNonNull(bedFeature.getName());
+		requireNonNull(bedFeature.getStart());
+		requireNonNull(bedFeature.getEnd());
+		this.bedFeature = bedFeature;
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException
 	{
-		name.write(out);
-		start.write(out);
-		end.write(out);
+		out.writeUTF(bedFeature.getName());
+		out.writeInt(bedFeature.getStart());
+		out.writeInt(bedFeature.getEnd());
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException
 	{
-		name.readFields(in);
-		start.readFields(in);
-		end.readFields(in);
+		String name = in.readUTF();
+		int start = in.readInt();
+		int end = in.readInt();
+		bedFeature = new FullBEDFeature(name, start, end);
+	}
+
+	@Override
+	public int compareTo(BedFeatureWritable o)
+	{
+		int c = this.get().getName().compareTo(o.get().getName());
+		if (c == 0) c = this.get().getStart() - o.get().getStart();
+		if (c == 0) c = this.get().getEnd() - o.get().getEnd();
+		return c;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + bedFeature.getName().hashCode();
+		result = prime * result + bedFeature.getStart();
+		result = prime * result + bedFeature.getEnd();
+		return result;
 	}
 }
