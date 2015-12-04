@@ -11,6 +11,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -18,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -117,18 +120,19 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			FileInputFormat.addInputPath(job, parser.getInputDir());
 			FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
-			// Sets and configures Mapper/Reducer.
+			// Sets Mapper/Reducer.
 			job.setMapperClass(HadoopPipelineMapper.class);
-			// job.setNumReduceTasks(0);
 			job.setReducerClass(HadoopPipelineReducer.class);
 
 			// Sets input/output formats.
 			job.setInputFormatClass(WholeFileInputFormat.class);
-			// job.setOutputFormatClass(); // Custom output format?
-			job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputKeyClass(BedFeatureWritable.class);
 			job.setMapOutputValueClass(SAMRecordWritable.class);
 			job.setOutputKeyClass(NullWritable.class);
 			job.setOutputValueClass(Text.class);
+
+			// Defines the custom output writing.
+			MultipleOutputs.addNamedOutput(job, "output", TextOutputFormat.class, NullWritable.class, Text.class);
 
 			// Returns 0 if job completed successfully. If not, returns 1.
 			return job.waitForCompletion(true) ? 0 : 1;

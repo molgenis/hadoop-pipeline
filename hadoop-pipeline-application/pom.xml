@@ -96,5 +96,11 @@
 			<classifier>hadoop2</classifier>
 			<scope>test</scope>
 		</dependency>
+		<!-- Possibly for TestNG MRUnit MultipleOutputs testing, though currently bugged: https://issues.apache.org/jira/browse/MRUNIT-213 -->
+		<!-- <dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-testng</artifactId>
+			<version>1.6.3</version>
+		</dependency> -->
 	</dependencies>
 </project>

@@ -8,10 +8,13 @@ import java.util.List;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkReduceDriver;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+//import org.powermock.modules.testng.PowerMockObjectFactory;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -19,13 +22,32 @@ import org.testng.annotations.Test;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
+import htsjdk.tribble.bed.FullBEDFeature;
 
+/**
+ * Tests the Reducer as a whole.
+ * 
+ * @deprecated Currently there is a bug within MRUnit that does not allow testing when using {@link MultipleOutputs}.
+ *             Please refrain from using this test until this bug is fixed. This class was not removed so it can
+ *             function as reference (or for re-use) when creating a working test class for the reducer.
+ * @see <a href='https://issues.apache.org/jira/browse/MRUNIT-213'>https://issues.apache.org/jira/browse/MRUNIT-213</a>
+ */
+// @PrepareForTest(HadoopPipelineReducer.class)
+// @PowerMockIgnore(
+// { "javax.xml.*", "org.xml.sax.*", "org.apache.xerces.*", "org.springframework.context.*", "org.apache.log4j.*",
+// "org.w3c.dom.*" })
 public class HadoopPipelineReducerTester extends HadoopPipelineTester
 {
 	/**
 	 * A mrunit MapDriver allowing the mapper to be tested.
 	 */
-	private ReduceDriver<Text, SAMRecordWritable, NullWritable, Text> rDriver;
+	private ReduceDriver<BedFeatureWritable, SAMRecordWritable, NullWritable, Text> rDriver;
+
+	// @ObjectFactory
+	// public IObjectFactory getObjectFactory()
+	// {
+	// return new PowerMockObjectFactory();
+	// }
 
 	/**
 	 * Generates a new {@link FileCacheSymlinkMapDriver} for testing the {@link HadoopPipelineMapper}.
@@ -35,8 +57,8 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		Reducer<Text, SAMRecordWritable, NullWritable, Text> reducer = new HadoopPipelineReducer();
-		rDriver = new FileCacheSymlinkReduceDriver<Text, SAMRecordWritable, NullWritable, Text>(reducer);
+		Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, Text> reducer = new HadoopPipelineReducer();
+		rDriver = new FileCacheSymlinkReduceDriver<BedFeatureWritable, SAMRecordWritable, NullWritable, Text>(reducer);
 		setDriver(rDriver);
 
 		super.beforeMethod();
@@ -47,7 +69,7 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 	 * 
 	 * @throws IOException
 	 */
-	@Test
+	@Test(enabled = false)
 	public void testReducerWithoutReadGroupLine() throws IOException
 	{
 		// Generates expected header information.
@@ -69,7 +91,14 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 			writable.set(record);
 			input.add(writable);
 		}
-		rDriver.withInput(new Text("key"), input);
+		rDriver.withInput(new BedFeatureWritable(new FullBEDFeature("1", 1, 1000000)), input);
+		rDriver.addMultiOutput("output", NullWritable.get(), expectedSqTag);
+		rDriver.addMultiOutput("output", NullWritable.get(), expectedPgTag);
+		for (SAMRecord record : getBwaResults())
+		{
+			rDriver.addMultiOutput("output", NullWritable.get(), record.getSAMString());
+		}
+		rDriver.runTest(true);
 
 		// Runs driver.
 		List<Pair<NullWritable, Text>> output = rDriver.run();
@@ -86,10 +115,10 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 
 	/**
 	 * Tests the {@link HadoopPipelineReducer} when a readgroupline is also given in the input.
-	 * 
+	 *
 	 * @throws IOException
 	 */
-	@Test
+	@Test(enabled = false)
 	public void testReducerWithReadGroupLine() throws IOException
 	{
 		// Generates expected header information.
@@ -114,7 +143,7 @@ public class HadoopPipelineReducerTester extends HadoopPipelineTester
 			writable.set(record);
 			input.add(writable);
 		}
-		rDriver.withInput(new Text("key"), input);
+		rDriver.withInput(new BedFeatureWritable(new FullBEDFeature("1", 1, 1000000)), input);
 
 		rDriver.getConfiguration().set("input_readgroupline", expectedRgTag);
 

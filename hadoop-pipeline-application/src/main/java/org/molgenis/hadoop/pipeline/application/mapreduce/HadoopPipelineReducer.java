@@ -8,29 +8,38 @@ import java.util.Iterator;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceRefSeqDictReader;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceToolsXmlReader;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Tool;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
+import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Hadoop MapReduce Job reducer.
  */
-public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, NullWritable, Text>
+public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, Text>
 {
 	/**
 	 * Logger to write information to.
 	 */
 	private static final Logger logger = Logger.getLogger(HadoopPipelineReducer.class);
+
+	/**
+	 * Collector for reducer output.
+	 */
+	private MultipleOutputs<NullWritable, Text> outputCollector;
 
 	/**
 	 * Stores the generated {@link SAMFileHeader}.
@@ -54,6 +63,10 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException
 	{
+		// Initiate a new output collector.
+		outputCollector = new MultipleOutputs<NullWritable, Text>(context);
+
+		// Digests cache.
 		digestCache(context);
 	}
 
@@ -61,29 +74,33 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 	 * Function run on a single key with an {@link Iterable} containing the values belonging to that key.
 	 */
 	@Override
-	protected void reduce(Text key, Iterable<SAMRecordWritable> values, Context context)
+	protected void reduce(BedFeatureWritable key, Iterable<SAMRecordWritable> values, Context context)
 			throws IOException, InterruptedException
 	{
-		// Writes the @SQ tags to the context.
+		// Retrieve the BEDFeature from the Writable.
+		BEDFeature bedFeature = key.get();
+
+		// Writes the @SQ tags to the output collector.
 		for (SAMSequenceRecord samSeq : samFileHeader.getSequenceDictionary().getSequences())
 		{
 			String SqString = new String("@SQ\tSN:" + samSeq.getSequenceName() + "\tLN:" + samSeq.getSequenceLength());
-			context.write(NullWritable.get(), new Text(SqString));
+			outputCollector.write("output", NullWritable.get(), new Text(SqString), generateOutputFileName(bedFeature));
 		}
 
-		// Writes the @RG tag to context, if it is present.
+		// Writes the @RG tag to output collector, if the @RG tag is present.
 		if (readGroupLine != null)
 		{
-			context.write(NullWritable.get(), new Text(readGroupLine));
+			outputCollector.write(NullWritable.get(), new Text(readGroupLine), generateOutputFileName(bedFeature));
 		}
 
 		// Writes @PG tags.
 		for (Tool usedTool : usedTools)
 		{
-			context.write(NullWritable.get(), new Text(usedTool.getSamString()));
+			outputCollector.write(NullWritable.get(), new Text(usedTool.getSamString()),
+					generateOutputFileName(bedFeature));
 		}
 
-		// Writes the aligned SAMRecord data to context.
+		// Writes the aligned SAMRecord data.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
 		while (iterator.hasNext())
 		{
@@ -91,8 +108,18 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 			SAMRecord record = samWritable.get();
 			record.setHeader(samFileHeader);
 
-			context.write(NullWritable.get(), new Text(record.getSAMString().trim()));
+			outputCollector.write(NullWritable.get(), new Text(record.getSAMString().trim()),
+					generateOutputFileName(bedFeature));
 		}
+	}
+
+	/**
+	 * Function called at the end of a task.
+	 */
+	@Override
+	protected void cleanup(Context context) throws IOException, InterruptedException
+	{
+		outputCollector.close();
 	}
 
 	/**
@@ -123,5 +150,20 @@ public class HadoopPipelineReducer extends Reducer<Text, SAMRecordWritable, Null
 		// Filters the tools present in the tools archive info.xml file for the used tools by this Job.
 		usedTools = new ArrayList<Tool>();
 		usedTools.add(tools.get("bwa"));
+	}
+
+	/**
+	 * Generates a {@link String} containing the subdirectory path/part of the filename to where the output is written
+	 * to (inside the output directory). Default {@link OutputFormat}{@code s} might add additional text to this path
+	 * such as adding something like {@code -m-<mapper number>} or {@code -r-<reducer number>} or similar after each
+	 * file.
+	 * 
+	 * @param bedFeature
+	 *            {@link BEDFeature}
+	 * @return {@link String}
+	 */
+	private String generateOutputFileName(BEDFeature bedFeature)
+	{
+		return bedFeature.getContig() + "-" + bedFeature.getStart() + "-" + bedFeature.getEnd();
 	}
 }
