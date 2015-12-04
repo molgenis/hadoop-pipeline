@@ -161,7 +161,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 					Pair<BedFeatureWritable, SAMRecordWritable> o2)
 			{
 				// Sorts on the key contig name first.
-				int c = o1.getFirst().get().getName().compareTo(o2.getFirst().get().getName());
+				int c = o1.getFirst().get().getContig().compareTo(o2.getFirst().get().getContig());
 				// If there is no difference, uses the key start position to sort.
 				if (c == 0) c = o1.getFirst().get().getStart() - o2.getFirst().get().getStart();
 				// If there is no difference, uses the key end position to sort.
@@ -208,7 +208,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 */
 	private void validateKeyString(BEDFeature actualKey, BEDFeature expectedKey)
 	{
-		Assert.assertEquals(actualKey.getName(), expectedKey.getName());
+		Assert.assertEquals(actualKey.getContig(), expectedKey.getContig());
 		Assert.assertEquals(actualKey.getStart(), expectedKey.getStart());
 		Assert.assertEquals(actualKey.getEnd(), expectedKey.getEnd());
 	}

@@ -47,7 +47,7 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	 */
 	public BedFeatureWritable(BEDFeature bedFeature)
 	{
-		requireNonNull(bedFeature.getName());
+		requireNonNull(bedFeature.getContig());
 		requireNonNull(bedFeature.getStart());
 		requireNonNull(bedFeature.getEnd());
 		this.bedFeature = bedFeature;
@@ -56,7 +56,7 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	@Override
 	public void write(DataOutput out) throws IOException
 	{
-		out.writeUTF(bedFeature.getName());
+		out.writeUTF(bedFeature.getContig());
 		out.writeInt(bedFeature.getStart());
 		out.writeInt(bedFeature.getEnd());
 	}
@@ -73,7 +73,7 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	@Override
 	public int compareTo(BedFeatureWritable o)
 	{
-		int c = this.get().getName().compareTo(o.get().getName());
+		int c = this.get().getContig().compareTo(o.get().getContig());
 		if (c == 0) c = this.get().getStart() - o.get().getStart();
 		if (c == 0) c = this.get().getEnd() - o.get().getEnd();
 		return c;
@@ -84,7 +84,7 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + bedFeature.getName().hashCode();
+		result = prime * result + bedFeature.getContig().hashCode();
 		result = prime * result + bedFeature.getStart();
 		result = prime * result + bedFeature.getEnd();
 		return result;
