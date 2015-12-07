@@ -1,7 +1,6 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.ParseException;
@@ -30,7 +29,7 @@ public class CommandLineInputParserTester extends Tester
 	String bwaRefFastaSa;
 	String bwaRefDict;
 	String bedFile;
-	String validReadGroup;
+	String samplesInfoFile;;
 
 	Path toolsAsPath;
 	Path inputDirAsPath;
@@ -44,6 +43,7 @@ public class CommandLineInputParserTester extends Tester
 	Path bwaRefFastaSaAsPath;
 	Path bwaRefDictAsPath;
 	Path bedFileAsPath;
+	Path samplesInfoFileAsPath;
 
 	String[] args;
 	String[] argsWithReadGroupLine;
@@ -72,7 +72,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
 		bwaRefDict = getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toString();
 		bedFile = getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toString();
-		validReadGroup = "@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
+		samplesInfoFile = getClassLoader().getResource("samplesheets/valid.csv").toString();
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);
@@ -87,10 +87,10 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaSaAsPath = new Path(bwaRefFastaSa);
 		bwaRefDictAsPath = new Path(bwaRefDict);
 		bedFileAsPath = new Path(bedFile);
+		samplesInfoFileAsPath = new Path(samplesInfoFile);
 
 		// Create arguments string for the command line parser input.
-		args = new String[10];
-		argsWithReadGroupLine = new String[12];
+		args = new String[12];
 	}
 
 	/**
@@ -106,15 +106,12 @@ public class CommandLineInputParserTester extends Tester
 		args[3] = inputDir;
 		args[4] = "-o";
 		args[5] = outputDir;
-		args[6] = "-bwa";
+		args[6] = "-r";
 		args[7] = bwaRefFasta;
-		args[8] = "-bed";
+		args[8] = "-b";
 		args[9] = bedFile;
-
-		// Defines the default command line input when a read group line is also given.
-		argsWithReadGroupLine = Arrays.copyOf(args, args.length + 2);
-		argsWithReadGroupLine[10] = "-rg";
-		argsWithReadGroupLine[11] = validReadGroup;
+		args[10] = "-s";
+		args[11] = samplesInfoFile;
 	}
 
 	/**
@@ -145,7 +142,7 @@ public class CommandLineInputParserTester extends Tester
 		Assert.assertEquals(parser.getAlignmentReferenceFastaSaFile(), bwaRefFastaSaAsPath);
 		Assert.assertEquals(parser.getAlignmentReferenceDictFile(), bwaRefDictAsPath);
 		Assert.assertEquals(parser.getBedFile(), bedFileAsPath);
-		Assert.assertEquals(parser.getReadGroupLine(), null); // Is null as parameter was not set.
+		Assert.assertEquals(parser.getSamplesInfoFile(), samplesInfoFileAsPath);
 		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
@@ -158,15 +155,17 @@ public class CommandLineInputParserTester extends Tester
 	@Test(expectedExceptions = MissingOptionException.class)
 	public void missingBwaIndexArgument() throws ParseException, IOException
 	{
-		String[] args = new String[8];
+		String[] args = new String[10];
 		args[0] = "-t";
 		args[1] = tools;
 		args[2] = "-i";
 		args[3] = inputDir;
 		args[4] = "-o";
 		args[5] = outputDir;
-		args[6] = "-bed";
+		args[6] = "-b";
 		args[7] = bedFile;
+		args[8] = "-s";
+		args[9] = samplesInfoFile;
 
 		new CommandLineInputParser(fileSys, args);
 	}
@@ -240,140 +239,6 @@ public class CommandLineInputParserTester extends Tester
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
 		Assert.assertEquals(parser.getOutputDir(), new Path(invalidOutputDir));
-		Assert.assertEquals(parser.isContinueApplication(), false);
-	}
-
-	/**
-	 * Test: If a read group line is also given.
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withValidReadGroupPgNameIlluminaLowerCase() throws ParseException, IOException
-	{
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), validReadGroup);
-		Assert.assertEquals(parser.isContinueApplication(), true);
-	}
-
-	/**
-	 * Test:
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withValidReadGroupPgNameIlluminaCapitalCase() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:Illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), true);
-	}
-
-	/**
-	 * Test:
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withValidReadGroupPgNameIlluminaUpperCase() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:ILLUMINA\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), true);
-	}
-
-	/**
-	 * Test:
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withValidReadGroupPgNameHelicos() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:ILLUMINA\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), true);
-	}
-
-	/**
-	 * Test:
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withInValidReadGroupPgNameKobol() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tPL:kobol\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), false);
-	}
-
-	/**
-	 * Test: If a read group line is also given but misses the {@code @RG} tag.
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withInvalidReadGroupNoStartTag() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "ID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), false);
-	}
-
-	/**
-	 * Test: If a read group line is also given but misses a field.
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withInvalidReadGroupMissingField() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
-		Assert.assertEquals(parser.isContinueApplication(), false);
-	}
-
-	/**
-	 * Test: If a read group line is also given but the field order differs.
-	 * 
-	 * @throws ParseException
-	 * @throws IOException
-	 */
-	@Test
-	public void withInvalidReadGroupDifferentFieldOrder() throws ParseException, IOException
-	{
-		argsWithReadGroupLine[11] = "@RG\tID:5\tLB:150702_SN163_0649_BHJYNKADXX_L5\tPL:illumina\tSM:sample3";
-
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, argsWithReadGroupLine);
-
-		Assert.assertEquals(parser.getReadGroupLine(), argsWithReadGroupLine[11]);
 		Assert.assertEquals(parser.isContinueApplication(), false);
 	}
 }

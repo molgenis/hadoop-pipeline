@@ -14,7 +14,12 @@ public abstract class StringSink extends Sink<String>
 {
 	/**
 	 * Digests the {@code inputStream}. For each line present in the {@code inputStream},
-	 * {@link #digestStreamItem(String)} is called.
+	 * {@link #digestStreamItem(String)} is called. If a custom {@link #digestHeader(String)} is implemented, the first
+	 * line will be treated differently. Otherwise, the first line will be treated like the rest,
+	 * 
+	 * @param inputStream
+	 *            {@link InputStream}
+	 * @throws IOException
 	 */
 	@Override
 	public void handleInputStream(InputStream inputStream) throws IOException
@@ -23,7 +28,8 @@ public abstract class StringSink extends Sink<String>
 		try
 		{
 			br = new BufferedReader(new InputStreamReader(inputStream));
-			String line = null;
+			String line = br.readLine();
+			digestHeader(line);
 			while ((line = br.readLine()) != null)
 			{
 				digestStreamItem(line);
@@ -43,4 +49,18 @@ public abstract class StringSink extends Sink<String>
 	 */
 	@Override
 	protected abstract void digestStreamItem(String item) throws IOException;
+
+	/**
+	 * Digests the first line within {@link #handleInputStream(InputStream)} from the {@link InputStream}. By default,
+	 * the first line will be treated the same as {@link #digestStreamItem(String)}. If a custom implementation is
+	 * created, uses this implementation for the first line instead.
+	 * 
+	 * @param item
+	 *            {@link String}
+	 * @throws IOException
+	 */
+	protected void digestHeader(String item) throws IOException
+	{
+		digestStreamItem(item);
+	};
 }

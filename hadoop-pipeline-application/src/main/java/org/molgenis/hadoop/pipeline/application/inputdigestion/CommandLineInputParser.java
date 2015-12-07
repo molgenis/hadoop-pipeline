@@ -54,7 +54,7 @@ public class CommandLineInputParser extends InputParser
 	{
 		String cmdSyntax = "HadoopPipelineApplicationWithDependencies.jar";
 		String helpHeader = System.lineSeparator() + System.lineSeparator();
-		String helpFooter = "Molgenis-hadoop";
+		String helpFooter = "Molgenis hadoop-pipeline";
 
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(80, cmdSyntax, helpHeader, this.options, helpFooter, true);
@@ -79,21 +79,23 @@ public class CommandLineInputParser extends InputParser
 						"Directory in which the results should be stored. Note that the directory itself should not exist, though the parent directory should.")
 				.create("o"));
 
-		options.addOption(OptionBuilder.withArgName("burrows_wheeler_align").hasArg().isRequired(true)
+		options.addOption(OptionBuilder.withArgName("align_ref").hasArg().isRequired(true)
 				.withDescription(
-						"BWA reference fasta file. Other BWA index file should be present as well using the same prefix.")
-				.create("bwa"));
+						"Burrows-Wheeler Alignment reference fasta file. Other BWA index file should be present as well using the same prefix.")
+				.create("r"));
 
 		options.addOption(OptionBuilder.withArgName("bed").hasArg().isRequired(true)
 				.withDescription(
 						"BED formatted file describing how to group the aligned SAMRecords during the shuffle/sort phase.")
-				.create("bed"));
+				.create("b"));
 
-		options.addOption(OptionBuilder.withArgName("readgroup").hasArg()
-				.withDescription(
-						"The read group line that should be added to generated alignment sam data. This line should adhere to the following regex format: "
-								+ "@RG\tID:[0-9]+\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\tSM:[a-zA-Z0-9]+")
-				.create("rg"));
+		options.addOption(OptionBuilder.withArgName("samples").hasArg().isRequired(true)
+				.withDescription("the samplesheet file containing information about the samples that are being used."
+						+ " The file may contain data about other samples as well (only needed data will be used)."
+						+ " This file should be a csv file that is comma-seperated and contains a header line with"
+						+ " at least the following fields; sequencer, sequencingStartDate, run, flowcell & lane."
+						+ " The order of these fields does not matter and they are case-insensitive.")
+				.create("s"));
 	}
 
 	/**
@@ -128,17 +130,17 @@ public class CommandLineInputParser extends InputParser
 		{
 			setOutputDir(commandLine.getOptionValue("o"));
 		}
-		if (commandLine.hasOption("bwa"))
+		if (commandLine.hasOption("r"))
 		{
-			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("bwa"));
+			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("r"));
 		}
-		if (commandLine.hasOption("bed"))
+		if (commandLine.hasOption("b"))
 		{
-			setBedFile(commandLine.getOptionValue("bed"));
+			setBedFile(commandLine.getOptionValue("b"));
 		}
-		if (commandLine.hasOption("rg"))
+		if (commandLine.hasOption("s"))
 		{
-			setReadGroupLine(commandLine.getOptionValue("rg"));
+			setSamplesInfoFile(commandLine.getOptionValue("s"));
 		}
 	}
 }

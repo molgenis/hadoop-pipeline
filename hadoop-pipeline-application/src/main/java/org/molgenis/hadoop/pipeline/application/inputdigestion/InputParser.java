@@ -83,7 +83,7 @@ public abstract class InputParser
 	/**
 	 * The read group line that should be added to generated alignment SAM files.
 	 */
-	private String readGroupLine;
+	private Path samplesInfoFile;
 
 	protected void setFileSys(FileSystem fileSys)
 	{
@@ -232,14 +232,19 @@ public abstract class InputParser
 		this.bedFile = new Path(bedFile);
 	}
 
-	public String getReadGroupLine()
+	public Path getSamplesInfoFile()
 	{
-		return readGroupLine;
+		return samplesInfoFile;
 	}
 
-	protected void setReadGroupLine(String readGroupLine)
+	protected void setSamplesInfoFile(Path samplesInfoFile)
 	{
-		this.readGroupLine = readGroupLine;
+		this.samplesInfoFile = samplesInfoFile;
+	}
+
+	protected void setSamplesInfoFile(String samplesInfoFile)
+	{
+		this.samplesInfoFile = new Path(samplesInfoFile);
 	}
 
 	/**
@@ -304,11 +309,10 @@ public abstract class InputParser
 			invalidInput = true;
 			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
-		// Checks for a valid read group line only if a read group line was given.
-		if (readGroupLine != null && !checkReadGroupLineFormat(readGroupLine))
+		if (!checkIfPathIsFile(samplesInfoFile))
 		{
 			invalidInput = true;
-			System.err.println("The readgroupline String is invalid: " + readGroupLine);
+			System.err.println("Samplesheet file containing information about the samples does not exist.");
 		}
 
 		// If no invalid input is found, continueApplication is set to true.
@@ -367,9 +371,10 @@ public abstract class InputParser
 	 * @param readGroupLine
 	 * @return boolean
 	 */
-	private boolean checkReadGroupLineFormat(String readGroupLine)
-	{
-		String pattern = "@RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+";
-		return readGroupLine.matches(pattern);
-	}
+	// private boolean checkReadGroupLineFormat(String readGroupLine)
+	// {
+	// String pattern =
+	// "@RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+";
+	// return readGroupLine.matches(pattern);
+	// }
 }

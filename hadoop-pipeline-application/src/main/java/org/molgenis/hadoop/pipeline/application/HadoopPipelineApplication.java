@@ -92,12 +92,6 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		// Only execute MapReduce job if all required paremeters are present and correct.
 		if (parser.isContinueApplication())
 		{
-			// Sets the read group line if given. Prefix "input_" is added to make clear its a custom parameter.
-			if (parser.getReadGroupLine() != null)
-			{
-				getConf().set("input_readgroupline", parser.getReadGroupLine());
-			}
-
 			Job job = Job.getInstance(getConf());
 			job.setJarByClass(HadoopPipelineApplication.class);
 			job.setJobName("HadoopPipelineApplication");
@@ -115,6 +109,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 			job.addCacheFile(parser.getAlignmentReferenceFastaSaFile().toUri());
 			job.addCacheFile(parser.getAlignmentReferenceDictFile().toUri());
 			job.addCacheFile(parser.getBedFile().toUri());
+			job.addCacheFile(parser.getSamplesInfoFile().toUri());
 
 			// Sets input/output paths.
 			FileInputFormat.addInputPath(job, parser.getInputDir());
