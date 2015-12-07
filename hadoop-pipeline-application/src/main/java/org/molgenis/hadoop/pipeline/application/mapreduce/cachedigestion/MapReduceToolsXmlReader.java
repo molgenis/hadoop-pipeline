@@ -20,7 +20,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Digests an XML {@link InputStream} formatted according to the {@link Schema} from
- * {@code src/main/resources/tools_archive_info.xsd}.
+ * {@code src/main/resources/tools_archive_info.xsd} (and within the jar after compiling).
  */
 public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, Tool>>
 {
@@ -29,7 +29,8 @@ public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, 
 	 */
 	static final String FILE_NAME = "fileName";
 	/**
-	 * A {@link File} that stores the validation {@link Schema}.
+	 * A {@link File} that stores the validation {@link Schema}. This file should be present within the created jar
+	 * after compiling.
 	 */
 	final URL schemaFile = getClass().getClassLoader().getResource("tools_archive_info.xsd");
 
