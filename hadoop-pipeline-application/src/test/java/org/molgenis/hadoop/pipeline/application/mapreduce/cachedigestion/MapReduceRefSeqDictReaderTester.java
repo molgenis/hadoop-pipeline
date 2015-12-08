@@ -40,7 +40,7 @@ public class MapReduceRefSeqDictReaderTester extends Tester
 	{
 		SAMSequenceDictionary expectedSeqDict = new SAMSequenceDictionary();
 
-		expectedSeqDict.addSequence(new SAMSequenceRecord("1:20000000-21000000", 1000001));
+		expectedSeqDict.addSequence(new SAMSequenceRecord("1", 1000001));
 
 		SAMSequenceDictionary actualSeqDict = reader
 				.read(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").getFile());

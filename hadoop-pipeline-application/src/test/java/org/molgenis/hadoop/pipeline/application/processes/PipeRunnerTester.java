@@ -125,6 +125,9 @@ public class PipeRunnerTester extends Tester
 	 * Tests the {@link PipeRunner} using the bwa binary and the {@link StringSink}. The header information is compared
 	 * for each record, but as a bwa alignment aligns reads randomly if a read can be aligned to multiple locations,
 	 * reads aligning to the first 100 bases of the reference are printed for manual checking.
+	 * 
+	 * IMPORTANT: Do note that a {@link org.molgenis.hadoop.pipeline.application.exceptions.UncheckedIOException} is
+	 * thrown when an {@link Assert} fails due to the assertions being done within a {@link Sink}.
 	 *
 	 * @throws Exception
 	 */
@@ -156,7 +159,7 @@ public class PipeRunnerTester extends Tester
 		// Splits the StringBuilder results into a String array with each line being one element.
 		String[] lines = sb.toString().split(System.lineSeparator());
 		// Compares the @SQ line.
-		Assert.assertEquals(lines[0], "@SQ\tSN:1:20000000-21000000\tLN:1000001");
+		Assert.assertEquals(lines[0], "@SQ\tSN:1\tLN:1000001");
 
 		// Splits the program line on the tab for easier comparison of individual items.
 		String[] pgLine = lines[1].split("\\t");
@@ -187,6 +190,9 @@ public class PipeRunnerTester extends Tester
 	 * Tests the {@link PipeRunner} using the bwa binary and the {@link SAMRecordSink}. The header information is
 	 * compared for each record, but as a bwa alignment aligns reads randomly if a read can be aligned to multiple
 	 * locations, reads aligning to the first 100 bases of the reference are printed for manual checking.
+	 * 
+	 * IMPORTANT: Do note that a {@link org.molgenis.hadoop.pipeline.application.exceptions.UncheckedIOException} is
+	 * thrown when an {@link Assert} fails due to the assertions being done within a {@link Sink}.
 	 *
 	 * @throws Exception
 	 */
@@ -203,8 +209,7 @@ public class PipeRunnerTester extends Tester
 			public void digestStreamItem(SAMRecord item)
 			{
 				// Compares the @SQ line.
-				Assert.assertEquals(item.getHeader().getSequenceDictionary().getSequence(0).getSequenceName(),
-						"1:20000000-21000000");
+				Assert.assertEquals(item.getHeader().getSequenceDictionary().getSequence(0).getSequenceName(), "1");
 				Assert.assertEquals(item.getHeader().getSequenceDictionary().getSequence(0).getSequenceLength(),
 						1000001);
 
