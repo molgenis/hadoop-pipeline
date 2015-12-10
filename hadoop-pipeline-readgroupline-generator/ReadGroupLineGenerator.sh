@@ -30,6 +30,7 @@ function main {
 	samplesheet=$1
 	# Expected line fields format. The number represents the field position starting
 	# from left (1-based), where each field is seperated by a ',' (comma):
+	#  2: externalSampleID
 	#  4: sequencer
 	# 10: sequencingStartDate
 	# 11: run
