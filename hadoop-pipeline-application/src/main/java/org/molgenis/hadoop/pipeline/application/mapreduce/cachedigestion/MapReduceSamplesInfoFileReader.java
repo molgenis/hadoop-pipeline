@@ -15,7 +15,7 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	MapReduceSamplesInfoFileReader(FileSystem fileSys)
+	public MapReduceSamplesInfoFileReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}
@@ -28,6 +28,11 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 
 		StringSink sink = new StringSink()
 		{
+			/**
+			 * Csv externalSampleID tag column.
+			 */
+			Integer externalSampleIdPos;
+
 			/**
 			 * Csv sequencer tag column.
 			 */
@@ -62,6 +67,7 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 					String[] lineSplits = item.split(",");
 
 					// Retrieves data from columns of interest.
+					String externalSampleId = lineSplits[externalSampleIdPos];
 					String sequencer = lineSplits[sequencerPos];
 					int sequencingStartDate = Integer.parseInt(lineSplits[sequencingStartDatePos]);
 					int run = Integer.parseInt(lineSplits[runPos]);
@@ -69,7 +75,7 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 					int lane = Integer.parseInt(lineSplits[lanePos]);
 
 					// Adds the data to the ArrayList.
-					samples.add(new Sample(sequencer, sequencingStartDate, run, flowcell, lane));
+					samples.add(new Sample(externalSampleId, sequencer, sequencingStartDate, run, flowcell, lane));
 				}
 				catch (NumberFormatException | ArrayIndexOutOfBoundsException e)
 				{
@@ -95,6 +101,9 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 				{
 					switch (lineSplits[i].toLowerCase())
 					{
+						case "externalsampleid":
+							externalSampleIdPos = i;
+							break;
 						case "sequencer":
 							sequencerPos = i;
 							break;

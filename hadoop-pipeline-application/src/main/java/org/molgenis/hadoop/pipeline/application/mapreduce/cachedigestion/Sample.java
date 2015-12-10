@@ -2,11 +2,17 @@ package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
 
 public class Sample
 {
+	private String externalSampleId;
 	private String sequencer;
 	private int sequencingStartDate;
 	private int run;
 	private String flowcell;
 	private int lane;
+
+	public String getExternalSampleId()
+	{
+		return externalSampleId;
+	}
 
 	public String getSequencer()
 	{
@@ -34,18 +40,25 @@ public class Sample
 	}
 
 	/**
-	 * Returns how the start of the expected file name should look like for this sample (after this part more text could
-	 * be present in the file name).
+	 * Returns a {@link String} that can be used for comparing whether this {@link Sample} matches a file/directory name
+	 * containing read data belonging to a {@link Sample}.
 	 * 
 	 * @return {@link String}
 	 */
-	public String getFileName()
+	public String getComparisonName()
 	{
 		return String.format("%s_%s_%s_%s_%s", sequencingStartDate, sequencer, run, flowcell, lane);
 	}
 
-	Sample(String sequencer, int sequencingStartDate, int run, String flowcell, int lane)
+	public String getReadGroupLine()
 	{
+		return String.format("@RG\\tID:%6$s\\tPL:illumina\\tLB:%2$_%3$_%4$_%5$_L%13$\\tSM:%1$", externalSampleId,
+				sequencingStartDate, sequencer, run, flowcell, lane);
+	}
+
+	Sample(String externalSampleId, String sequencer, int sequencingStartDate, int run, String flowcell, int lane)
+	{
+		this.externalSampleId = externalSampleId;
 		this.sequencer = sequencer;
 		this.sequencingStartDate = sequencingStartDate;
 		this.run = run;
@@ -58,6 +71,7 @@ public class Sample
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((externalSampleId == null) ? 0 : externalSampleId.hashCode());
 		result = prime * result + ((flowcell == null) ? 0 : flowcell.hashCode());
 		result = prime * result + lane;
 		result = prime * result + run;
@@ -73,6 +87,11 @@ public class Sample
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		Sample other = (Sample) obj;
+		if (externalSampleId == null)
+		{
+			if (other.externalSampleId != null) return false;
+		}
+		else if (!externalSampleId.equals(other.externalSampleId)) return false;
 		if (flowcell == null)
 		{
 			if (other.flowcell != null) return false;
@@ -88,4 +107,5 @@ public class Sample
 		if (sequencingStartDate != other.sequencingStartDate) return false;
 		return true;
 	}
+
 }

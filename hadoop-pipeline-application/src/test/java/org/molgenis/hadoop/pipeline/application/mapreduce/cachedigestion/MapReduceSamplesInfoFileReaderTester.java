@@ -30,9 +30,9 @@ public class MapReduceSamplesInfoFileReaderTester extends Tester
 		reader = new MapReduceSamplesInfoFileReader(FileSystem.get(new Configuration()));
 
 		expectedValidSamples = new ArrayList<Sample>();
-		expectedValidSamples.add(new Sample("SN163", 150616, 648, "AHKYLMADXX", 1));
-		expectedValidSamples.add(new Sample("SN163", 150616, 648, "AHKYLMADXX", 2));
-		expectedValidSamples.add(new Sample("SN163", 150702, 649, "BHJYNKADXX", 5));
+		expectedValidSamples.add(new Sample("sample1", "SN163", 150616, 648, "AHKYLMADXX", 1));
+		expectedValidSamples.add(new Sample("sample2", "SN163", 150616, 648, "AHKYLMADXX", 2));
+		expectedValidSamples.add(new Sample("sample3", "SN163", 150702, 649, "BHJYNKADXX", 5));
 	}
 
 	/**
@@ -43,7 +43,8 @@ public class MapReduceSamplesInfoFileReaderTester extends Tester
 	@Test
 	public void testValidSamplesheet() throws IOException
 	{
-		ArrayList<Sample> actualSamples = reader.read(getClassLoader().getResource("samplesheets/valid.csv").getFile());
+		ArrayList<Sample> actualSamples = reader
+				.read(getClassLoader().getResource("samplesheets/samplesheet.csv").getFile());
 
 		Assert.assertEquals(actualSamples, expectedValidSamples);
 	}
@@ -119,7 +120,7 @@ public class MapReduceSamplesInfoFileReaderTester extends Tester
 		@SuppressWarnings("unchecked")
 		ArrayList<Sample> expectedSamples = (ArrayList<Sample>) expectedValidSamples.clone();
 		expectedSamples.remove(1);
-		expectedSamples.add(1, new Sample("SN163", 648, 150616, "AHKYLMADXX", 2));
+		expectedSamples.add(1, new Sample("sample2", "SN163", 648, 150616, "AHKYLMADXX", 2));
 
 		ArrayList<Sample> actualSamples = reader.read(
 				getClassLoader().getResource("samplesheets/sample_run_sequencingStartDate_swapped.csv").getFile());
