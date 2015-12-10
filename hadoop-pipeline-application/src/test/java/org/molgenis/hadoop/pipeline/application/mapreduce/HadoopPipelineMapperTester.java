@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -28,7 +28,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapDriver allowing the mapper to be tested.
 	 */
-	private MapDriver<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable> mDriver;
+	private MapDriver<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable> mDriver;
 
 	/**
 	 * Stores the fastq file as byte array to be used.
@@ -36,14 +36,9 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	private byte[] fastqData;
 
 	/**
-	 * The expected mapper output when no readgroupline was used.
+	 * The available groups that results can be grouped into.
 	 */
-	private List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedMapperResults;
-
-	/**
-	 * The expected mapper output when a readgroupline was used.
-	 */
-	private List<Pair<BedFeatureWritable, SAMRecordWritable>> expectedMapperResultsWithReadGroupLine;
+	private ArrayList<BEDFeature> groups;
 
 	/**
 	 * Loads/generates general data needed for testing.
@@ -55,9 +50,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	{
 		super.beforeClass();
 		fastqData = readFileAsByteArray("input_fastq_mini/mini_halvade_0_0.fq.gz");
-		ArrayList<BEDFeature> groups = readBedFile("bed_files/chr1_20000000-21000000.bed");
-		expectedMapperResults = generateExpectedMapperOutput(getBwaResults(), groups);
-		expectedMapperResultsWithReadGroupLine = generateExpectedMapperOutput(getBwaResultsWithReadGroupLine(), groups);
+		groups = readBedFile("bed_files/chr1_20000000-21000000.bed");
 	}
 
 	/**
@@ -68,45 +61,48 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		Mapper<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
-		mDriver = new FileCacheSymlinkMapDriver<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable>(
-				mapper);
+		Mapper<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
+		mDriver = new FileCacheSymlinkMapDriver<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable>(mapper);
 		setDriver(mDriver);
 
 		super.beforeMethod();
 	}
 
 	/**
-	 * Tests the {@link HadoopPipelineMapper} when no readgroupline is given in the input.
-	 * 
-	 * @throws IOException
-	 */
-	@Test
-	public void testMapperWithoutReadGroupLine() throws IOException
-	{
-		mDriver.withInput(NullWritable.get(), new BytesWritable(fastqData));
-
-		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
-		sortMapperOutput(output);
-		validateOutput(output, expectedMapperResults);
-	}
-
-	/**
-	 * Tests the {@link HadoopPipelineMapper} when a readgroupline is also given in the input.
+	 * Tests the {@link HadoopPipelineMapper} when a single sample is given.
 	 * 
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public void testMapperWithReadGroupLine() throws IOException, URISyntaxException
+	public void testMapperWithSingleSample() throws IOException, URISyntaxException
 	{
-		mDriver.withInput(NullWritable.get(), new BytesWritable(fastqData));
-		mDriver.getConfiguration().set("input_readgroupline",
-				"@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3");
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz"),
+				new BytesWritable(fastqData));
 
 		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
 		sortMapperOutput(output);
-		validateOutput(output, expectedMapperResultsWithReadGroupLine);
+		validateOutput(output, generateExpectedMapperOutput(getBwaResultsL2(), groups));
+	}
+
+	/**
+	 * Tests the {@link HadoopPipelineMapper} when two samples is given.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void testMapperWithMultipleSamples() throws IOException, URISyntaxException
+	{
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz"),
+				new BytesWritable(fastqData));
+		mDriver.withInput(new Text("hdfs/path/to/150702_SN163_0649_BHJYNKADXX_L5/halvade_0_0.fq.gz"),
+				new BytesWritable(fastqData));
+
+		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
+		sortMapperOutput(output);
+
+		validateOutput(output, generateExpectedMapperOutput(getAllBwaResults(), groups));
 	}
 
 	/**

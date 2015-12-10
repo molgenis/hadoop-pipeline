@@ -25,11 +25,22 @@ public class HadoopPipelineTester extends Tester
 	private TestDriver<?, ?, ?> driver;
 
 	/**
-	 * Expected results bwa can be generated with a terminal using: {@code bwa mem -p -M
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/input_fastq/mini_halvade_0_0.fq.gz}
+	 * Expected results bwa when using readgroup example L2. Can be generated with a terminal using:
+	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:2\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L2\tSM:sample2"
+	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
+	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
+	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L2.sam}
 	 */
-	private ArrayList<SAMRecord> bwaResults;
+	private ArrayList<SAMRecord> bwaResultsL2;
+
+	/**
+	 * Expected results bwa when using readgroup example L5. Can be generated with a terminal using:
+	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:5\tPL:illumina\tLB:150702_SN163_649_BHJYNKADXX_L5\tSM:sample3"
+	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
+	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
+	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L5.sam}
+	 */
+	private ArrayList<SAMRecord> bwaResultsL5;
 
 	/**
 	 * Expected results bwa can be generated with a terminal using:
@@ -55,9 +66,22 @@ public class HadoopPipelineTester extends Tester
 		this.driver = driver;
 	}
 
-	ArrayList<SAMRecord> getBwaResults()
+	ArrayList<SAMRecord> getBwaResultsL2()
 	{
-		return bwaResults;
+		return bwaResultsL2;
+	}
+
+	ArrayList<SAMRecord> getBwaResultsL5()
+	{
+		return bwaResultsL5;
+	}
+
+	ArrayList<SAMRecord> getAllBwaResults()
+	{
+		ArrayList<SAMRecord> allResults = new ArrayList<SAMRecord>();
+		allResults.addAll(bwaResultsL2);
+		allResults.addAll(bwaResultsL5);
+		return allResults;
 	}
 
 	ArrayList<SAMRecord> getBwaResultsWithReadGroupLine()
@@ -78,15 +102,14 @@ public class HadoopPipelineTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		bwaResults = readSamFile("expected_mini_outputs/mini_halvade_0_0-bwa_results.sam");
-		bwaResultsWithReadGroupLine = readSamFile(
-				"expected_mini_outputs/mini_halvade_0_0-bwa_results_withreadlinegroup.sam");
+		bwaResultsL2 = readSamFile("expected_bwa_outputs_mini/output_mini_L2.sam");
+		bwaResultsL5 = readSamFile("expected_bwa_outputs_mini/output_mini_L5.sam");
 
 		samFileHeader = new SAMFileHeader();
 		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
-		// @SQ\tSN:1:20000000-21000000\tLN:1000001
-		samFileHeader.setSequenceDictionary(
-				new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1:20000000-21000000", 1000001))));
+		// @SQ\tSN:1\tLN:1000001
+		samFileHeader
+				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
 	}
 
 	/**
@@ -120,5 +143,6 @@ public class HadoopPipelineTester extends Tester
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toURI());
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toURI());
 		driver.addCacheFile(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toURI());
+		driver.addCacheFile(getClassLoader().getResource("samplesheets/samplesheet.csv").toURI());
 	}
 }

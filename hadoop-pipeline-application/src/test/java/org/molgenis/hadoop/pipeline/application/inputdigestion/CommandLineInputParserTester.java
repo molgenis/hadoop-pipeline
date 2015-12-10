@@ -72,7 +72,7 @@ public class CommandLineInputParserTester extends Tester
 		bwaRefFastaSa = getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa.sa").toString();
 		bwaRefDict = getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toString();
 		bedFile = getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toString();
-		samplesInfoFile = getClassLoader().getResource("samplesheets/valid.csv").toString();
+		samplesInfoFile = getClassLoader().getResource("samplesheets/samplesheet.csv").toString();
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);

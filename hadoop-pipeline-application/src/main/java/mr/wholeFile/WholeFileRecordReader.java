@@ -26,7 +26,13 @@
  * were made with the author name "dimamayteacher", this name was filled in
  * as copyright owner.
  * 
- * Furthermore, comments (line 106-109) have been added to the method getProgress().
+ * Furthermore, comments (line 106-109) have been added to the method
+ * getProgress().
+ * 
+ * Regarding code adjustments, the getCurrentKey() returned a NullWritable
+ * originally, but was adjusted to return Text containing the path to
+ * the file instead. This also means the extends was changed to
+ * <Text, BytesWritable> instead of <NullWritable, BytesWritable>.
  */
 
 package mr.wholeFile;
@@ -38,15 +44,14 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class WholeFileRecordReader extends RecordReader<NullWritable, BytesWritable>
+public class WholeFileRecordReader extends RecordReader<Text, BytesWritable>
 {
-
 	private FileSplit split;
 	private Configuration conf;
 
@@ -78,7 +83,6 @@ public class WholeFileRecordReader extends RecordReader<NullWritable, BytesWrita
 			in = fs.open(split.getPath());
 			IOUtils.readFully(in, result, 0, fileLength);
 			currValue.set(result, 0, fileLength);
-
 		}
 		finally
 		{
@@ -89,9 +93,9 @@ public class WholeFileRecordReader extends RecordReader<NullWritable, BytesWrita
 	}
 
 	@Override
-	public NullWritable getCurrentKey() throws IOException, InterruptedException
+	public Text getCurrentKey() throws IOException, InterruptedException
 	{
-		return NullWritable.get();
+		return new Text(split.getPath().toString());
 	}
 
 	@Override

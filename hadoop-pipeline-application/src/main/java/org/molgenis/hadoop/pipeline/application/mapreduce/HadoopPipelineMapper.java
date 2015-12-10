@@ -5,13 +5,15 @@ import java.util.ArrayList;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceBedFormatFileReader;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
@@ -22,7 +24,7 @@ import htsjdk.tribble.bed.BEDFeature;
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, BedFeatureWritable, SAMRecordWritable>
+public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -40,15 +42,15 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Be
 	private String alignmentReferenceFastaFile;
 
 	/**
-	 * Stores the read group line that should be added to the bwa alignment, if present.
-	 */
-	private String readGroupLine;
-
-	/**
 	 * Allows retrieval of the groups to which a specific {@link SAMRecord} belongs to (based upon the area the
 	 * {@link SAMRecord} was aligned to on the reference data compared to a BED file stored start/end regions).
 	 */
 	private SamRecordGroupsRetriever groupsRetriever;
+
+	/**
+	 * The possible samples an input split can belong to.
+	 */
+	private ArrayList<Sample> samples;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -63,10 +65,12 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Be
 	 * Function run on individual chunks of the data.
 	 */
 	@Override
-	public void map(final NullWritable key, BytesWritable value, final Context context)
-			throws IOException, InterruptedException
+	public void map(final Text key, BytesWritable value, final Context context) throws IOException, InterruptedException
 	{
 		logger.info("running mapper");
+
+		// Retrieve the sample belonging to the input split.
+		Sample sample = retrieveCorrectSample(key.toString());
 
 		SamRecordSink sink = new SamRecordSink()
 		{
@@ -95,19 +99,9 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Be
 			}
 		};
 
-		// Executes bwa alignment. If a read group line is available, it is used as well.
-		if (readGroupLine != null)
-		{
-			logger.debug("Executing pipeline with readGroupLine: " + readGroupLine);
-			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
-					readGroupLine, alignmentReferenceFastaFile, "-").start());
-		}
-		else
-		{
-			logger.debug("Executing pipeline without readGroupLine.");
-			PipeRunner.startPipeline(value.getBytes(), sink,
-					new ProcessBuilder(bwaTool, "mem", "-p", "-M", alignmentReferenceFastaFile, "-").start());
-		}
+		logger.debug("Executing pipeline with readGroupLine: " + sample.getReadGroupLine());
+		PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
+				sample.getSafeReadGroupLine(), alignmentReferenceFastaFile, "-").start());
 	}
 
 	/**
@@ -129,11 +123,27 @@ public class HadoopPipelineMapper extends Mapper<NullWritable, BytesWritable, Be
 				FileSystem.get(context.getConfiguration())).read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
-		// Reads the readgroupline and adds an extra backslash for correct interpretation by the ProcessBuilder. When
-		// formatted wrongly, can result in an empty Job output while still saying the Job finished successfully. This
-		// should however not be possible as the readgroupline format is checked during the input digestion.
-		readGroupLine = context.getConfiguration().get("input_readgroupline");
-		if (readGroupLine != null) readGroupLine.replace("\\t", "\\\\t");
+		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
+		samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
 	}
 
+	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
+	{
+		// Splits the path into individual directories with the last item being the file name.
+		String[] pathParts = inputSplitPath.split("/");
+
+		// Goes through each available sample for comparison.
+		for (Sample sample : samples)
+		{
+			// If the sample comparison name equals the last directory in the input split path,
+			// returns the sample.
+			System.out.println(sample.getComparisonName());
+			if (sample.getComparisonName().equals(pathParts[pathParts.length - 2]))
+			{
+				return sample;
+			}
+		}
+		// If no matching sample was found, throws an Exception.
+		throw new IOException("Incorrectly named path or samplesheet missing information about: " + inputSplitPath);
+	}
 }

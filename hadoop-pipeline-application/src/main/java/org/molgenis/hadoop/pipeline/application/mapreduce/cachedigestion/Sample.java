@@ -47,7 +47,8 @@ public class Sample
 	 */
 	public String getComparisonName()
 	{
-		return String.format("%s_%s_%s_%s_%s", sequencingStartDate, sequencer, run, flowcell, lane);
+		return String.format("%1$s_%2$s_%3$4s_%4$s_L%5$s", sequencingStartDate, sequencer, run, flowcell, lane)
+				.replace(' ', '0');
 	}
 
 	/**
@@ -57,8 +58,19 @@ public class Sample
 	 */
 	public String getReadGroupLine()
 	{
-		return String.format("@RG\\tID:%6$s\\tPL:illumina\\tLB:%2$_%3$_%4$_%5$_L%13$\\tSM:%1$", externalSampleId,
+		return String.format("@RG\tID:%6$s\tPL:illumina\tLB:%2$s_%3$s_%4$s_%5$s_L%6$s\tSM:%1$s", externalSampleId,
 				sequencingStartDate, sequencer, run, flowcell, lane);
+	}
+
+	/**
+	 * A safe version of {@link #getReadGroupLine()} where an extra {@code \} is added to the {@code \t} turning it into
+	 * {@code \\t} allowing it to be used safely as argument within a {@link ProcessBuilder}.
+	 * 
+	 * @return {@link String}
+	 */
+	public String getSafeReadGroupLine()
+	{
+		return getReadGroupLine().replace("\t", "\\t");
 	}
 
 	/**

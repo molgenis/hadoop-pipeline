@@ -79,7 +79,7 @@ public class CommandLineInputParser extends InputParser
 						"Directory in which the results should be stored. Note that the directory itself should not exist, though the parent directory should.")
 				.create("o"));
 
-		options.addOption(OptionBuilder.withArgName("align_ref").hasArg().isRequired(true)
+		options.addOption(OptionBuilder.withArgName("reference").hasArg().isRequired(true)
 				.withDescription(
 						"Burrows-Wheeler Alignment reference fasta file. Other BWA index file should be present as well using the same prefix.")
 				.create("r"));
