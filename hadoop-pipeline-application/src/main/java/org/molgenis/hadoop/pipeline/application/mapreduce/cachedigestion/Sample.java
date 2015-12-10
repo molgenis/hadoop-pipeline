@@ -50,12 +50,33 @@ public class Sample
 		return String.format("%s_%s_%s_%s_%s", sequencingStartDate, sequencer, run, flowcell, lane);
 	}
 
+	/**
+	 * A String that is conform to what is expected by a bwa binary tool to be used with -R to give a read group.
+	 * 
+	 * @return {@link String}
+	 */
 	public String getReadGroupLine()
 	{
 		return String.format("@RG\\tID:%6$s\\tPL:illumina\\tLB:%2$_%3$_%4$_%5$_L%13$\\tSM:%1$", externalSampleId,
 				sequencingStartDate, sequencer, run, flowcell, lane);
 	}
 
+	/**
+	 * Create a new {@link Sample} instance.
+	 * 
+	 * @param externalSampleId
+	 *            {@link String}
+	 * @param sequencer
+	 *            {@link String}
+	 * @param sequencingStartDate
+	 *            {@code int}
+	 * @param run
+	 *            {@code int}
+	 * @param flowcell
+	 *            {@link String}
+	 * @param lane
+	 *            {@code int}
+	 */
 	Sample(String externalSampleId, String sequencer, int sequencingStartDate, int run, String flowcell, int lane)
 	{
 		this.externalSampleId = externalSampleId;
