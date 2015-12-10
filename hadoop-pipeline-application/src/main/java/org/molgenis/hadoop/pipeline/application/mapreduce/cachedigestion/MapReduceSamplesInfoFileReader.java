@@ -121,8 +121,8 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 					}
 				}
 				// Throws an exception if the header is missing vital fields.
-				if (sequencerPos == null || sequencingStartDatePos == null || runPos == null || flowcellPos == null
-						|| lanePos == null)
+				if (externalSampleIdPos == null || sequencerPos == null || sequencingStartDatePos == null
+						|| runPos == null || flowcellPos == null || lanePos == null)
 				{
 					throw new IOException("Header line missing fields.");
 				}
