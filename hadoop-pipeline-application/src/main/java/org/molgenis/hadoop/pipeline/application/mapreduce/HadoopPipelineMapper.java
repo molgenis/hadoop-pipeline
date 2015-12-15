@@ -67,8 +67,6 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	@Override
 	public void map(final Text key, BytesWritable value, final Context context) throws IOException, InterruptedException
 	{
-		logger.info("running mapper");
-
 		// Only digests an input split if it is an ".fq.gz" file that starts with "halvade_" in the filename.
 		// Non-".fq.gz" files will simply be ignored while ".fq.gz" files that start with a different name will cause an
 		// IOException.
@@ -105,7 +103,8 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 				}
 			};
 
-			logger.debug("Executing pipeline with readGroupLine: " + sample.getReadGroupLine());
+			logger.debug("Executing pipeline with input split: \"" + key.toString() + "\" and read group line \""
+					+ sample.getReadGroupLine() + "\".");
 			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
 					sample.getSafeReadGroupLine(), alignmentReferenceFastaFile, "-").start());
 		}
@@ -130,6 +129,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 				FileSystem.get(context.getConfiguration())).read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
+		// Retrieves the samples stored in the samples information file.
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
 		samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
 	}
@@ -153,7 +153,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 		String fileName = pathParts[pathParts.length - 1];
 
 		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
-		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_0"))
+		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_"))
 		{
 			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
 		}
