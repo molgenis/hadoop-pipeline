@@ -69,39 +69,46 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	{
 		logger.info("running mapper");
 
-		// Retrieve the sample belonging to the input split.
-		Sample sample = retrieveCorrectSample(key.toString());
-
-		SamRecordSink sink = new SamRecordSink()
+		// Only digests an input split if it is an ".fq.gz" file that starts with "halvade_" in the filename.
+		// Non-".fq.gz" files will simply be ignored while ".fq.gz" files that start with a different name will cause an
+		// IOException.
+		if (validateInputFileType(key.toString()))
 		{
-			@Override
-			public void digestStreamItem(SAMRecord item) throws IOException
+			// Retrieve the sample belonging to the input split.
+			Sample sample = retrieveCorrectSample(key.toString());
+
+			SamRecordSink sink = new SamRecordSink()
 			{
-				try
+				@Override
+				public void digestStreamItem(SAMRecord item) throws IOException
 				{
-					// Creates value.
-					SAMRecordWritable samWritable = new SAMRecordWritable();
-					samWritable.set(item);
-
-					// Retrieves all keys for the value.
-					ArrayList<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
-
-					// Writes a key-value pair for each key found that matched with the SAMRecord alignment position.
-					for (BEDFeature key : groups)
+					try
 					{
-						context.write(new BedFeatureWritable(key), samWritable);
+						// Creates value.
+						SAMRecordWritable samWritable = new SAMRecordWritable();
+						samWritable.set(item);
+
+						// Retrieves all keys for the value.
+						ArrayList<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
+
+						// Writes a key-value pair for each key found that matched with the SAMRecord alignment
+						// position.
+						for (BEDFeature key : groups)
+						{
+							context.write(new BedFeatureWritable(key), samWritable);
+						}
+					}
+					catch (InterruptedException e)
+					{
+						throw new RuntimeException(e);
 					}
 				}
-				catch (InterruptedException e)
-				{
-					throw new RuntimeException(e);
-				}
-			}
-		};
+			};
 
-		logger.debug("Executing pipeline with readGroupLine: " + sample.getReadGroupLine());
-		PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
-				sample.getSafeReadGroupLine(), alignmentReferenceFastaFile, "-").start());
+			logger.debug("Executing pipeline with readGroupLine: " + sample.getReadGroupLine());
+			PipeRunner.startPipeline(value.getBytes(), sink, new ProcessBuilder(bwaTool, "mem", "-p", "-M", "-R",
+					sample.getSafeReadGroupLine(), alignmentReferenceFastaFile, "-").start());
+		}
 	}
 
 	/**
@@ -127,6 +134,49 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 		samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
 	}
 
+	/**
+	 * Checks whether an input split is a valid halvade input chunk.
+	 * 
+	 * @param inputSplitPath
+	 *            {@link String}
+	 * @return {@code true} if input split is a file with a name that starts with "halvade_" and ends with ".fq.gz",
+	 *         false if it has a file extension different to ".fq.gz".
+	 * @throws IOException
+	 *             if the given input split is a ".fq.gz" file but does not start with "halvade_0" (probably a wrongly
+	 *             uploaded file and throws an {@link Exception) as safety measure as the to-be-digested could be
+	 *             invalid.
+	 */
+	private boolean validateInputFileType(String inputSplitPath) throws IOException
+	{
+		// Retrieves the file name.
+		String[] pathParts = inputSplitPath.split("/");
+		String fileName = pathParts[pathParts.length - 1];
+
+		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
+		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_0"))
+		{
+			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
+		}
+
+		// Non-".fq.gz" files return false.
+		if (!fileName.endsWith(".fq.gz"))
+		{
+			return false;
+		}
+
+		//  Otherwise returns true.
+		return true;
+	}
+
+	/**
+	 * Returns a {@link Sample} that belongs to the current input split.
+	 * 
+	 * @param inputSplitPath
+	 *            {@link String}
+	 * @return {@link Sample}
+	 * @throws IOException
+	 *             if no {@link Sample} could be found within {@code this.samples} that matches the current input split.
+	 */
 	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
 	{
 		// Splits the path into individual directories with the last item being the file name.
@@ -137,7 +187,6 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 		{
 			// If the sample comparison name equals the last directory in the input split path,
 			// returns the sample.
-			System.out.println(sample.getComparisonName());
 			if (sample.getComparisonName().equals(pathParts[pathParts.length - 2]))
 			{
 				return sample;

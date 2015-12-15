@@ -25,6 +25,8 @@ Before using the tool, be sure that the following has been done:
 
 	* IMPORTANT: The bed file shoulde be UTF-8 compliant!
 
+* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. More can be mentioned as well (it simply filters on the ones that are needed).
+
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).
 2. From within the `halvade/halvade_upload_tools/` directory, use `ant` (Apache Ant) to create a jar file.
@@ -70,17 +72,58 @@ The `info.xml` file contains information of all tools present in the archive and
 	
 		yarn jar HalvadeUploaderWithLibs.jar -1 reads1.fastq.gz -2 reads2.fastq.gz -O /path/to/hdfs/output/folder/ -size <size in mb>
 	
+	* The last folder of the output path should use the following format (so the files in this sample can be identified using the accompanying samplesheet csv file during the MapReduce job): 
+		
+			<sequencingStartDate>_<sequencer>_<run>_<flowcell>_<lane>/
+		
 	* To make proper use of data locality, be sure that a single created file is smaller than the HDFS block size. You can check the set HDFS block size of a given file using `hdfs dfs -stat %o /hdfs/path/to/file`.
 	* See [https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing](https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing) for more information about the halvade upload tool.
 2. Run the HadoopPipelineApplication:
 	
-		yarn jar HadoopPipelineApplicationWithDependencies.jar -t tools.tar.gz -i /path/to/hdfs/input/folder/ -o /path/to/hdfs/output/folder/ -bwa /path/to/hdfs/bwa/reference/data/file.fa(sta)
+		yarn jar HadoopPipelineApplicationWithDependencies.jar -t /hdfs/path/to/tools.tar.gz -i /hdfs/path/to/input/folder/ -o /hdfs/path/to/output/folder/ -r /hdfs/path/to/bwa/reference/data/file.fa(sta) -s /hdfs/path/to/samples/info/file.csv -b /hdfs/path/to/groups/file.bed
+	
 3. Download the results:
 	
-		hdfs dfs -get /path/to/hdfs/output/folder/ /local/folder/to/copy/results/to/
+		hdfs dfs -get /hdfs/path/to/output/folder/ /local/folder/to/copy/results/to/
 
 
 ## Troubleshooting
+
+__Problem:__
+
+When running HadoopPipelineApplicationWithDependencies.jar, I get the following error:
+
+	java.io.IOException: Incorrectly named path or samplesheet missing information about: hdfs/path/to/halvade_0_0.fq.gz
+
+__Solution:__
+
+To allow usage of multiple different samples within a single job, the last directory of the path on HDFS that stores the input files has to be in a specific format. The reason for this is so that using the samplesheet that is given using `-s`, the individual input files can be matched within the MapReduce job with their correct sample. This means that even if you only use a single input sample, it is still needed to adhere to these requirements.
+
+---
+
+__Problem:__
+
+When running the job, I get the following error:
+
+	Error: java.io.FileNotFoundException: Path is not a file:
+
+__Solution:__
+
+One of the input directories you've given contains a folder. Every input folder given as parameter should ONLY contain the expected `.fq.gz` input files. Alternatively, if you want to give a single folder containing subfolders that each contain the `.fq.gz` files from a single sample that should function as input, add the following argument instead `-D mapreduce.input.fileinputformat.input.dir.recursive=true` when executing the job jar.
+
+---
+
+__Problem:__
+
+When running the application, I get the error:
+
+	java.io.IOException: Invalid .fq.gz file found:
+
+__Solution:__
+
+As the job jar is written to assume input uploaded using the `HalvadeUploaderWithLibs.jar`, each input split is validated whether the file name of that split starts with `halvade_`. The reason the application quits after finding a `.fq.gz` file that starts with a different name is because this could indicate a wrongly uploaded file. Please be sure that the input folder ONLY contains `.fq.gz` files that are named in the way it is expected. Other file extensions will not cause any problems as these will simply be ignored (though as these will still be initially treated as input splits and are only disgarded within the Mappers themselves, it is still not advisable to have other files present in the input directories).
+
+---
 
 __Problem:__
 The `-D` argument suggested below does not work.

@@ -86,6 +86,57 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	}
 
 	/**
+	 * Tests the {@link HadoopPipelineMapper} when a single sample is given that has an incorrect last directory name.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	@Test(expectedExceptions = IOException.class)
+	public void testMapperWithSingleInvalidDirToSample() throws IOException, URISyntaxException
+	{
+		mDriver.withInput(new Text("hdfs/path/to/999999_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz"),
+				new BytesWritable(fastqData));
+
+		mDriver.run();
+	}
+
+	/**
+	 * Tests the {@link HadoopPipelineMapper} when a single sample is given that does not start with "halvade_".
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	@Test(expectedExceptions = IOException.class)
+	public void testMapperWithSingleInvalidInputFileName() throws IOException, URISyntaxException
+	{
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L2/prefix_0_0.fq.gz"),
+				new BytesWritable(fastqData));
+
+		mDriver.run();
+	}
+
+	/**
+	 * Tests the {@link HadoopPipelineMapper} when a single sample is given that does not have the expected file type.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void testMapperWithSingleInvalidInputFileType() throws IOException, URISyntaxException
+	{
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.csv"),
+				new BytesWritable(fastqData));
+
+		List<Pair<BedFeatureWritable, SAMRecordWritable>> output = mDriver.run();
+
+		// As the input file "represents" a csv file, it should not be digested and the output should stay empty.
+		if (!output.isEmpty())
+		{
+			Assert.fail();
+		}
+	}
+
+	/**
 	 * Tests the {@link HadoopPipelineMapper} when two samples is given.
 	 * 
 	 * @throws IOException

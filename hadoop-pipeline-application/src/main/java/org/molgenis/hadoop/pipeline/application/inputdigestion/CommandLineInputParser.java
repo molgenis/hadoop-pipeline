@@ -44,7 +44,11 @@ public class CommandLineInputParser extends InputParser
 		createOptions();
 		retrieveParser(args);
 		digestCommandLine();
-		checkValidityArguments();
+		if (!checkValidityArguments())
+		{
+			printHelpMessage();
+			throw new ParseException("Input arguments are invalid (see error messages for more information).");
+		}
 	}
 
 	/**
@@ -53,11 +57,12 @@ public class CommandLineInputParser extends InputParser
 	public void printHelpMessage()
 	{
 		String cmdSyntax = "HadoopPipelineApplicationWithDependencies.jar";
-		String helpHeader = System.lineSeparator() + System.lineSeparator();
+		String helpHeader = "-t <tools> -i <input>... -o <output> -r <reference> -s <samples> -b <bed>"
+				+ System.lineSeparator();
 		String helpFooter = "Molgenis hadoop-pipeline";
 
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(80, cmdSyntax, helpHeader, this.options, helpFooter, true);
+		formatter.printHelp(80, cmdSyntax, helpHeader, this.options, helpFooter, false);
 	}
 
 	/**
@@ -122,9 +127,9 @@ public class CommandLineInputParser extends InputParser
 		{
 			setToolsArchiveLocation(commandLine.getOptionValue("t"));
 		}
-		if (commandLine.hasOption("i"))
+		if (commandLine.hasOption("i")) // Supports multiple input values.
 		{
-			setInputDir(commandLine.getOptionValue("i"));
+			setInputDirs(commandLine.getOptionValues("i"));
 		}
 		if (commandLine.hasOption("o"))
 		{

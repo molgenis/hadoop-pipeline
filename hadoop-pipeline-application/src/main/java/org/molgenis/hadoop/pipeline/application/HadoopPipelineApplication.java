@@ -6,6 +6,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -86,58 +87,50 @@ public class HadoopPipelineApplication extends Configured implements Tool
 
 		FileSystem fileSys = FileSystem.get(getConf());
 
-		// Digests application-specific command line arguments.
+		// Digests application-specific command line arguments. Throws an Exception if the input arguments are invalid.
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
-		// Only execute MapReduce job if all required paremeters are present and correct.
-		if (parser.isContinueApplication())
+		Job job = Job.getInstance(getConf());
+		job.setJarByClass(HadoopPipelineApplication.class);
+		job.setJobName("HadoopPipelineApplication");
+
+		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
+		job.addCacheArchive(parser.getToolsArchiveLocation().toUri());
+
+		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
+		job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaBwtFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaFaiFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaPacFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceFastaSaFile().toUri());
+		job.addCacheFile(parser.getAlignmentReferenceDictFile().toUri());
+		job.addCacheFile(parser.getBedFile().toUri());
+		job.addCacheFile(parser.getSamplesInfoFile().toUri());
+
+		// Sets input/output paths.
+		for (Path inputPath : parser.getInputDirs())
 		{
-			Job job = Job.getInstance(getConf());
-			job.setJarByClass(HadoopPipelineApplication.class);
-			job.setJobName("HadoopPipelineApplication");
-
-			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-			job.addCacheArchive(parser.getToolsArchiveLocation().toUri());
-
-			// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-			job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaBwtFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaFaiFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaPacFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceFastaSaFile().toUri());
-			job.addCacheFile(parser.getAlignmentReferenceDictFile().toUri());
-			job.addCacheFile(parser.getBedFile().toUri());
-			job.addCacheFile(parser.getSamplesInfoFile().toUri());
-
-			// Sets input/output paths.
-			FileInputFormat.addInputPath(job, parser.getInputDir());
-			FileOutputFormat.setOutputPath(job, parser.getOutputDir());
-
-			// Sets Mapper/Reducer.
-			job.setMapperClass(HadoopPipelineMapper.class);
-			job.setReducerClass(HadoopPipelineReducer.class);
-
-			// Sets input/output formats.
-			job.setInputFormatClass(WholeFileInputFormat.class);
-			job.setMapOutputKeyClass(BedFeatureWritable.class);
-			job.setMapOutputValueClass(SAMRecordWritable.class);
-			job.setOutputKeyClass(NullWritable.class);
-			job.setOutputValueClass(Text.class);
-
-			// Defines the custom output writing.
-			MultipleOutputs.addNamedOutput(job, "output", TextOutputFormat.class, NullWritable.class, Text.class);
-
-			// Returns 0 if job completed successfully. If not, returns 1.
-			return job.waitForCompletion(true) ? 0 : 1;
+			FileInputFormat.addInputPath(job, inputPath);
 		}
-		else
-		{
-			parser.printHelpMessage();
-		}
+		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
-		// Returns exit code 1 if no job was executed.
-		return 1;
+		// Sets Mapper/Reducer.
+		job.setMapperClass(HadoopPipelineMapper.class);
+		job.setReducerClass(HadoopPipelineReducer.class);
+
+		// Sets input/output formats.
+		job.setInputFormatClass(WholeFileInputFormat.class);
+		job.setMapOutputKeyClass(BedFeatureWritable.class);
+		job.setMapOutputValueClass(SAMRecordWritable.class);
+		job.setOutputKeyClass(NullWritable.class);
+		job.setOutputValueClass(Text.class);
+
+		// Defines the custom output writing.
+		MultipleOutputs.addNamedOutput(job, "output", TextOutputFormat.class, NullWritable.class, Text.class);
+
+		// Returns 0 if job completed successfully. If not, returns 1.
+		return job.waitForCompletion(true) ? 0 : 1;
 	}
 }

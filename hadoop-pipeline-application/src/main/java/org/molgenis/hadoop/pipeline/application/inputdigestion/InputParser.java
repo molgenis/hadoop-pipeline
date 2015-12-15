@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -16,11 +17,6 @@ public abstract class InputParser
 	private FileSystem fileSys;
 
 	/**
-	 * Switch that only allows the MapReduce phase to start if all required files exist.
-	 */
-	private boolean continueApplication = false;
-
-	/**
 	 * Location of the .tar.gz archive containing the required tools.
 	 */
 	private Path toolsArchiveLocation;
@@ -28,7 +24,7 @@ public abstract class InputParser
 	/**
 	 * Location with input files.
 	 */
-	private Path inputDir;
+	private ArrayList<Path> inputDirs = new ArrayList<Path>();
 
 	/**
 	 * Location results can be written to.
@@ -90,11 +86,6 @@ public abstract class InputParser
 		this.fileSys = fileSys;
 	}
 
-	public boolean isContinueApplication()
-	{
-		return continueApplication;
-	}
-
 	public Path getToolsArchiveLocation()
 	{
 		return toolsArchiveLocation;
@@ -110,19 +101,32 @@ public abstract class InputParser
 		this.toolsArchiveLocation = new Path(toolsArchiveLocation);
 	}
 
-	public Path getInputDir()
+	public ArrayList<Path> getInputDirs()
 	{
-		return inputDir;
+		return inputDirs;
 	}
 
-	protected void setInputDir(Path inputDir)
+	protected void setInputDirs(ArrayList<Path> inputDirs)
 	{
-		this.inputDir = inputDir;
+		this.inputDirs = inputDirs;
 	}
 
-	protected void setInputDir(String inputDir)
+	protected void setInputDirs(String[] inputDirs)
 	{
-		this.inputDir = new Path(inputDir);
+		for (String inputDir : inputDirs)
+		{
+			addInputDir(inputDir);
+		}
+	}
+
+	protected void addInputDir(String inputDir)
+	{
+		addInputDir(new Path(inputDir));
+	}
+
+	protected void addInputDir(Path inputDir)
+	{
+		this.inputDirs.add(inputDir);
 	}
 
 	public Path getOutputDir()
@@ -248,42 +252,56 @@ public abstract class InputParser
 	}
 
 	/**
-	 * Checks whether all required files exist. If one of the required files could not be found, a print statement to
-	 * stderr is given regarding the missing file(s). If all required files are present, {@code isContinueApplication()}
-	 * is set to {@code true}.
+	 * Checks whether all required input parameters are valid. If one of the required files could not be found or a
+	 * parameter is incorrect, a print statement to stderr is given with a message.
 	 * 
+	 * @return {@code true} if all parameters are correct, otherwise {@code false}
 	 * @throws IOException
 	 */
-	protected void checkValidityArguments() throws IOException
+	protected boolean checkValidityArguments() throws IOException
 	{
 		// Is set to true if one argument is invalid.
-		boolean invalidInput = false;
+		boolean validInput = true;
 
 		// Checks user input files whether they are present.
 		if (!checkIfPathIsFile(toolsArchiveLocation))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Tools archive path is invalid.");
 		}
-		if (!checkIfPathIsDir(inputDir))
+
+		// Checks if there are any input dirs and for each of them check if it is valid.
+		if (inputDirs.size() < 1)
 		{
-			invalidInput = true;
-			System.err.println("Input directory does not exist.");
+			validInput = false;
+			System.err.println("No input directories were given.");
 		}
+		else
+		{
+			for (Path inputDir : inputDirs)
+			{
+				if (!checkIfPathIsDir(inputDir))
+				{
+					validInput = false;
+					System.err.println("The following input directory does not exist: " + inputDir);
+				}
+			}
+		}
+
 		if (!checkIfPathParentIsDir(outputDir))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Output directory parent does not exist.");
 		}
 		else if (checkIfPathIsDir(outputDir))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Output directory already exists.");
 		}
 		if (!checkIfPathIsFile(alignmentReferenceFastaFile))
 		{
-			invalidInput = true;
-			System.err.println("BWA index fasta file is not present.");
+			validInput = false;
+			System.err.println("BWA index fasta file is not present (skipping check on aditional index files).");
 		}
 		// Only check for accompanying bwa index files if original fasta file is found.
 		else if (!checkIfPathIsFile(alignmentReferenceFastaAmbFile)
@@ -293,7 +311,7 @@ public abstract class InputParser
 				|| !checkIfPathIsFile(alignmentReferenceFastaPacFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaSaFile) || !checkIfPathIsFile(alignmentReferenceDictFile))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println(
 					"Additional BWA index/dict files are incomplete. Please be sure the following files are present as well: "
 							+ System.lineSeparator() + getAlignmentReferenceFastaAmbFile() + System.lineSeparator()
@@ -306,20 +324,16 @@ public abstract class InputParser
 		}
 		if (!checkIfPathIsFile(bedFile))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
 		if (!checkIfPathIsFile(samplesInfoFile))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Samplesheet file containing information about the samples does not exist.");
 		}
 
-		// If no invalid input is found, continueApplication is set to true.
-		if (!invalidInput)
-		{
-			continueApplication = true;
-		}
+		return validInput;
 	}
 
 	/**

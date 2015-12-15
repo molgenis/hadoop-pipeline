@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.ParseException;
@@ -32,7 +33,7 @@ public class CommandLineInputParserTester extends Tester
 	String samplesInfoFile;;
 
 	Path toolsAsPath;
-	Path inputDirAsPath;
+	ArrayList<Path> inputDirsAsPath;
 	Path outputDirAsPath;
 	Path bwaRefFastaAsPath;
 	Path bwaRefFastaAmbAsPath;
@@ -76,7 +77,8 @@ public class CommandLineInputParserTester extends Tester
 
 		// Path objects for comparison with expected output.
 		toolsAsPath = new Path(tools);
-		inputDirAsPath = new Path(inputDir);
+		inputDirsAsPath = new ArrayList<Path>();
+		inputDirsAsPath.add(new Path(inputDir));
 		outputDirAsPath = new Path(outputDir);
 		bwaRefFastaAsPath = new Path(bwaRefFasta);
 		bwaRefFastaAmbAsPath = new Path(bwaRefFastaAmb);
@@ -131,7 +133,7 @@ public class CommandLineInputParserTester extends Tester
 		parser.printHelpMessage();
 
 		Assert.assertEquals(parser.getToolsArchiveLocation(), toolsAsPath);
-		Assert.assertEquals(parser.getInputDir(), inputDirAsPath);
+		Assert.assertEquals(parser.getInputDirs(), inputDirsAsPath);
 		Assert.assertEquals(parser.getOutputDir(), outputDirAsPath);
 		Assert.assertEquals(parser.getAlignmentReferenceFastaFile(), bwaRefFastaAsPath);
 		Assert.assertEquals(parser.getAlignmentReferenceFastaAmbFile(), bwaRefFastaAmbAsPath);
@@ -143,7 +145,6 @@ public class CommandLineInputParserTester extends Tester
 		Assert.assertEquals(parser.getAlignmentReferenceDictFile(), bwaRefDictAsPath);
 		Assert.assertEquals(parser.getBedFile(), bedFileAsPath);
 		Assert.assertEquals(parser.getSamplesInfoFile(), samplesInfoFileAsPath);
-		Assert.assertEquals(parser.isContinueApplication(), true);
 	}
 
 	/**
@@ -176,16 +177,13 @@ public class CommandLineInputParserTester extends Tester
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	@Test
+	@Test(expectedExceptions = ParseException.class)
 	public void nonExistingToolsArchive() throws ParseException, IOException
 	{
 		String invalidTools = getClassLoader().getResource("").toString() + "non_existing.tar.gz";
 		args[1] = invalidTools;
 
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
-
-		Assert.assertEquals(parser.getToolsArchiveLocation(), new Path(invalidTools));
-		Assert.assertEquals(parser.isContinueApplication(), false);
+		new CommandLineInputParser(fileSys, args);
 	}
 
 	/**
@@ -194,16 +192,13 @@ public class CommandLineInputParserTester extends Tester
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	@Test
+	@Test(expectedExceptions = ParseException.class)
 	public void nonExistingInputDir() throws ParseException, IOException
 	{
 		String invalidInputDir = getClassLoader().getResource("").toString() + "non_existing_input/";
 		args[3] = invalidInputDir;
 
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
-
-		Assert.assertEquals(parser.getInputDir(), new Path(invalidInputDir));
-		Assert.assertEquals(parser.isContinueApplication(), false);
+		new CommandLineInputParser(fileSys, args);
 	}
 
 	/**
@@ -212,16 +207,13 @@ public class CommandLineInputParserTester extends Tester
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	@Test
+	@Test(expectedExceptions = ParseException.class)
 	public void nonExistingOutputParentDir() throws ParseException, IOException
 	{
 		String invalidOutputDir = getClassLoader().getResource("").toString() + "output/another_output/";
 		args[5] = invalidOutputDir;
 
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
-
-		Assert.assertEquals(parser.getOutputDir(), new Path(invalidOutputDir));
-		Assert.assertEquals(parser.isContinueApplication(), false);
+		new CommandLineInputParser(fileSys, args);
 	}
 
 	/**
@@ -230,15 +222,12 @@ public class CommandLineInputParserTester extends Tester
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	@Test
+	@Test(expectedExceptions = ParseException.class)
 	public void outputDirAlreadyExists() throws ParseException, IOException
 	{
 		String invalidOutputDir = getClassLoader().getResource("").toString();
 		args[5] = invalidOutputDir;
 
-		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
-
-		Assert.assertEquals(parser.getOutputDir(), new Path(invalidOutputDir));
-		Assert.assertEquals(parser.isContinueApplication(), false);
+		new CommandLineInputParser(fileSys, args);
 	}
 }
