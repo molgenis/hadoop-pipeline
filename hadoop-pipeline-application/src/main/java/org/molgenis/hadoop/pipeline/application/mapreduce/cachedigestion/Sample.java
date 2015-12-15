@@ -7,7 +7,7 @@ public class Sample
 	private int sequencingStartDate;
 	private int run;
 	private String flowcell;
-	private int lane;
+	private int lane; // is the @RG ID
 
 	public String getExternalSampleId()
 	{
@@ -52,7 +52,8 @@ public class Sample
 	}
 
 	/**
-	 * A String that is conform to what is expected by a bwa binary tool to be used with -R to give a read group.
+	 * A String that is conform to what is expected as {@code @RG} within a sam file or by a bwa binary tool as input
+	 * with the {@code -R} argument.
 	 * 
 	 * @return {@link String}
 	 */
@@ -63,7 +64,7 @@ public class Sample
 	}
 
 	/**
-	 * A safe version of {@link #getReadGroupLine()} where an extra {@code \} is added to the {@code \t} turning it into
+	 * A wrapper of {@link #getReadGroupLine()} where an extra {@code \} is added to the {@code \t} turning it into
 	 * {@code \\t} allowing it to be used safely as argument within a {@link ProcessBuilder}.
 	 * 
 	 * @return {@link String}

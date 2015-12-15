@@ -25,7 +25,7 @@ Before using the tool, be sure that the following has been done:
 
 	* IMPORTANT: The bed file shoulde be UTF-8 compliant!
 
-* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. More can be mentioned as well (it simply filters on the ones that are needed).
+* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file by the job (this to reduce application running time).
 
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).
