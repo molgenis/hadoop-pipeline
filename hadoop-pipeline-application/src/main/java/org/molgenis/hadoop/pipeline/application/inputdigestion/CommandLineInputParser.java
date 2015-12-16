@@ -60,9 +60,8 @@ public class CommandLineInputParser extends InputParser
 	 */
 	public void printHelpMessage()
 	{
-		String cmdSyntax = "HadoopPipelineApplicationWithDependencies.jar";
-		String helpHeader = "-t <tools> -i <input>... -o <output> -r <reference> -s <samples> -b <bed>"
-				+ System.lineSeparator();
+		String cmdSyntax = "yarn jar HadoopPipelineApplicationWithDependencies.jar [-D <property>=<value>]... -t <tools> -i <input> [-i <input>]... -o <output> -r <reference> -s <samples> -b <bed>";
+		String helpHeader = "";
 		String helpFooter = "Molgenis hadoop-pipeline";
 
 		HelpFormatter formatter = new HelpFormatter();
