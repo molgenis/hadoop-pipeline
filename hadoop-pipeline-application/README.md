@@ -23,7 +23,7 @@ Within some TestNG tests a python script is used for testing the Process calling
 
 ### Preperations
 1. use `git clone https://github.com/svandenhoek/hadoop-pipeline.git` to create a clone of the git repository.
-2. Download the `hadoop-pipeline.tar.gz` from [here](https://molgenis26.target.rug.nl/downloads/hadoop/).
+2. Download the most recent version of the hadoop-pipeline `.tar.gz` archive from [here](https://molgenis26.target.rug.nl/downloads/hadoop/).
 3. Extract the content of `hadoop-pipeline.tar.gz` into directory of the cloned repository (so that the subdirectories will overlap with each other and the files will be placed in the correct location).
 4. Go to the  `hadoop-pipeline-application` directory.
 5. Use `mvn install`.

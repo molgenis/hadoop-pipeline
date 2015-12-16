@@ -1,4 +1,4 @@
-# VERSION: 2015-12-03
+# VERSION: 2015-12-16
 a hadoop-pipeline-application/src/test/resources/bed_files
 a hadoop-pipeline-application/src/test/resources/bed_files/chr1_20000000-21000000.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig-start-end-name_normal-end.bed
@@ -9,9 +9,9 @@ a hadoop-pipeline-application/src/test/resources/bed_files/line_contig-start_tab
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig_normal-end.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig_tab-end.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/unsorted_contig-start-end.bed
-a hadoop-pipeline-application/src/test/resources/expected_mini_outputs
-a hadoop-pipeline-application/src/test/resources/expected_mini_outputs/mini_halvade_0_0-bwa_results.sam
-a hadoop-pipeline-application/src/test/resources/expected_mini_outputs/mini_halvade_0_0-bwa_results_withreadlinegroup.sam
+a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini
+a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L2.sam
+a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L5.sam
 a hadoop-pipeline-application/src/test/resources/extra_dict_files
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_length_field.dict
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_name_field.dict
@@ -29,6 +29,21 @@ a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa.fai
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa.pac
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa.sa
+a hadoop-pipeline-application/src/test/resources/samplesheets
+a hadoop-pipeline-application/src/test/resources/samplesheets/header_missing_run_column.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field_comma-ended.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_run.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/sample_run_sequencingStartDate_swapped.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/samplesheet.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/valid_minimal.csv
+a hadoop-pipeline-application/src/test/resources/three_samples
+a hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L1
+a hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L2
+a hadoop-pipeline-application/src/test/resources/three_samples/150702_SN163_0649_BHJYNKADXX_L5
+a hadoop-pipeline-application/src/test/resources/three_samples/150702_SN163_0649_BHJYNKADXX_L5/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/multiple_tools_single_tool_missing_child.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/multiple_valid_tools.xml
@@ -36,8 +51,17 @@ a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/no_tool
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_tool_missing_attribute.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_tool_missing_child.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_valid_tool.xml
-a hadoop-pipeline-halvade-testing/data/testdata_1.fq.gz
-a hadoop-pipeline-halvade-testing/data/testdata_2.fq.gz
+a hadoop-pipeline-halvade-testing/data/single_sample
+a hadoop-pipeline-halvade-testing/data/single_sample/testdata_1.fq.gz
+a hadoop-pipeline-halvade-testing/data/single_sample/testdata_2.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples
+a hadoop-pipeline-halvade-testing/data/three_samples/150616_SN163_0648_AHKYLMADXX_L1_1.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples/150616_SN163_0648_AHKYLMADXX_L1_2.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples/150616_SN163_0648_AHKYLMADXX_L2_1.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples/150616_SN163_0648_AHKYLMADXX_L2_2.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples/150702_SN163_0649_BHJYNKADXX_L5_1.fq.gz
+a hadoop-pipeline-halvade-testing/data/three_samples/150702_SN163_0649_BHJYNKADXX_L5_2.fq.gz
 a hadoop-pipeline-tools/linux_tools.tar.gz
 a hadoop-pipeline-tools/mac_tools.tar.gz
+a archive_files_info.md
 a archive_files.txt
