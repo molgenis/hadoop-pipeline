@@ -11,7 +11,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -138,10 +137,6 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);
-
-		// Defines the custom output format.
-		MultipleOutputs.addNamedOutput(job, "output", BamOutputFormat.class, NullWritable.class,
-				SAMRecordWritable.class);
 
 		// Returns 0 if job completed successfully. If not, returns 1.
 		return job.waitForCompletion(true) ? 0 : 1;
