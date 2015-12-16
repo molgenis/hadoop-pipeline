@@ -1,37 +1,23 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.Logger;
-import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceRefSeqDictReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceSamplesInfoFileReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceToolsXmlReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Sample;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Tool;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
-import htsjdk.samtools.SAMFileHeader;
-import htsjdk.samtools.SAMRecord;
-import htsjdk.samtools.SAMSequenceDictionary;
-import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Hadoop MapReduce Job reducer.
  */
-public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, Text>
+public class HadoopPipelineReducer
+		extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -41,23 +27,7 @@ public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecord
 	/**
 	 * Collector for reducer output.
 	 */
-	private MultipleOutputs<NullWritable, Text> outputCollector;
-
-	/**
-	 * Stores the generated {@link SAMFileHeader}.
-	 */
-	private SAMFileHeader samFileHeader = new SAMFileHeader();
-
-	/**
-	 * Stores the tools that have been used in this Job and that should be added as {@code @PG} tags to the
-	 * SAM-formatted file.
-	 */
-	private ArrayList<Tool> usedTools;
-
-	/**
-	 * The possible samples an input split can belong to.
-	 */
-	private ArrayList<Sample> samples;
+	private MultipleOutputs<NullWritable, SAMRecordWritable> outputCollector;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -66,10 +36,7 @@ public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecord
 	protected void setup(Context context) throws IOException, InterruptedException
 	{
 		// Initiate a new output collector.
-		outputCollector = new MultipleOutputs<NullWritable, Text>(context);
-
-		// Digests cache.
-		digestCache(context);
+		outputCollector = new MultipleOutputs<NullWritable, SAMRecordWritable>(context);
 	}
 
 	/**
@@ -82,37 +49,11 @@ public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecord
 		// Retrieve the BEDFeature from the Writable.
 		BEDFeature bedFeature = key.get();
 
-		// Writes the @SQ tags to the output collector.
-		for (SAMSequenceRecord samSeq : samFileHeader.getSequenceDictionary().getSequences())
-		{
-			String SqString = new String("@SQ\tSN:" + samSeq.getSequenceName() + "\tLN:" + samSeq.getSequenceLength());
-			outputCollector.write("output", NullWritable.get(), new Text(SqString), generateOutputFileName(bedFeature));
-		}
-
-		// Writes the @RG tags present in the samples file to the output collector.
-		for (Sample sample : samples)
-		{
-			outputCollector.write(NullWritable.get(), new Text(sample.getReadGroupLine()),
-					generateOutputFileName(bedFeature));
-		}
-
-		// Writes @PG tags.
-		for (Tool usedTool : usedTools)
-		{
-			outputCollector.write(NullWritable.get(), new Text(usedTool.getSamString()),
-					generateOutputFileName(bedFeature));
-		}
-
 		// Writes the aligned SAMRecord data.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
 		while (iterator.hasNext())
 		{
-			SAMRecordWritable samWritable = iterator.next();
-			SAMRecord record = samWritable.get();
-			record.setHeader(samFileHeader);
-
-			outputCollector.write(NullWritable.get(), new Text(record.getSAMString().trim()),
-					generateOutputFileName(bedFeature));
+			outputCollector.write(NullWritable.get(), iterator.next(), generateOutputFileName(bedFeature));
 		}
 	}
 
@@ -123,37 +64,6 @@ public class HadoopPipelineReducer extends Reducer<BedFeatureWritable, SAMRecord
 	protected void cleanup(Context context) throws IOException, InterruptedException
 	{
 		outputCollector.close();
-	}
-
-	/**
-	 * Digests the cache files that are needed into the required formats.
-	 * 
-	 * IMPORTANT: Be sure the exact same array order is used as defined in {@link HadoopPipelineApplication}!
-	 * 
-	 * @throws IllegalArgumentException
-	 * @throws IOException
-	 */
-	private void digestCache(Context context) throws IllegalArgumentException, IOException
-	{
-		// Adds @SQ tags data to the SAMFileHeader.
-		String alignmentReferenceDictFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[7]));
-		SAMSequenceDictionary seqDict = new MapReduceRefSeqDictReader(FileSystem.get(context.getConfiguration()))
-				.read(alignmentReferenceDictFile);
-		samFileHeader.setSequenceDictionary(seqDict);
-
-		// Retrieves the tools data stored in the tools archive info.xml file.
-		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
-				+ "/tools/info.xml";
-		HashMap<String, Tool> tools = new MapReduceToolsXmlReader(FileSystem.get(context.getConfiguration()))
-				.read(toolsArchiveInfoXml);
-
-		// Filters the tools present in the tools archive info.xml file for the used tools by this Job.
-		usedTools = new ArrayList<Tool>();
-		usedTools.add(tools.get("bwa"));
-
-		// Retrieves the samples stored in the samples information file.
-		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
 	}
 
 	/**

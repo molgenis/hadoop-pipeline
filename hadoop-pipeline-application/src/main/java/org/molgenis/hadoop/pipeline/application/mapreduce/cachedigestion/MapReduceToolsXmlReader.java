@@ -18,11 +18,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import htsjdk.samtools.SAMProgramRecord;
+
 /**
  * Digests an XML {@link InputStream} formatted according to the {@link Schema} from
  * {@code src/main/resources/tools_archive_info.xsd} (and within the jar after compiling).
  */
-public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, Tool>>
+public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, SAMProgramRecord>>
 {
 	/**
 	 * Stores the attribute that stores the file name in each tool node within the XML file.
@@ -52,7 +54,7 @@ public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, 
 	 * @return {@link ArrayList}{@code <}{@link Tool}{@code >}
 	 */
 	@Override
-	public HashMap<String, Tool> read(InputStream inputStream) throws IOException
+	public HashMap<String, SAMProgramRecord> read(InputStream inputStream) throws IOException
 	{
 		try
 		{
@@ -72,12 +74,12 @@ public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, 
 	 * 
 	 * @param dom
 	 *            {@link Document}
-	 * @return {@link ArrayList}{@code <}{@link Tool}{@code >}
+	 * @return {@link ArrayList}{@code <}{@link SAMProgramRecord}{@code >}
 	 */
-	private HashMap<String, Tool> digestDomStructure(Document dom)
+	private HashMap<String, SAMProgramRecord> digestDomStructure(Document dom)
 	{
 		// ArrayList to store digested data in.
-		HashMap<String, Tool> tools = new HashMap<String, Tool>();
+		HashMap<String, SAMProgramRecord> tools = new HashMap<String, SAMProgramRecord>();
 
 		// Retrieve root node and it's children.
 		Element rootNode = dom.getDocumentElement();
@@ -120,8 +122,12 @@ public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, 
 					}
 				}
 			}
+
 			// Creates a new tool instance and adds it to the ArrayList for storing.
-			tools.put(fileName, new Tool(fileName, toolId, toolName, toolVersion));
+			SAMProgramRecord program = new SAMProgramRecord(toolId);
+			program.setProgramName(toolName);
+			program.setProgramVersion(toolVersion);
+			tools.put(fileName, program);
 		}
 
 		return tools;

@@ -8,16 +8,15 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
+import org.molgenis.hadoop.pipeline.application.formats.BamOutputFormat;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
@@ -122,13 +121,17 @@ public class HadoopPipelineApplication extends Configured implements Tool
 
 		// Sets input/output formats.
 		job.setInputFormatClass(WholeFileInputFormat.class);
+		job.setOutputFormatClass(BamOutputFormat.class);
+
+		// Sets Mapper/Reducer output key/value.
 		job.setMapOutputKeyClass(BedFeatureWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputValueClass(SAMRecordWritable.class);
 
 		// Defines the custom output writing.
-		MultipleOutputs.addNamedOutput(job, "output", TextOutputFormat.class, NullWritable.class, Text.class);
+		MultipleOutputs.addNamedOutput(job, "output", BamOutputFormat.class, NullWritable.class,
+				SAMRecordWritable.class);
 
 		// Returns 0 if job completed successfully. If not, returns 1.
 		return job.waitForCompletion(true) ? 0 : 1;

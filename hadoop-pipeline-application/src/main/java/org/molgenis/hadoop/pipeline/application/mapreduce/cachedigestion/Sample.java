@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
 
+import htsjdk.samtools.SAMReadGroupRecord;
+
 public class Sample
 {
 	private String externalSampleId;
@@ -72,6 +74,21 @@ public class Sample
 	public String getSafeReadGroupLine()
 	{
 		return getReadGroupLine().replace("\t", "\\t");
+	}
+
+	/**
+	 * Returns the sample as a {@link SAMReadGroupRecord}.
+	 * 
+	 * @return {@link SAMReadGroupRecord}
+	 */
+	public SAMReadGroupRecord getAsReadGroupRecord()
+	{
+		SAMReadGroupRecord record = new SAMReadGroupRecord(Integer.toString(lane));
+		record.setPlatform("illumina");
+		record.setLibrary(
+				String.format("%1$s_%2$s_%3$s_%4$s_L%5$s", sequencingStartDate, sequencer, run, flowcell, lane));
+		record.setSample(externalSampleId);
+		return record;
 	}
 
 	/**

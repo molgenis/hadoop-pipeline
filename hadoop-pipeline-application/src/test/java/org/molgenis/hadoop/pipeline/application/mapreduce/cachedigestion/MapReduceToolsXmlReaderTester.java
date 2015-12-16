@@ -11,6 +11,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXParseException;
 
+import htsjdk.samtools.SAMProgramRecord;
+
 public class MapReduceToolsXmlReaderTester extends Tester
 {
 	/**
@@ -37,14 +39,13 @@ public class MapReduceToolsXmlReaderTester extends Tester
 	@Test
 	public void testSingleValidTool() throws IOException
 	{
-		HashMap<String, Tool> tools = reader
+		HashMap<String, SAMProgramRecord> tools = reader
 				.read(getClassLoader().getResource("tools_archive_xml_files/single_valid_tool.xml").getFile());
 
 		Assert.assertEquals(tools.containsKey("bwa"), true);
-		Assert.assertEquals(tools.get("bwa").getFileName(), "bwa");
 		Assert.assertEquals(tools.get("bwa").getId(), "bwa");
-		Assert.assertEquals(tools.get("bwa").getName(), "bwa");
-		Assert.assertEquals(tools.get("bwa").getVersion(), "0.7.12-r1039");
+		Assert.assertEquals(tools.get("bwa").getProgramName(), "bwa");
+		Assert.assertEquals(tools.get("bwa").getProgramVersion(), "0.7.12-r1039");
 	}
 
 	/**
@@ -55,20 +56,18 @@ public class MapReduceToolsXmlReaderTester extends Tester
 	@Test
 	public void testMultipleValidTools() throws IOException
 	{
-		HashMap<String, Tool> tools = reader
+		HashMap<String, SAMProgramRecord> tools = reader
 				.read(getClassLoader().getResource("tools_archive_xml_files/multiple_valid_tools.xml").getFile());
 
 		Assert.assertEquals(tools.containsKey("tool.sh"), true);
-		Assert.assertEquals(tools.get("tool.sh").getFileName(), "tool.sh");
 		Assert.assertEquals(tools.get("tool.sh").getId(), "id1");
-		Assert.assertEquals(tools.get("tool.sh").getName(), "myTool");
-		Assert.assertEquals(tools.get("tool.sh").getVersion(), "8.88");
+		Assert.assertEquals(tools.get("tool.sh").getProgramName(), "myTool");
+		Assert.assertEquals(tools.get("tool.sh").getProgramVersion(), "8.88");
 
 		Assert.assertEquals(tools.containsKey("program.exe"), true);
-		Assert.assertEquals(tools.get("program.exe").getFileName(), "program.exe");
 		Assert.assertEquals(tools.get("program.exe").getId(), "id2");
-		Assert.assertEquals(tools.get("program.exe").getName(), "another tool name");
-		Assert.assertEquals(tools.get("program.exe").getVersion(), "revision42");
+		Assert.assertEquals(tools.get("program.exe").getProgramName(), "another tool name");
+		Assert.assertEquals(tools.get("program.exe").getProgramVersion(), "revision42");
 	}
 
 	/**
