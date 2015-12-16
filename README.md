@@ -109,7 +109,7 @@ When running the job, I get the following error:
 
 __Solution:__
 
-One of the input directories you've given contains a folder. Every input folder given as parameter should ONLY contain the expected `.fq.gz` input files. Alternatively, if you want to give a single folder containing subfolders that each contain the `.fq.gz` files from a single sample that should function as input, add the following argument instead `-D mapreduce.input.fileinputformat.input.dir.recursive=true` when executing the job jar.
+One of the input directories you've given contains a folder. Every input folder given as parameter should ONLY contain files. Any `.fq.gz` file should adhere to the format as created by the Halvade Upload tool. Any non-`.tar.gz` file will be ignored, though for efficiency it is advisable to not have any other files in the input folder(s) at all. Alternatively, if you want to give a single folder containing subfolders that each contain the `.fq.gz` files from a single sample that should function as input, add the following argument instead `-D mapreduce.input.fileinputformat.input.dir.recursive=true` when executing the job jar.
 
 ---
 
