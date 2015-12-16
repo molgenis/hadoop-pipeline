@@ -10,7 +10,6 @@ import java.util.HashMap;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.http.conn.scheme.Scheme;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,17 +34,6 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<HashMap<String, SAMPro
 	 * after compiling.
 	 */
 	final URL schemaFile = getClass().getClassLoader().getResource("tools_archive_info.xsd");
-
-	/**
-	 * Create a new {@link HadoopToolsXmlReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	public HadoopToolsXmlReader(FileSystem fileSys)
-	{
-		super(fileSys);
-	}
 
 	/**
 	 * Reads and digests an XML-formatted {@link inputStream} that adheres to the format as defined in the

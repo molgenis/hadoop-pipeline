@@ -1,13 +1,10 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.fs.FileSystem;
 
 /**
  * Read a file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}.
@@ -16,27 +13,6 @@ import org.apache.hadoop.fs.FileSystem;
  */
 public abstract class HadoopFileReader<T>
 {
-	/**
-	 * Stores the {@link FileSystem} to be used for reading the file.
-	 */
-	private FileSystem fileSys;
-
-	public FileSystem getFileSys()
-	{
-		return fileSys;
-	}
-
-	/**
-	 * Create a new {@link HadoopFileReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	HadoopFileReader(FileSystem fileSys)
-	{
-		this.fileSys = requireNonNull(fileSys);
-	}
-
 	/**
 	 * Wrapper for {@link #read(InputStream)}.
 	 * 

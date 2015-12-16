@@ -3,10 +3,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopToolsXmlReader;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,7 +26,7 @@ public class HadoopToolsXmlReaderTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new HadoopToolsXmlReader(FileSystem.get(new Configuration()));
+		reader = new HadoopToolsXmlReader();
 	}
 
 	/**

@@ -2,10 +2,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopRefSeqDictReader;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,7 +25,7 @@ public class HadoopRefSeqDictReaderTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new HadoopRefSeqDictReader(FileSystem.get(new Configuration()));
+		reader = new HadoopRefSeqDictReader();
 	}
 
 	/**

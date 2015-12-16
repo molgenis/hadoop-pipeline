@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
 /**
@@ -13,17 +12,6 @@ import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
  */
 public class HadoopSamplesInfoFileReader extends HadoopFileReader<ArrayList<Sample>>
 {
-	/**
-	 * Create a new {@link HadoopSamplesInfoFileReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	public HadoopSamplesInfoFileReader(FileSystem fileSys)
-	{
-		super(fileSys);
-	}
-
 	/**
 	 * Reads an {@link InputStream} and digests each line of it into a {@link Sample}, which is added to the
 	 * {@link ArrayList} that is returned when done.

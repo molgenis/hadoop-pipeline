@@ -3,10 +3,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
-import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -22,7 +19,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new HadoopBedFormatFileReader(FileSystem.get(new Configuration()));
+		reader = new HadoopBedFormatFileReader();
 
 		// IMPORTANT:
 		// BED-format is 0-based, start is inclusive, end is exclusive!

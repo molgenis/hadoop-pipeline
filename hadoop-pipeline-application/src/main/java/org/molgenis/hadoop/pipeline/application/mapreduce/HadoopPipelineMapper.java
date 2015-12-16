@@ -3,7 +3,6 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -125,13 +124,12 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[8]));
-		ArrayList<BEDFeature> possibleGroups = new HadoopBedFormatFileReader(
-				FileSystem.get(context.getConfiguration())).read(bedFile);
+		ArrayList<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		samples = new HadoopSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
+		samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 	}
 
 	/**

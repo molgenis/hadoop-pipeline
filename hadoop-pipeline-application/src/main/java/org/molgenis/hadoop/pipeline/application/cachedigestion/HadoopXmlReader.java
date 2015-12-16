@@ -11,7 +11,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -24,17 +23,6 @@ import org.xml.sax.SAXException;
  */
 public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 {
-	/**
-	 * Create a new {@link HadoopXmlReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	HadoopXmlReader(FileSystem fileSys)
-	{
-		super(fileSys);
-	}
-
 	/**
 	 * Retrieve a {@link Schema} to be used for XML file validation.
 	 * 

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
 import htsjdk.tribble.bed.BEDCodec;
@@ -18,17 +17,6 @@ import htsjdk.tribble.bed.BEDFeature;
  */
 public class HadoopBedFormatFileReader extends HadoopFileReader<ArrayList<BEDFeature>>
 {
-	/**
-	 * Create a new {@link HadoopBedFormatFileReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	public HadoopBedFormatFileReader(FileSystem fileSys)
-	{
-		super(fileSys);
-	}
-
 	/**
 	 * Turns a BED-formatted {@link InputStream} into an {@link ArrayList}{@code <}{@link BEDFeature}{@code >}. This
 	 * BED-format that is 0-based with an exclusive end-position is converted to {@link BEDFeature}{@code s} that are

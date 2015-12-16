@@ -3,7 +3,6 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
 import htsjdk.samtools.SAMSequenceDictionary;
@@ -15,17 +14,6 @@ import htsjdk.samtools.SAMSequenceRecord;
  */
 public class HadoopRefSeqDictReader extends HadoopFileReader<SAMSequenceDictionary>
 {
-	/**
-	 * Create a new {@link HadoopRefSeqDictReader} instance.
-	 * 
-	 * @param fileSys
-	 *            {@link FileSystem}
-	 */
-	public HadoopRefSeqDictReader(FileSystem fileSys)
-	{
-		super(fileSys);
-	}
-
 	/**
 	 * Digests an alignment reference dictionary {@link InputStream} and stores the individual lines with an {@code @SQ}
 	 * tag as {@link SAMSequenceRecord}{@code s} that are added to a {@link SAMSequenceDictionary}. Each

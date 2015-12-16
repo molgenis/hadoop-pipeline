@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -57,23 +56,20 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 
 		// Adds @SQ tags data to the SAMFileHeader.
 		String alignmentReferenceDictFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[7]));
-		SAMSequenceDictionary seqDict = new HadoopRefSeqDictReader(FileSystem.get(context.getConfiguration()))
-				.read(alignmentReferenceDictFile);
+		SAMSequenceDictionary seqDict = new HadoopRefSeqDictReader().read(alignmentReferenceDictFile);
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the tools data stored in the tools archive info.xml file.
 		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
 				+ "/tools/info.xml";
-		HashMap<String, SAMProgramRecord> tools = new HadoopToolsXmlReader(
-				FileSystem.get(context.getConfiguration())).read(toolsArchiveInfoXml);
+		HashMap<String, SAMProgramRecord> tools = new HadoopToolsXmlReader().read(toolsArchiveInfoXml);
 
 		// Add the @PG tags for the tools within the tools archive that were used (define manually!!!).
 		samFileHeader.addProgramRecord(tools.get("bwa"));
 
 		// Retrieves the samples stored in the samples information file and adds them as SAMReadGroupRecords (@RG tags).
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		ArrayList<Sample> samples = new HadoopSamplesInfoFileReader(FileSystem.get(context.getConfiguration()))
-				.read(samplesInfoFile);
+		ArrayList<Sample> samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 		for (Sample sample : samples)
 		{
 			samFileHeader.addReadGroup(sample.getAsReadGroupRecord());
