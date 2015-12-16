@@ -22,7 +22,7 @@ public abstract class InputParser
 	private Path toolsArchiveLocation;
 
 	/**
-	 * Location with input files.
+	 * Directories with input files.
 	 */
 	private ArrayList<Path> inputDirs = new ArrayList<Path>();
 
@@ -77,7 +77,7 @@ public abstract class InputParser
 	private Path bedFile;
 
 	/**
-	 * The read group line that should be added to generated alignment SAM files.
+	 * The file containing information about the samples.
 	 */
 	private Path samplesInfoFile;
 
@@ -113,6 +113,8 @@ public abstract class InputParser
 
 	protected void setInputDirs(String[] inputDirs)
 	{
+		this.inputDirs.clear();
+
 		for (String inputDir : inputDirs)
 		{
 			addInputDir(inputDir);
@@ -150,10 +152,12 @@ public abstract class InputParser
 	}
 
 	/**
-	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
-	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac, .sa & .dict).
+	 * These associated files should be in the same directory as the {@code alignmentReferenceFastaFile} and should have
+	 * the same file name prefix.
 	 * 
 	 * @param alignmentReferenceFastaFile
+	 *            {@link Path} location of alignment reference fasta file.
 	 */
 	protected void setAlignmentReferenceFastaFiles(Path alignmentReferenceFastaFile)
 	{
@@ -169,10 +173,12 @@ public abstract class InputParser
 	}
 
 	/**
-	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
-	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac, .sa & .dict).
+	 * These associated files should be in the same directory as the {@code alignmentReferenceFastaFile} and should have
+	 * the same file name prefix.
 	 * 
 	 * @param alignmentReferenceFastaFile
+	 *            {@link String} location of alignment reference fasta file.
 	 */
 	protected void setAlignmentReferenceFastaFiles(String alignmentReferenceFastaFile)
 	{
@@ -252,30 +258,31 @@ public abstract class InputParser
 	}
 
 	/**
-	 * Checks whether all required input parameters are valid. If one of the required files could not be found or a
-	 * parameter is incorrect, a print statement to stderr is given with a message.
+	 * Checks whether all required input parameters are valid. For each invalid parameter, an error message is written
+	 * (unless otherwise specified by in-line code comments).
 	 * 
-	 * @return {@code true} if all parameters are correct, otherwise {@code false}
+	 * @return {@code true} if all parameters are correct, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkValidityArguments() throws IOException
 	{
-		// Is set to true if one argument is invalid.
+		// Is set to false if at least one argument is invalid.
 		boolean validInput = true;
 
-		// Checks user input files whether they are present.
+		// Validates tools archive.
 		if (!checkIfPathIsFile(toolsArchiveLocation))
 		{
 			validInput = false;
 			System.err.println("Tools archive path is invalid.");
 		}
 
-		// Checks if there are any input dirs and for each of them check if it is valid.
+		// Checks if there are any input directories given.
 		if (inputDirs.size() < 1)
 		{
 			validInput = false;
 			System.err.println("No input directories were given.");
 		}
+		// If there are any input directories, validates each input directory.
 		else
 		{
 			for (Path inputDir : inputDirs)
@@ -288,6 +295,8 @@ public abstract class InputParser
 			}
 		}
 
+		// Validates that the output directory does not exist, and if it doesn't, also checks that the parent directory
+		// does exist.
 		if (!checkIfPathParentIsDir(outputDir))
 		{
 			validInput = false;
@@ -298,12 +307,14 @@ public abstract class InputParser
 			validInput = false;
 			System.err.println("Output directory already exists.");
 		}
+
+		// Checks whether the alignment reference fasta file exists.
 		if (!checkIfPathIsFile(alignmentReferenceFastaFile))
 		{
 			validInput = false;
 			System.err.println("BWA index fasta file is not present (skipping check on aditional index files).");
 		}
-		// Only check for accompanying bwa index files if original fasta file is found.
+		// Only check for accompanying bwa index files if reference fasta file is valid.
 		else if (!checkIfPathIsFile(alignmentReferenceFastaAmbFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaAnnFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaBwtFile)
@@ -322,17 +333,22 @@ public abstract class InputParser
 							+ getAlignmentReferenceFastaSaFile() + System.lineSeparator()
 							+ getAlignmentReferenceDictFile());
 		}
+
+		// Checks validity bed file.
 		if (!checkIfPathIsFile(bedFile))
 		{
 			validInput = false;
 			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
+
+		// Checks validity samples info file.
 		if (!checkIfPathIsFile(samplesInfoFile))
 		{
 			validInput = false;
 			System.err.println("Samplesheet file containing information about the samples does not exist.");
 		}
 
+		// Returns whether input parameters were valid.
 		return validInput;
 	}
 
@@ -340,7 +356,8 @@ public abstract class InputParser
 	 * Checks if a given location is an existing file.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path} exists and is a file, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathIsFile(Path fileLocation) throws IOException
@@ -352,7 +369,8 @@ public abstract class InputParser
 	 * Checks if a given location is an existing directory.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path} exists and is a directory, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathIsDir(Path fileLocation) throws IOException
@@ -364,7 +382,8 @@ public abstract class InputParser
 	 * Checks if a given location's parent is an existing directory.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path#getParent()} exists and is a directory, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathParentIsDir(Path fileLocation) throws IOException
@@ -372,23 +391,4 @@ public abstract class InputParser
 		return fileSys.exists(fileLocation.getParent())
 				&& fileSys.getFileStatus(fileLocation.getParent()).isDirectory();
 	}
-
-	/**
-	 * Checks whether the given read group line {@link String} matches the expected pattern. This pattern is:
-	 * 
-	 * <pre>
-	 * {@code @RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+}
-	 * </pre>
-	 * 
-	 * (above is a Java compatible regex, so characters such as an extra exclusion backslash are present)
-	 * 
-	 * @param readGroupLine
-	 * @return boolean
-	 */
-	// private boolean checkReadGroupLineFormat(String readGroupLine)
-	// {
-	// String pattern =
-	// "@RG\\tID:[0-9]+\\tPL:(?i:(capillary|ls454|illumina|solid|helicos|iontorrent|ont|pacbio))\\tLB:[0-9]+_[A-Z]+[0-9]+_[0-9]+_[A-Z]+_L[0-9]+\\tSM:[a-zA-Z0-9]+";
-	// return readGroupLine.matches(pattern);
-	// }
 }

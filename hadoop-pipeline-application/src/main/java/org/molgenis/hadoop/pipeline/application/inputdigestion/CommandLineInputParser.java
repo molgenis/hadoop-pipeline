@@ -32,7 +32,9 @@ public class CommandLineInputParser extends InputParser
 	 * Initiates parsing of the command line.
 	 * 
 	 * @param fileSys
+	 *            {@link FileSystem} current {@link FileSystem}.
 	 * @param args
+	 *            {@link String}{@code []} user input.
 	 * @throws ParseException
 	 * @throws IOException
 	 */
@@ -44,6 +46,8 @@ public class CommandLineInputParser extends InputParser
 		createOptions();
 		retrieveParser(args);
 		digestCommandLine();
+
+		// If the user input arguments aren't all valid, a ParseException is thrown together with the help message.
 		if (!checkValidityArguments())
 		{
 			printHelpMessage();
@@ -77,16 +81,22 @@ public class CommandLineInputParser extends InputParser
 				.create("t"));
 
 		options.addOption(OptionBuilder.withArgName("input").hasArg().isRequired(true)
-				.withDescription("Directory containing the input files.").create("i"));
+				.withDescription(
+						"Directory containing the input files. It is possible to use multiple -i arguments to add more"
+								+ " than 1 input directory or use subdirectories by adding"
+								+ " \"-D mapreduce.input.fileinputformat.input.dir.recursive=true\"")
+				.create("i"));
 
 		options.addOption(OptionBuilder.withArgName("output").hasArg().isRequired(true)
 				.withDescription(
-						"Directory in which the results should be stored. Note that the directory itself should not exist, though the parent directory should.")
+						"Directory in which the results should be stored. Note that the directory itself should not exist,"
+								+ " though the parent directory should.")
 				.create("o"));
 
 		options.addOption(OptionBuilder.withArgName("reference").hasArg().isRequired(true)
 				.withDescription(
-						"Burrows-Wheeler Alignment reference fasta file. Other BWA index file should be present as well using the same prefix.")
+						"Burrows-Wheeler Alignment reference fasta file. Other BWA index file should be present as well"
+								+ " using the same prefix.")
 				.create("r"));
 
 		options.addOption(OptionBuilder.withArgName("bed").hasArg().isRequired(true)
@@ -95,11 +105,11 @@ public class CommandLineInputParser extends InputParser
 				.create("b"));
 
 		options.addOption(OptionBuilder.withArgName("samples").hasArg().isRequired(true)
-				.withDescription("the samplesheet file containing information about the samples that are being used."
-						+ " The file may contain data about other samples as well (only needed data will be used)."
-						+ " This file should be a csv file that is comma-seperated and contains a header line with"
-						+ " at least the following fields; sequencer, sequencingStartDate, run, flowcell & lane."
-						+ " The order of these fields does not matter and they are case-insensitive.")
+				.withDescription(
+						"The samplesheet file containing information about (only) the samples that are being used. This file"
+								+ " should be a csv file that is comma-seperated and contains a header line with at least"
+								+ " the following fields; externalSampleID, sequencer, sequencingStartDate, run, flowcell & lane."
+								+ " The order of these fields does not matter and they are case-insensitive.")
 				.create("s"));
 	}
 
@@ -107,6 +117,7 @@ public class CommandLineInputParser extends InputParser
 	 * Creates a parser for command line parsing.
 	 * 
 	 * @param args
+	 *            {@link String}{@code []}
 	 * @throws ParseException
 	 */
 	private void retrieveParser(String[] args) throws ParseException

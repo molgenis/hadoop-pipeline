@@ -9,11 +9,11 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HdfsFileMetaDataHandler;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceBedFormatFileReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceSamplesInfoFileReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
@@ -125,13 +125,13 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[8]));
-		ArrayList<BEDFeature> possibleGroups = new MapReduceBedFormatFileReader(
+		ArrayList<BEDFeature> possibleGroups = new HadoopBedFormatFileReader(
 				FileSystem.get(context.getConfiguration())).read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
+		samples = new HadoopSamplesInfoFileReader(FileSystem.get(context.getConfiguration())).read(samplesInfoFile);
 	}
 
 	/**
@@ -142,9 +142,9 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	 * @return {@code true} if input split is a file with a name that starts with "halvade_" and ends with ".fq.gz",
 	 *         false if it has a file extension different to ".fq.gz".
 	 * @throws IOException
-	 *             if the given input split is a ".fq.gz" file but does not start with "halvade_0" (probably a wrongly
-	 *             uploaded file and throws an {@link Exception) as safety measure as the to-be-digested could be
-	 *             invalid.
+	 *             if the given input split is a ".fq.gz" file but does not start with "halvade_", throws an
+	 *             {@link Exception) as safety measure as the to-be-digested could be invalid due to being wrongly
+	 *             uploaded (or some other reason that should result in the file not being processed).
 	 */
 	private boolean validateInputFileType(String inputSplitPath) throws IOException
 	{
@@ -169,13 +169,15 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	}
 
 	/**
-	 * Returns a {@link Sample} that belongs to the current input split.
+	 * Returns the first found {@link Sample} that matches to the current input split (only one match should be present
+	 * in {@code this.samples}).
 	 * 
 	 * @param inputSplitPath
 	 *            {@link String}
-	 * @return {@link Sample}
+	 * @return {@link Sample} the {@link Sample} that matches with the {@code inputSplitPath}.
 	 * @throws IOException
-	 *             if no {@link Sample} could be found within {@code this.samples} that matches the current input split.
+	 *             if no {@link Sample} could be found within {@code this.samples} that matches the
+	 *             {@code inputSplitPath}.
 	 */
 	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
 	{

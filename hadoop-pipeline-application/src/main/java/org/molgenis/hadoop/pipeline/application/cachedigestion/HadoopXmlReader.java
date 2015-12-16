@@ -1,6 +1,5 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -23,15 +22,15 @@ import org.xml.sax.SAXException;
  * 
  * @param <T>
  */
-public abstract class MapReduceXmlReader<T> extends MapReduceFileReader<T>
+public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 {
 	/**
-	 * Create a new {@link MapReduceXmlReader} instance.
+	 * Create a new {@link HadoopXmlReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	MapReduceXmlReader(FileSystem fileSys)
+	HadoopXmlReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}
@@ -40,7 +39,7 @@ public abstract class MapReduceXmlReader<T> extends MapReduceFileReader<T>
 	 * Retrieve a {@link Schema} to be used for XML file validation.
 	 * 
 	 * @param schemaFile
-	 *            {@link File}
+	 *            {@link URL}
 	 * @return {@link Schema}
 	 * @throws SAXException
 	 */

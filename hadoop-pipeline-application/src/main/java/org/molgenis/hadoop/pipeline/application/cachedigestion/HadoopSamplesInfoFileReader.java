@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,19 +7,29 @@ import java.util.ArrayList;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
-public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayList<Sample>>
+/**
+ * Reads a samples information file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}
+ * .
+ */
+public class HadoopSamplesInfoFileReader extends HadoopFileReader<ArrayList<Sample>>
 {
 	/**
-	 * Create a new {@link MapReduceSamplesInfoFileReader} instance.
+	 * Create a new {@link HadoopSamplesInfoFileReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	public MapReduceSamplesInfoFileReader(FileSystem fileSys)
+	public HadoopSamplesInfoFileReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}
 
+	/**
+	 * Reads an {@link InputStream} and digests each line of it into a {@link Sample}, which is added to the
+	 * {@link ArrayList} that is returned when done.
+	 * 
+	 * @return {@link ArrayList}{@code <}{@link Sample}{@code >}
+	 */
 	@Override
 	public ArrayList<Sample> read(InputStream inputStream) throws IOException
 	{
@@ -133,5 +143,4 @@ public class MapReduceSamplesInfoFileReader extends MapReduceFileReader<ArrayLis
 
 		return samples;
 	}
-
 }

@@ -108,5 +108,4 @@ public class PipeRunner implements Runnable
 			IOUtils.closeQuietly(outputStream);
 		}
 	}
-
 }

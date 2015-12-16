@@ -1,7 +1,7 @@
 /**
  * The Javadoc from Oracle's org.xml.saxErrorHandler was used to create the Javadoc present in this file.
  */
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.ErrorHandler;
@@ -38,5 +38,4 @@ public class XmlReaderStrictErrorHandler implements ErrorHandler
 	{
 		throw exception;
 	}
-
 }

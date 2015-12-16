@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.net.URI;
 
@@ -10,10 +10,11 @@ import org.apache.hadoop.fs.Path;
 public abstract class HdfsFileMetaDataHandler
 {
 	/**
-	 * Retrieves the file name without the path before it.
+	 * Retrieves the file name (so without the complete path to the file).
 	 * 
 	 * @param filePath
-	 * @return {@link String}
+	 *            {@link String} complete path to a file.
+	 * @return {@link String} the file name.
 	 */
 	public static String retrieveFileName(String filePath)
 	{
@@ -22,10 +23,11 @@ public abstract class HdfsFileMetaDataHandler
 	}
 
 	/**
-	 * Retrieves the file name without the path before it.
+	 * Wrapper for {@link HdfsFileMetaDataHandler#retrieveFileName(String)}.
 	 * 
 	 * @param filePath
-	 * @return {@link String}
+	 *            {@link String} complete path to a file.
+	 * @return {@link String} the file name.
 	 */
 	public static String retrieveFileName(URI filePath)
 	{
@@ -33,10 +35,11 @@ public abstract class HdfsFileMetaDataHandler
 	}
 
 	/**
-	 * Retrieves the file name without the path before it.
+	 * Wrapper for {@link HdfsFileMetaDataHandler#retrieveFileName(String)}.
 	 * 
 	 * @param filePath
-	 * @return {@link String}
+	 *            {@link String} complete path to a file.
+	 * @return {@link String} the file name.
 	 */
 	public static String retrieveFileName(Path filePath)
 	{

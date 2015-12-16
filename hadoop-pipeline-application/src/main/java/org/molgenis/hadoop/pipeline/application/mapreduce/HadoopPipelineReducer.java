@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.Logger;
@@ -40,7 +39,7 @@ public class HadoopPipelineReducer
 	}
 
 	/**
-	 * Function run on a single key with an {@link Iterable} containing the values belonging to that key.
+	 * Function run on a key with an {@link Iterable} containing the values belonging to that key.
 	 */
 	@Override
 	protected void reduce(BedFeatureWritable key, Iterable<SAMRecordWritable> values, Context context)
@@ -67,14 +66,13 @@ public class HadoopPipelineReducer
 	}
 
 	/**
-	 * Generates a {@link String} containing the subdirectory path/part of the filename to where the output is written
-	 * to (inside the output directory). Default {@link OutputFormat}{@code s} might add additional text to this path
-	 * such as adding something like {@code -m-<mapper number>} or {@code -r-<reducer number>} or similar after each
-	 * file.
+	 * Generates a {@link String} containing the start of the file name prefix to where the output should be written to
+	 * (inside the output directory). The actual output file name might slightly differ however (for example by having
+	 * something like {@code -r-<reducer number>} appended after the given name).
 	 * 
 	 * @param bedFeature
-	 *            {@link BEDFeature}
-	 * @return {@link String}
+	 *            {@link BEDFeature} used to define the file name.
+	 * @return {@link String} file name to be used.
 	 */
 	private String generateOutputFileName(BEDFeature bedFeature)
 	{

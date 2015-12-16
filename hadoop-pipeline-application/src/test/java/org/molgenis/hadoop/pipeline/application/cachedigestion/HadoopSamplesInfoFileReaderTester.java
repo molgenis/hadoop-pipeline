@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,28 +6,31 @@ import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopToolsXmlReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class MapReduceSamplesInfoFileReaderTester extends Tester
+public class HadoopSamplesInfoFileReaderTester extends Tester
 {
 	/**
 	 * The reader that is being tested.
 	 */
-	private MapReduceSamplesInfoFileReader reader;
+	private HadoopSamplesInfoFileReader reader;
 
 	ArrayList<Sample> expectedValidSamples;
 
 	/**
-	 * Creates a {@link MapReduceToolsXmlReader} needed for testing.
+	 * Creates a {@link HadoopToolsXmlReader} needed for testing.
 	 * 
 	 * @throws IOException
 	 */
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new MapReduceSamplesInfoFileReader(FileSystem.get(new Configuration()));
+		reader = new HadoopSamplesInfoFileReader(FileSystem.get(new Configuration()));
 
 		expectedValidSamples = new ArrayList<Sample>();
 		expectedValidSamples.add(new Sample("sample1", "SN163", 150616, 648, "AHKYLMADXX", 1));

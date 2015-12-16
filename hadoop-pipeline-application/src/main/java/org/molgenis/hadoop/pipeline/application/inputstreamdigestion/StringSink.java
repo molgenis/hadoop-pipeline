@@ -15,11 +15,7 @@ public abstract class StringSink extends Sink<String>
 	/**
 	 * Digests the {@code inputStream}. For each line present in the {@code inputStream},
 	 * {@link #digestStreamItem(String)} is called. If a custom {@link #digestHeader(String)} is implemented, the first
-	 * line will be treated differently. Otherwise, the first line will be treated like the rest,
-	 * 
-	 * @param inputStream
-	 *            {@link InputStream}
-	 * @throws IOException
+	 * line will be treated differently. Otherwise, the first line will be treated like the other lines.
 	 */
 	@Override
 	public void handleInputStream(InputStream inputStream) throws IOException
@@ -42,10 +38,13 @@ public abstract class StringSink extends Sink<String>
 	}
 
 	/**
-	 * Digests a single line from the {@link InputStream}. Be sure to create a custom {@code @Override} implementation!
+	 * Digests a single line from the {@link InputStream}. Be sure to create a custom {@code @Override} implementation
+	 * that defines what should be done for each line (excluding the first line if a custom
+	 * {@link #digestHeader(String)} is implemented)!
 	 * 
 	 * @param item
-	 *            {@link String}
+	 *            {@link String} a line from the {@link InputStream} digested by {@link #handleInputStream(InputStream)}
+	 *            .
 	 */
 	@Override
 	protected abstract void digestStreamItem(String item) throws IOException;
@@ -56,7 +55,8 @@ public abstract class StringSink extends Sink<String>
 	 * created, uses this implementation for the first line instead.
 	 * 
 	 * @param item
-	 *            {@link String}
+	 *            {@link String} the first line from the {@link InputStream} digested by
+	 *            {@link #handleInputStream(InputStream)}.
 	 * @throws IOException
 	 */
 	protected void digestHeader(String item) throws IOException

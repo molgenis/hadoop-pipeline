@@ -39,6 +39,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 * Default main class that calls {@link ToolRunner} to execute Hadoop MapReduce.
 	 * 
 	 * @param args
+	 *            {@link String}{@code []} user input.
 	 */
 	public static void main(String[] args)
 	{
@@ -72,6 +73,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 * in the mapper/reducer, to use the positions as defined within this function!
 	 * 
 	 * @param args
+	 *            {@link String}{@code []} (part of the) user input.
 	 * @throws IOException
 	 * @throws ParseException
 	 * @throws InterruptedException
@@ -79,19 +81,26 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 */
 	public int run(String[] args) throws IOException, ParseException, ClassNotFoundException, InterruptedException
 	{
-		// Writes Configuration properties to logger.debug that can (and have) cause(d) out of memory/timeout errors.
+		// Writes Configuration properties to logger.debug that can (and have) cause(d) out of memory/timeout errors or
+		// other problems.
 		logger.debug("mapreduce.map.memory.mb: " + getConf().get("mapreduce.map.memory.mb"));
 		logger.debug("mapreduce.map.java.opts: " + getConf().get("mapreduce.map.java.opts"));
 		logger.debug("mapreduce.task.timeout: " + getConf().get("mapreduce.task.timeout"));
+		logger.debug("mapreduce.input.fileinputformat.input.dir.recursive: "
+				+ getConf().get("mapreduce.input.fileinputformat.input.dir.recursive"));
 
 		FileSystem fileSys = FileSystem.get(getConf());
 
 		// Digests application-specific command line arguments. Throws an Exception if the input arguments are invalid.
 		CommandLineInputParser parser = new CommandLineInputParser(fileSys, args);
 
+		// Generates the job and basic settings.
 		Job job = Job.getInstance(getConf());
 		job.setJarByClass(HadoopPipelineApplication.class);
 		job.setJobName("HadoopPipelineApplication");
+
+		// Adds distributed cache files. If any adjustments are made, a manual validation of the Mapper, Reducer &
+		// OutputFormat are required!!!
 
 		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
 		job.addCacheArchive(parser.getToolsArchiveLocation().toUri());
@@ -129,7 +138,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);
 
-		// Defines the custom output writing.
+		// Defines the custom output format.
 		MultipleOutputs.addNamedOutput(job, "output", BamOutputFormat.class, NullWritable.class,
 				SAMRecordWritable.class);
 

@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,20 +14,17 @@ import htsjdk.tribble.bed.BEDCodec.StartOffset;
 import htsjdk.tribble.bed.BEDFeature;
 
 /**
- * Read a bed-formatted file that was added to {@link org.apache.hadoop.mapreduce.Job} using
- * {@link org.apache.hadoop.mapreduce.Job#addCacheArchive(java.net.URI)} or
- * {@link org.apache.hadoop.mapreduce.Job#addCacheFile(java.net.URI)} from within a
- * {@link org.apache.hadoop.mapreduce.Mapper} or {@link org.apache.hadoop.mapreduce.Reducer}.
+ * Read a bed-formatted file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}.
  */
-public class MapReduceBedFormatFileReader extends MapReduceFileReader<ArrayList<BEDFeature>>
+public class HadoopBedFormatFileReader extends HadoopFileReader<ArrayList<BEDFeature>>
 {
 	/**
-	 * Create a new {@link MapReduceBedFormatFileReader} instance.
+	 * Create a new {@link HadoopBedFormatFileReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	public MapReduceBedFormatFileReader(FileSystem fileSys)
+	public HadoopBedFormatFileReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}
@@ -102,6 +99,5 @@ public class MapReduceBedFormatFileReader extends MapReduceFileReader<ArrayList<
 				return c;
 			}
 		});
-
 	}
 }

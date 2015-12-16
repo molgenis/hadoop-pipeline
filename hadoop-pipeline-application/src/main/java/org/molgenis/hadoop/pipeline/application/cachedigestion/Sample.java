@@ -1,9 +1,14 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import htsjdk.samtools.SAMReadGroupRecord;
 
+/**
+ * Information about the data that represents a single {@link Sample}.
+ */
 public class Sample
 {
+	// Retrieved sample information fields that can be used to find which data belongs to which sample and to add
+	// identifying information to this data within the application/created output.
 	private String externalSampleId;
 	private String sequencer;
 	private int sequencingStartDate;
@@ -54,8 +59,7 @@ public class Sample
 	}
 
 	/**
-	 * A String that is conform to what is expected as {@code @RG} within a sam file or by a bwa binary tool as input
-	 * with the {@code -R} argument.
+	 * A String that is conform to what is expected as {@code @RG} within a sam file.
 	 * 
 	 * @return {@link String}
 	 */
@@ -67,7 +71,8 @@ public class Sample
 
 	/**
 	 * A wrapper of {@link #getReadGroupLine()} where an extra {@code \} is added to the {@code \t} turning it into
-	 * {@code \\t} allowing it to be used safely as argument within a {@link ProcessBuilder}.
+	 * {@code \\t}. This allows it to be used safely within the application as argument within a {@link ProcessBuilder}
+	 * (for example with the {@code -R} argument for a bwa binary executable).
 	 * 
 	 * @return {@link String}
 	 */
@@ -158,5 +163,4 @@ public class Sample
 		if (sequencingStartDate != other.sequencingStartDate) return false;
 		return true;
 	}
-
 }

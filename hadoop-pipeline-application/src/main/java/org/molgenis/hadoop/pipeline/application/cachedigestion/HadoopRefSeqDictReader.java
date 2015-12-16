@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,20 +10,18 @@ import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
 
 /**
- * Read an alignment reference dictionary file that was added to {@link org.apache.hadoop.mapreduce.Job} using
- * {@link org.apache.hadoop.mapreduce.Job#addCacheArchive(java.net.URI)} or
- * {@link org.apache.hadoop.mapreduce.Job#addCacheFile(java.net.URI)} from within a
- * {@link org.apache.hadoop.mapreduce.Mapper} or {@link org.apache.hadoop.mapreduce.Reducer}.
+ * Reads an alignment reference dictionary file that was added to the distributed cache of a
+ * {@link org.apache.hadoop.mapreduce.Job}.
  */
-public class MapReduceRefSeqDictReader extends MapReduceFileReader<SAMSequenceDictionary>
+public class HadoopRefSeqDictReader extends HadoopFileReader<SAMSequenceDictionary>
 {
 	/**
-	 * Create a new {@link MapReduceRefSeqDictReader} instance.
+	 * Create a new {@link HadoopRefSeqDictReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	public MapReduceRefSeqDictReader(FileSystem fileSys)
+	public HadoopRefSeqDictReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}
@@ -35,7 +33,8 @@ public class MapReduceRefSeqDictReader extends MapReduceFileReader<SAMSequenceDi
 	 * omitted. If a single {@code @SQ} line has no name or length field (or the given length is lower than 1), an
 	 * {@link IOException} is thrown.
 	 * 
-	 * @return {@link SAMSequenceDictionary}
+	 * @return {@link SAMSequenceDictionary} containing {@link SAMSequenceRecord}{@code s}, each having a value for
+	 *         {@link SAMSequenceRecord#getSequenceName()} and {@link SAMSequenceRecord#getSequenceLength()}.
 	 */
 	@Override
 	public SAMSequenceDictionary read(InputStream inputStream) throws IOException

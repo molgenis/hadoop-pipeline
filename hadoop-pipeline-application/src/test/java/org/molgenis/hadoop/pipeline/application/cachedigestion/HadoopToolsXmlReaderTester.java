@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopToolsXmlReader;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -13,22 +14,22 @@ import org.xml.sax.SAXParseException;
 
 import htsjdk.samtools.SAMProgramRecord;
 
-public class MapReduceToolsXmlReaderTester extends Tester
+public class HadoopToolsXmlReaderTester extends Tester
 {
 	/**
 	 * The reader that is being tested.
 	 */
-	private MapReduceToolsXmlReader reader;
+	private HadoopToolsXmlReader reader;
 
 	/**
-	 * Creates a {@link MapReduceToolsXmlReader} needed for testing.
+	 * Creates a {@link HadoopToolsXmlReader} needed for testing.
 	 * 
 	 * @throws IOException
 	 */
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new MapReduceToolsXmlReader(FileSystem.get(new Configuration()));
+		reader = new HadoopToolsXmlReader(FileSystem.get(new Configuration()));
 	}
 
 	/**

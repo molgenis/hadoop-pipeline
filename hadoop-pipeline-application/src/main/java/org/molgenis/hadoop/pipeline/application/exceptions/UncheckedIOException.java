@@ -20,8 +20,8 @@ public class UncheckedIOException extends RuntimeException
 	 * throwables.
 	 *
 	 * @param cause
-	 *            the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
-	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
+	 *            {@link Throwable} the cause (which is saved for later retrieval by the {@link #getCause()} method). (A
+	 *            <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
 	public UncheckedIOException(Throwable cause)
 	{

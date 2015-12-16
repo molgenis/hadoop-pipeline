@@ -1,10 +1,11 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopRefSeqDictReader;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -12,22 +13,22 @@ import org.testng.annotations.Test;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
 
-public class MapReduceRefSeqDictReaderTester extends Tester
+public class HadoopRefSeqDictReaderTester extends Tester
 {
 	/**
 	 * The reader that is being tested.
 	 */
-	private MapReduceRefSeqDictReader reader;
+	private HadoopRefSeqDictReader reader;
 
 	/**
-	 * Creates a {@link MapReduceRefSeqDictReader} needed for testing.
+	 * Creates a {@link HadoopRefSeqDictReader} needed for testing.
 	 * 
 	 * @throws IOException
 	 */
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new MapReduceRefSeqDictReader(FileSystem.get(new Configuration()));
+		reader = new HadoopRefSeqDictReader(FileSystem.get(new Configuration()));
 	}
 
 	/**

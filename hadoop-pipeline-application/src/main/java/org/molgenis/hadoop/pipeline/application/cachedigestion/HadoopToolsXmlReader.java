@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import htsjdk.samtools.SAMProgramRecord;
  * Digests an XML {@link InputStream} formatted according to the {@link Schema} from
  * {@code src/main/resources/tools_archive_info.xsd} (and within the jar after compiling).
  */
-public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, SAMProgramRecord>>
+public class HadoopToolsXmlReader extends HadoopXmlReader<HashMap<String, SAMProgramRecord>>
 {
 	/**
 	 * Stores the attribute that stores the file name in each tool node within the XML file.
@@ -37,12 +37,12 @@ public class MapReduceToolsXmlReader extends MapReduceXmlReader<HashMap<String, 
 	final URL schemaFile = getClass().getClassLoader().getResource("tools_archive_info.xsd");
 
 	/**
-	 * Create a new {@link MapReduceToolsXmlReader} instance.
+	 * Create a new {@link HadoopToolsXmlReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	public MapReduceToolsXmlReader(FileSystem fileSys)
+	public HadoopToolsXmlReader(FileSystem fileSys)
 	{
 		super(fileSys);
 	}

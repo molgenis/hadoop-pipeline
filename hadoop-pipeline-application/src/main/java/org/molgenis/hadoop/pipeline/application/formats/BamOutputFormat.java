@@ -9,11 +9,11 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.HdfsFileMetaDataHandler;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceRefSeqDictReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceSamplesInfoFileReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceToolsXmlReader;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.Sample;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopRefSeqDictReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopToolsXmlReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HdfsFileMetaDataHandler;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.seqdoop.hadoop_bam.BAMOutputFormat;
 import org.seqdoop.hadoop_bam.KeyIgnoringBAMOutputFormat;
 import org.seqdoop.hadoop_bam.KeyIgnoringBAMRecordWriter;
@@ -40,10 +40,14 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 	}
 
 	/**
-	 * Retrieves the {@link SAMFileHeader} using the cache files.
+	 * Retrieves the {@link SAMFileHeader} using the cache files. When adjusting the Mapper/Reducer, a manual validation
+	 * of this method is required to see if it is still up-to-date!!!
 	 * 
 	 * IMPORTANT: Be sure the exact same array order is used as defined in {@link HadoopPipelineApplication}!
 	 * 
+	 * @param context
+	 *            {@link TaskAttemptContext}
+	 * @return {@link SAMFileHeader}
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
@@ -53,29 +57,29 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 
 		// Adds @SQ tags data to the SAMFileHeader.
 		String alignmentReferenceDictFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[7]));
-		SAMSequenceDictionary seqDict = new MapReduceRefSeqDictReader(FileSystem.get(context.getConfiguration()))
+		SAMSequenceDictionary seqDict = new HadoopRefSeqDictReader(FileSystem.get(context.getConfiguration()))
 				.read(alignmentReferenceDictFile);
-		System.out.println(seqDict.getSequence(0));
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the tools data stored in the tools archive info.xml file.
 		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
 				+ "/tools/info.xml";
-		HashMap<String, SAMProgramRecord> tools = new MapReduceToolsXmlReader(
+		HashMap<String, SAMProgramRecord> tools = new HadoopToolsXmlReader(
 				FileSystem.get(context.getConfiguration())).read(toolsArchiveInfoXml);
 
-		// Add the @PG tags for the tools within the tools archive that were used.
+		// Add the @PG tags for the tools within the tools archive that were used (define manually!!!).
 		samFileHeader.addProgramRecord(tools.get("bwa"));
 
 		// Retrieves the samples stored in the samples information file and adds them as SAMReadGroupRecords (@RG tags).
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		ArrayList<Sample> samples = new MapReduceSamplesInfoFileReader(FileSystem.get(context.getConfiguration()))
+		ArrayList<Sample> samples = new HadoopSamplesInfoFileReader(FileSystem.get(context.getConfiguration()))
 				.read(samplesInfoFile);
 		for (Sample sample : samples)
 		{
 			samFileHeader.addReadGroup(sample.getAsReadGroupRecord());
 		}
 
+		// Returns the completed SAMFileHeader.
 		return samFileHeader;
 	}
 }

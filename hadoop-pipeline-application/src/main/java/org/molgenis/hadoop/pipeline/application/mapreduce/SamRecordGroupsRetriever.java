@@ -24,6 +24,8 @@ public class SamRecordGroupsRetriever
 	 * {@link BEDFeature}{@code s} a specific {@link SAMRecord} belongs to.
 	 * 
 	 * @param groups
+	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >} groups to be used for matching with a
+	 *            {@link SAMRecord}.
 	 */
 	SamRecordGroupsRetriever(ArrayList<BEDFeature> groups)
 	{
@@ -36,8 +38,9 @@ public class SamRecordGroupsRetriever
 	 * {@link SAMRecord}.
 	 * 
 	 * @param record
-	 *            {@link SAMRecord}
-	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 *            {@link SAMRecord} to be used to find the {@link BEDFeature}{@code s} that are within range of it.
+	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >} the {@link BEDFeature}{@code s} within range of the
+	 *         given {@link SAMRecord}.
 	 */
 	ArrayList<BEDFeature> retrieveGroupsWithinRange(SAMRecord record)
 	{

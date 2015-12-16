@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion.MapReduceBedFormatFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -95,14 +95,14 @@ public abstract class Tester
 	 * bed-formatted file with an exclusive end to 1-based {@link BEDFeature} with an inclusive end is implemented by
 	 * adding 1 to the {@link BEDFeature#getStart()}. For more information about the difference between a bed-formatted
 	 * file and a {@link BEDFeature}, please view the Javadoc from
-	 * {@link MapReduceBedFormatFileReader#read(java.io.File)}.
+	 * {@link HadoopBedFormatFileReader#read(java.io.File)}.
 	 * 
 	 * @param fileName
 	 *            {@link String}
 	 * @return {@code byte[]}
 	 * @throws IOException
 	 * 
-	 * @see {@link MapReduceBedFormatFileReader#read(java.io.File)}
+	 * @see {@link HadoopBedFormatFileReader#read(java.io.File)}
 	 */
 	protected ArrayList<BEDFeature> readBedFile(String fileName) throws IOException
 	{

@@ -20,8 +20,6 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	/**
 	 * Digests a SAM-formatted {@link InputStream}. For each {@link SAMRecord} present in the {@link InputStream},
 	 * {@link #digestStreamItem(SAMRecord)} is called.
-	 * 
-	 * @throws IOException
 	 */
 	@Override
 	public void handleInputStream(InputStream inputStream) throws IOException
@@ -46,11 +44,10 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 
 	/**
 	 * Digests a single {@link SAMRecord} from the {@link InputStream}. Be sure to create a custom {@code @Override}
-	 * implementation!
+	 * implementation that defines what should be done with each {@link SAMRecord}!
 	 * 
 	 * @param item
 	 *            {@link SAMRecord}
-	 * @throws IOException
 	 */
 	@Override
 	protected abstract void digestStreamItem(SAMRecord item) throws IOException;

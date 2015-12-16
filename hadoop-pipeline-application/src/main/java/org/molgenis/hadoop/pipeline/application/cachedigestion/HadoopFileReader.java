@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import static java.util.Objects.requireNonNull;
 
@@ -10,14 +10,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 
 /**
- * Read a file that was added to {@link org.apache.hadoop.mapreduce.Job} using
- * {@link org.apache.hadoop.mapreduce.Job#addCacheArchive(java.net.URI)} or
- * {@link org.apache.hadoop.mapreduce.Job#addCacheFile(java.net.URI)} from within a
- * {@link org.apache.hadoop.mapreduce.Mapper} or {@link org.apache.hadoop.mapreduce.Reducer}.
+ * Read a file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}.
  * 
  * @param <T>
  */
-public abstract class MapReduceFileReader<T>
+public abstract class HadoopFileReader<T>
 {
 	/**
 	 * Stores the {@link FileSystem} to be used for reading the file.
@@ -30,12 +27,12 @@ public abstract class MapReduceFileReader<T>
 	}
 
 	/**
-	 * Create a new {@link MapReduceFileReader} instance.
+	 * Create a new {@link HadoopFileReader} instance.
 	 * 
 	 * @param fileSys
 	 *            {@link FileSystem}
 	 */
-	MapReduceFileReader(FileSystem fileSys)
+	HadoopFileReader(FileSystem fileSys)
 	{
 		this.fileSys = requireNonNull(fileSys);
 	}

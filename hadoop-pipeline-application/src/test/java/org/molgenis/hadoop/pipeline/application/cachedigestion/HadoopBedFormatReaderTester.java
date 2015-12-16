@@ -1,4 +1,4 @@
-package org.molgenis.hadoop.pipeline.application.mapreduce.cachedigestion;
+package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,22 +6,23 @@ import java.util.ArrayList;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
 
-public class MapReduceBedFormatReaderTester extends BedFeatureTester
+public class HadoopBedFormatReaderTester extends BedFeatureTester
 {
-	private MapReduceBedFormatFileReader reader;
+	private HadoopBedFormatFileReader reader;
 	private ArrayList<BEDFeature> expectedValidBed;
 	private ArrayList<BEDFeature> expectedBedNoEndValueForFourthLine;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		reader = new MapReduceBedFormatFileReader(FileSystem.get(new Configuration()));
+		reader = new HadoopBedFormatFileReader(FileSystem.get(new Configuration()));
 
 		// IMPORTANT:
 		// BED-format is 0-based, start is inclusive, end is exclusive!

@@ -51,5 +51,4 @@ public class PipeOutHandler<T> implements Runnable
 			throw new UncheckedIOException(e);
 		}
 	}
-
 }

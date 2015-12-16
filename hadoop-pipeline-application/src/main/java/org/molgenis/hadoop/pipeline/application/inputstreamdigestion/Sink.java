@@ -3,11 +3,8 @@ package org.molgenis.hadoop.pipeline.application.inputstreamdigestion;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-
 /**
- * Abstract class describing required methods for a {@link PipeRunner}{@code 's} last {@link Process}{@code '}
- * {@link InputStream} digestion.
+ * Abstract class for the digestion of an {@link InputStream}, one {@code <T>} at a time.
  * 
  * @param <T>
  */

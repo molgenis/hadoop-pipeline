@@ -26,7 +26,7 @@
  * were made with the author name "dimamayteacher", this name was filled in
  * as copyright owner.
  * 
- * Furthermore, comments (line 106-109) have been added to the method
+ * Furthermore, comments (line 110-113) have been added to the method
  * getProgress().
  * 
  * Regarding code adjustments, the getCurrentKey() returned a NullWritable
