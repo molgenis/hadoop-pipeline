@@ -79,6 +79,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 * @throws InterruptedException
 	 * @throws ClassNotFoundException
 	 */
+	@Override
 	public int run(String[] args) throws IOException, ParseException, ClassNotFoundException, InterruptedException
 	{
 		// Writes Configuration properties to logger.debug that can (and have) cause(d) out of memory/timeout errors or
