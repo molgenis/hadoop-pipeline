@@ -73,14 +73,45 @@ The `info.xml` file contains information of all tools present in the archive and
 		yarn jar HalvadeUploaderWithLibs.jar -1 reads1.fastq.gz -2 reads2.fastq.gz -O /path/to/hdfs/output/folder/ -size <size in mb>
 	
 	* The last folder of the output path should use the following format (so the files in this sample can be identified using the accompanying samplesheet csv file during the MapReduce job): 
-		
+	
 			<sequencingStartDate>_<sequencer>_<run>_<flowcell>_<lane>/
-		
+	
+	* When only processing a single sample, simply be sure that the last folder adheres to this structure (and the samplesheet csv file used during the Hadoop job contains information about this sample only).
+	
+	* When using multiple samples, use the Hadoop upload tool for each set of sample read files. Each of these samples should have their own output directory. An example of creating this data with 3 samples could look something like:
+	
+			yarn jar HalvadeUploaderWithLibs.jar -1 local/path/to/150616_SN163_0648_AHKYLMADXX_L1/reads1.fastq.gz -2 local/path/to/150616_SN163_0648_AHKYLMADXX_L1/reads2.fastq.gz -O /path/to/hdfs/output/folder/150616_SN163_0648_AHKYLMADXX_L1 -size 124
+			yarn jar HalvadeUploaderWithLibs.jar -1 local/path/to/150616_SN163_0648_AHKYLMADXX_L2/reads1.fastq.gz -2 local/path/to/150616_SN163_0648_AHKYLMADXX_L2/reads2.fastq.gz -O /path/to/hdfs/output/folder/150616_SN163_0648_AHKYLMADXX_L2 -size 124
+			yarn jar HalvadeUploaderWithLibs.jar -1 local/path/to/150702_SN163_0649_BHJYNKADXX_L5/reads1.fastq.gz -2 local/path/to/150702_SN163_0649_BHJYNKADXX_L5/reads2.fastq.gz -O /path/to/hdfs/output/folder/150702_SN163_0649_BHJYNKADXX_L5 -size 124
+	
+	In this case, the 3 different samples represent sequenced data from 3 different lanes. to view a samplesheet.csv that would adhere to the above files, please review the file `hadoop-pipeline/hadoop-pipeline-application/src/test/resources/samplesheets/valid_minimal.csv` which can be found in the [externally downloadable files archive](https://molgenis26.target.rug.nl/downloads/hadoop/). Do note that the used samplesheet should only contain the lines for the actual used samples within the job. While this might seem cumbersome, this this removes the necessity to go through all reads to look which samples are present before actually writing the results back to HDFS.
+	
 	* To make proper use of data locality, be sure that a single created file is smaller than the HDFS block size. You can check the set HDFS block size of a given file using `hdfs dfs -stat %o /hdfs/path/to/file`.
 	* See [https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing](https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing) for more information about the halvade upload tool.
 2. Run the HadoopPipelineApplication:
 	
 		yarn jar HadoopPipelineApplicationWithDependencies.jar -t /hdfs/path/to/tools.tar.gz -i /hdfs/path/to/input/folder/ -o /hdfs/path/to/output/folder/ -r /hdfs/path/to/bwa/reference/data/file.fa(sta) -s /hdfs/path/to/samples/info/file.csv -b /hdfs/path/to/groups/file.bed
+	
+	* When using multiple samples, a `-i /hdfs/path/to/input/folder` can be given for each input folder (sample). Alternatively, `-D mapreduce.input.fileinputformat.input.dir.recursive=true` can be given to use all input files in the given input folder and the subfolders. Do note that when using recursiveness input, the given input folder should have a structure similar to:
+	
+			/hdfs/input/folder/
+				|- 150616_SN163_0648_AHKYLMADXX_L1/
+					|- halvade_0_0.fq.gz
+					|- halvade_0_1.fq.gz
+					|- halvade_1_0.fq.gz
+					|- etc.
+				|- 150616_SN163_0648_AHKYLMADXX_L2/
+					|- halvade_0_0.fq.gz
+					|- halvade_0_1.fq.gz
+					|- halvade_1_0.fq.gz
+					|- etc.
+				|- 150702_SN163_0649_BHJYNKADXX_L5/
+					|- halvade_0_0.fq.gz
+					|- halvade_0_1.fq.gz
+					|- halvade_1_0.fq.gz
+					|- etc.
+	
+	While the samplesheet belonging to this data can be stored in the main `/hdfs/input/folder/`, it is suggested to store it elsewhere as initially it will be treated as an input file and only during the Mapper phase itself it will be ignored. When using a separate `-i` argument for each input path, this does not matter at all as the shared parent directory isn't processed itself. An added bonus to using separate `-i` arguments is that each input sample can have a completely different path. The only thing that matters is that the final directory which stores the actual files uploaded using the halvade upload tool is coherent to the expected format so it can be used to retrieve which sample is stored in that directory (together with a samplesheet csv file).
 	
 3. Download the results:
 	
