@@ -46,20 +46,23 @@ public class SamRecordGroupsRetriever
 	{
 		ArrayList<BEDFeature> matchingGroups = new ArrayList<BEDFeature>();
 
+		// Retrieves the groups that match the contig of the SAMRecord.
+		ArrayList<BEDFeature> contigGroups = getGroupsOfContig(record);
+
 		// Starting from the first BEDFeature which has it's end value higher or equal to the SAMRecord start value,
 		// continues through the remaining BEDFeatures until a BEDFeature is found which start value is higher than the
 		// SAMRecord end value or if no remaining BEDFeatures are present. If the search for the first BEDFeature
 		// returned null, skips looking for any other BEDFeatures that might match and simply returns and empty
 		// ArrayList.
-		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, groups);
+		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, contigGroups);
 
 		// Checks if a single match was found. Skips further looking.
 		if (firstGroupIndex != null)
 		{
 			// Goes through the following BEDFeatures looking for additional matches.
-			for (int i = firstGroupIndex; i < groups.size(); i++)
+			for (int i = firstGroupIndex; i < contigGroups.size(); i++)
 			{
-				BEDFeature group = groups.get(i);
+				BEDFeature group = contigGroups.get(i);
 				if (group.getStart() > record.getEnd())
 				{
 					break;
@@ -68,6 +71,29 @@ public class SamRecordGroupsRetriever
 			}
 		}
 		return matchingGroups;
+	}
+
+	/**
+	 * Filters the {@code groups} containing all possible groups for groups that match the contig of the given
+	 * {@link SAMRecord}.
+	 * 
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >} containing groups where the
+	 *         {@link BEDFeature#getContig()} matches the {@link SAMRecord#getContig()}.
+	 */
+	private ArrayList<BEDFeature> getGroupsOfContig(SAMRecord record)
+	{
+		ArrayList<BEDFeature> contigGroups = new ArrayList<BEDFeature>();
+
+		for (BEDFeature group : groups)
+		{
+			if (record.getContig().equals(group.getContig()))
+			{
+				contigGroups.add(group);
+			}
+		}
+		return contigGroups;
 	}
 
 	/**

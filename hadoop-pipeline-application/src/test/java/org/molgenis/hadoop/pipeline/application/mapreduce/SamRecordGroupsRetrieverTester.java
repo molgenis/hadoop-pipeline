@@ -20,22 +20,35 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 {
 	SamRecordGroupsRetriever grouper;
 	SAMRecord record;
+	SAMRecord record2;
 	ArrayList<BEDFeature> inputGroups;
 	ArrayList<BEDFeature> expectedOutputGroups;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		// record = readSamFile("mini_halvade_0_0-bwa_results.sam").get(0);
 		SAMFileHeader header = new SAMFileHeader();
 		SAMSequenceDictionary seqDict = new SAMSequenceDictionary();
 		seqDict.addSequence(new SAMSequenceRecord("1:1-301", 300));
 		header.setSequenceDictionary(seqDict);
 		record = new SAMRecord(header);
 
-		// Sets a record with range 100-200 (inclusive start/end).
+		// Sets a record on contig 1 with range 100-200 (inclusive start/end).
+		record.setReferenceName("1");
 		record.setAlignmentStart(100);
 		record.setCigarString("101M");
+
+		SAMFileHeader header2 = new SAMFileHeader();
+		SAMSequenceDictionary seqDict2 = new SAMSequenceDictionary();
+		seqDict2.addSequence(new SAMSequenceRecord("1:1-301", 300));
+		seqDict2.addSequence(new SAMSequenceRecord("2:1-301", 300));
+		header2.setSequenceDictionary(seqDict2);
+		record2 = new SAMRecord(header2);
+
+		// Sets a record on contig 2 with range 100-200 (inclusive start/end).
+		record2.setReferenceName("2");
+		record2.setAlignmentStart(100);
+		record2.setCigarString("101M");
 	}
 
 	@BeforeMethod
@@ -369,6 +382,76 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 
 		// Executes and runs comparison.
 		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+	}
+
+	@Test
+	public void testWithMultipleBedsEvenArrayLengthTwoOnSameContigOfWhichAllInRange()
+	{
+		// Prepares/executes bed with record matching.
+		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
+		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
+		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
+		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
+		grouper = new SamRecordGroupsRetriever(inputGroups);
+
+		// Sublist of input should be returned.
+		expectedOutputGroups.addAll(inputGroups.subList(6, 8));
+
+		// Executes and runs comparison.
+		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+	}
+
+	@Test
+	public void testWithMultipleBedsUnevenArrayLengthThreeOnSameContigOfWhichAllInRange()
+	{
+		// Prepares/executes bed with record matching.
+		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
+		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
+		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
+		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
+		inputGroups.add(new SimpleBEDFeature(171, 190, "2"));
+		grouper = new SamRecordGroupsRetriever(inputGroups);
+
+		// Sublist of input should be returned.
+		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
+
+		// Executes and runs comparison.
+		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+	}
+
+	@Test
+	public void testWithMultipleBedsEvenArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
+	{
+		// Prepares/executes bed with record matching.
+		for (int i = 1; i < 3; i++)
+		{
+			String iStr = Integer.toString(i);
+
+			inputGroups.add(new SimpleBEDFeature(61, 90, iStr));
+			inputGroups.add(new SimpleBEDFeature(91, 120, iStr));
+			inputGroups.add(new SimpleBEDFeature(121, 150, iStr));
+			inputGroups.add(new SimpleBEDFeature(151, 180, iStr));
+			inputGroups.add(new SimpleBEDFeature(181, 210, iStr));
+			inputGroups.add(new SimpleBEDFeature(211, 240, iStr));
+		}
+		grouper = new SamRecordGroupsRetriever(inputGroups);
+
+		// Sublist of input should be returned.
+		expectedOutputGroups.addAll(inputGroups.subList(7, 11));
+
+		// Executes and runs comparison.
+		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 }
