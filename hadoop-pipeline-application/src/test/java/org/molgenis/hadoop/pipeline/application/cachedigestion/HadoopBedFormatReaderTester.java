@@ -10,10 +10,24 @@ import org.testng.annotations.Test;
 import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
 
+/**
+ * Tester for {@link HadoopBedFormatFileReader}.
+ */
 public class HadoopBedFormatReaderTester extends BedFeatureTester
 {
+	/**
+	 * Reader to be tested.
+	 */
 	private HadoopBedFormatFileReader reader;
+
+	/**
+	 * Expected bed valid results.
+	 */
 	private ArrayList<BEDFeature> expectedValidBed;
+
+	/**
+	 * Expected valid results when the 4th line does not have an end value.
+	 */
 	private ArrayList<BEDFeature> expectedBedNoEndValueForFourthLine;
 
 	@BeforeClass
@@ -53,6 +67,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
 	}
 
+	/**
+	 * Test when an unsorted BED-formatted file is loaded.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testUnsortedBedFile() throws IOException
 	{
@@ -64,6 +83,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
 	}
 
+	/**
+	 * Test when a BED-formatted file is loaded that has a tab after the end value on the 4th line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testBedFileWithLineEndingWithATab() throws IOException
 	{
@@ -75,6 +99,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
 	}
 
+	/**
+	 * Test a BED-formatted file that has no end value on the 4th line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testBedFileWithLineWithoutEndValue() throws IOException
 	{
@@ -86,6 +115,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedBedNoEndValueForFourthLine);
 	}
 
+	/**
+	 * Test a BED-formatted file that has no end value on the 4th line, but still has the tab at the end.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testBedFileWithLineWithoutEndValueThatEndsWithATab() throws IOException
 	{
@@ -97,6 +131,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedBedNoEndValueForFourthLine);
 	}
 
+	/**
+	 * Tests a BED-formatted file that only has the contig field on the 4th line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = IOException.class)
 	public void testBedFileWithLineThatOnlyHasContig() throws IOException
 	{
@@ -104,6 +143,12 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		reader.read(getClassLoader().getResource("bed_files/line_contig_normal-end.bed").getFile());
 	}
 
+	/**
+	 * Tests a BED-formatted file that only has the contig field on the 4th line but still has the tab at the end of the
+	 * line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test(expectedExceptions = IOException.class)
 	public void testBedFileWithLineThatOnlyHasContigAndEndsWithATab() throws IOException
 	{
@@ -111,6 +156,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		reader.read(getClassLoader().getResource("bed_files/line_contig_tab-end.bed").getFile());
 	}
 
+	/**
+	 * Tests a BED-formatted file that contains an additional field on the 4th line.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testBedFileWithLineThatAlsoContainsNameField() throws IOException
 	{
@@ -122,6 +172,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
 	}
 
+	/**
+	 * Tests a BED-formatted file that contains and additional field on the 4th line and also has a tab after that.
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void testBedFileWithLineThatAlsoContainsNameFieldAndEndsWithATab() throws IOException
 	{

@@ -7,6 +7,10 @@ import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 
+/**
+ * {@link ReduceDriver} that also creates symlinks in the current working directory to the tmp folder storing the MRUnit
+ * testing distributed cache.
+ */
 @SuppressWarnings("deprecation")
 public class FileCacheSymlinkReduceDriver<K1, V1, K2, V2> extends ReduceDriver<K1, V1, K2, V2>
 {

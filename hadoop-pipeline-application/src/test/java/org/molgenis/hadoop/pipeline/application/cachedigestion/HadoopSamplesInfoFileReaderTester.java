@@ -8,6 +8,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/**
+ * Tester for {@link HadoopSamplesInfoFileReader}.
+ */
 public class HadoopSamplesInfoFileReaderTester extends Tester
 {
 	/**
@@ -15,6 +18,9 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	 */
 	private HadoopSamplesInfoFileReader reader;
 
+	/**
+	 * The expected valid samples.
+	 */
 	ArrayList<Sample> expectedValidSamples;
 
 	/**

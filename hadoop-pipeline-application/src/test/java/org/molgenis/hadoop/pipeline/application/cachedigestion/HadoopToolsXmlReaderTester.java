@@ -11,6 +11,9 @@ import org.xml.sax.SAXParseException;
 
 import htsjdk.samtools.SAMProgramRecord;
 
+/**
+ * Tester for the {@link HadoopXmlReader}.
+ */
 public class HadoopToolsXmlReaderTester extends Tester
 {
 	/**

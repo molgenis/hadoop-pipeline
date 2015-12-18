@@ -30,7 +30,7 @@ public abstract class WorkDirSymlinkManager
 	 * Creates a symlink in the working directory to each {@link Path} present in the array. Calls
 	 * {@link #createSymlinkInCurrentWorkDirToPath(Path)} for each {@link Path} in {@code tmpFiles}.
 	 * 
-	 * @param tmpFiles
+	 * @param targetFiles
 	 *            {@link Path}{@code []}
 	 * @throws IOException
 	 */
@@ -48,7 +48,7 @@ public abstract class WorkDirSymlinkManager
 	 * with that name, a {@link SymlinkAlreadyExistsException} is thrown. If a file already exists with that name (but
 	 * wasn't created using this class) or another {@link IOException} would be thrown, the default behavior is used.
 	 * 
-	 * @param tmpFile
+	 * @param targetFile
 	 *            {@link Path}
 	 * @throws IOException
 	 */

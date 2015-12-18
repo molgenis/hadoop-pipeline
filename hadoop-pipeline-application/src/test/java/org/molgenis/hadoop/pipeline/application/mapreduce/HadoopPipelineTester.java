@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.hadoop.mrunit.TestDriver;
-import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.testng.annotations.BeforeClass;
@@ -17,6 +16,9 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
 
+/**
+ * Contains general code of Mapper/Reducer testing.
+ */
 public class HadoopPipelineTester extends Tester
 {
 	/**
@@ -41,14 +43,6 @@ public class HadoopPipelineTester extends Tester
 	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L5.sam}
 	 */
 	private ArrayList<SAMRecord> bwaResultsL5;
-
-	/**
-	 * Expected results bwa can be generated with a terminal using:
-	 * {@code bwa mem -p -M -R "@RG\tID:5\tPL:illumina\tLB:150702_SN163_0649_BHJYNKADXX_L5\tSM:sample3"
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline/hadoop-pipeline-application/target/test-classes/input_fastq/mini_halvade_0_0.fq.gz}
-	 */
-	private ArrayList<SAMRecord> bwaResultsWithReadGroupLine;
 
 	/**
 	 * {@link SAMFileHeader} for storing sequence information so that {@link SAMRecord#getSAMString()} can be used
@@ -76,17 +70,18 @@ public class HadoopPipelineTester extends Tester
 		return bwaResultsL5;
 	}
 
+	/**
+	 * Returns an {@link ArrayList} that stores the data from both {@link #getBwaResultsL2()} and
+	 * {@link #getBwaResultsL5()}.
+	 * 
+	 * @return {@link ArrayList}{@code <}{@link SAMRecord}{@code >}
+	 */
 	ArrayList<SAMRecord> getAllBwaResults()
 	{
 		ArrayList<SAMRecord> allResults = new ArrayList<SAMRecord>();
 		allResults.addAll(bwaResultsL2);
 		allResults.addAll(bwaResultsL5);
 		return allResults;
-	}
-
-	ArrayList<SAMRecord> getBwaResultsWithReadGroupLine()
-	{
-		return bwaResultsWithReadGroupLine;
 	}
 
 	SAMFileHeader getSamFileHeader()
@@ -120,7 +115,7 @@ public class HadoopPipelineTester extends Tester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		addCacheToMapDriver();
+		addCacheToDriver();
 	}
 
 	/**
@@ -128,7 +123,7 @@ public class HadoopPipelineTester extends Tester
 	 * 
 	 * @throws URISyntaxException
 	 */
-	private void addCacheToMapDriver() throws URISyntaxException
+	private void addCacheToDriver() throws URISyntaxException
 	{
 		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
 		driver.addCacheArchive(getClassLoader().getResource("tools.tar.gz").toURI());

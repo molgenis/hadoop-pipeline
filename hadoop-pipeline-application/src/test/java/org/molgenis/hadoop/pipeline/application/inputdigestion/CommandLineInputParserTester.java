@@ -14,6 +14,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * Tester for {@link CommandLineInputParser}.
+ */
 public class CommandLineInputParserTester extends Tester
 {
 	FileSystem fileSys;

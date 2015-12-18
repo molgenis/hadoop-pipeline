@@ -23,6 +23,9 @@ import org.testng.annotations.Test;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.tribble.bed.BEDFeature;
 
+/**
+ * Tester for {@link HadoopPipelineMapper}.
+ */
 public class HadoopPipelineMapperTester extends HadoopPipelineTester
 {
 	/**

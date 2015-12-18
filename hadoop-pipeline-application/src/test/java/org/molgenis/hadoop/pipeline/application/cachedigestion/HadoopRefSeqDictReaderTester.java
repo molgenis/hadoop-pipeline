@@ -10,6 +10,9 @@ import org.testng.annotations.Test;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
 
+/**
+ * Tester for {@link HadoopRefSeqDictReader}.
+ */
 public class HadoopRefSeqDictReaderTester extends Tester
 {
 	/**
@@ -108,5 +111,4 @@ public class HadoopRefSeqDictReaderTester extends Tester
 					expectedSeqDict.getSequence(i).getSequenceLength());
 		}
 	}
-
 }

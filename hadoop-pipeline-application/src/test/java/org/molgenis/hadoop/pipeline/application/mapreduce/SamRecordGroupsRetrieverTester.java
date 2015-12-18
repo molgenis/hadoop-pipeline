@@ -16,12 +16,34 @@ import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.SimpleBEDFeature;
 
+/**
+ * Tester for {@link SamRecordGroupsRetriever}.
+ */
 public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 {
+	/**
+	 * Grouper to be tested.
+	 */
 	SamRecordGroupsRetriever grouper;
+
+	/**
+	 * A test {@link SAMRecord}.
+	 */
 	SAMRecord record;
+
+	/**
+	 * Another test {@link SAMRecord}.
+	 */
 	SAMRecord record2;
+
+	/**
+	 * {@link ArrayList} with {@link BEDFeature}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
+	 */
 	ArrayList<BEDFeature> inputGroups;
+
+	/**
+	 * Stores the expected output.
+	 */
 	ArrayList<BEDFeature> expectedOutputGroups;
 
 	@BeforeClass
@@ -67,6 +89,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		grouper = null;
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that is just before the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithSingleBedJustBeforeRecord()
 	{
@@ -81,6 +106,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that is matches exactly with the start of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithSingleBedJustOnStartOfRecord()
 	{
@@ -96,6 +124,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that is just after the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithSingleBedJustAfterRecord()
 	{
@@ -110,6 +141,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that matches exactly with the end of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithSingleBedJustOnEndOfRecord()
 	{
@@ -125,6 +159,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that is in the middle of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithSingleBedWithinRecord()
 	{
@@ -140,6 +177,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with a {@link BEDFeature} that overlaps the {@link SAMRecord} completely.
+	 */
 	@Test
 	public void testWithSingleBedCompletelyOverlappingRecord()
 	{
@@ -155,6 +195,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are in range of the
+	 * {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllWithinRange()
 	{
@@ -174,6 +218,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are in range of
+	 * the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllWithinRange()
 	{
@@ -194,6 +242,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllBeforeRecord()
 	{
@@ -212,6 +264,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllBeforeRecord()
 	{
@@ -231,6 +287,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllAfterRecord()
 	{
@@ -249,6 +309,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllAfterRecord()
 	{
@@ -268,6 +332,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some are on range of
+	 * the {@link SAMRecord} while others are before or after it.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthSomeBeforeInAfterRecord()
 	{
@@ -287,6 +355,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some are on range of
+	 * the {@link SAMRecord} while others are before or after it.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthSomeBeforeInAfterRecord()
 	{
@@ -307,6 +379,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the first
+	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthOnlyFirstWithinRecord()
 	{
@@ -326,6 +402,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the first
+	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthOnlyFirstWithinRecord()
 	{
@@ -346,6 +426,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the last
+	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthOnlyLastWithinRecord()
 	{
@@ -365,6 +449,10 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the last
+	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthOnlyLastWithinRecord()
 	{
@@ -385,6 +473,39 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
+	 * match a different contig (so should not match even though the positions might be within range). There are an odd
+	 * number of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
+	 */
+	@Test
+	public void testWithMultipleBedsOddArrayLengthThreeOnSameContigOfWhichAllInRange()
+	{
+		// Prepares/executes bed with record matching.
+		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
+		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
+		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
+		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
+		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
+		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
+		inputGroups.add(new SimpleBEDFeature(171, 190, "2"));
+		grouper = new SamRecordGroupsRetriever(inputGroups);
+
+		// Sublist of input should be returned.
+		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
+
+		// Executes and runs comparison.
+		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
+	 * match a different contig (so should not match even though the positions might be within range). There are an even
+	 * number of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthTwoOnSameContigOfWhichAllInRange()
 	{
@@ -407,19 +528,26 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
+	 * match a different contig (so should not match even though the positions might be within range). There are an odd
+	 * number of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the
+	 * {@link SAMRecord}, while others are before or after it.
+	 */
 	@Test
-	public void testWithMultipleBedsUnevenArrayLengthThreeOnSameContigOfWhichAllInRange()
+	public void testWithMultipleBedsOddArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
-		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
-		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "2"));
+		for (int i = 1; i < 3; i++)
+		{
+			String iStr = Integer.toString(i);
+
+			inputGroups.add(new SimpleBEDFeature(10, 60, iStr));
+			inputGroups.add(new SimpleBEDFeature(61, 110, iStr));
+			inputGroups.add(new SimpleBEDFeature(111, 160, iStr));
+			inputGroups.add(new SimpleBEDFeature(161, 210, iStr));
+			inputGroups.add(new SimpleBEDFeature(211, 260, iStr));
+		}
 		grouper = new SamRecordGroupsRetriever(inputGroups);
 
 		// Sublist of input should be returned.
@@ -430,6 +558,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
+	/**
+	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
+	 * match a different contig (so should not match even though the positions might be within range). There are an even
+	 * number of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the
+	 * {@link SAMRecord}, while others are before or after it.
+	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
 	{

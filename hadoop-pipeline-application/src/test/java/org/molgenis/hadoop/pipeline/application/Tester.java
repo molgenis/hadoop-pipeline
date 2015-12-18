@@ -60,11 +60,11 @@ public abstract class Tester
 	}
 
 	/**
-	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link SAMRecord}{@code >}.
+	 * Reads in the defined file as an {@link ArrayList}{@code <}{@link SAMRecord}{@code >}.
 	 * 
 	 * @param fileName
 	 *            {@link String}
-	 * @return {@code byte[]}
+	 * @return {@link ArrayList}{@code <}{@link SAMRecord}{@code >}
 	 * @throws IOException
 	 */
 	protected ArrayList<SAMRecord> readSamFile(String fileName) throws IOException
@@ -91,15 +91,14 @@ public abstract class Tester
 	}
 
 	/**
-	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link SAMRecord}{@code >}. Conversion from 0-based
+	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link BEDFeature}{@code >}. Conversion from 0-based
 	 * bed-formatted file with an exclusive end to 1-based {@link BEDFeature} with an inclusive end is implemented by
 	 * adding 1 to the {@link BEDFeature#getStart()}. For more information about the difference between a bed-formatted
-	 * file and a {@link BEDFeature}, please view the Javadoc from
-	 * {@link HadoopBedFormatFileReader#read(java.io.File)}.
+	 * file and a {@link BEDFeature}, please view the Javadoc from {@link HadoopBedFormatFileReader#read(java.io.File)}.
 	 * 
 	 * @param fileName
 	 *            {@link String}
-	 * @return {@code byte[]}
+	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
 	 * @throws IOException
 	 * 
 	 * @see {@link HadoopBedFormatFileReader#read(java.io.File)}

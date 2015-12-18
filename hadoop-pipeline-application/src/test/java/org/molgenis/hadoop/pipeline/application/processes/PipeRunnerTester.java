@@ -16,10 +16,24 @@ import org.testng.annotations.Test;
 
 import htsjdk.samtools.SAMRecord;
 
+/**
+ * Tester for {@link PipeRunnerTester}.
+ */
 public class PipeRunnerTester extends Tester
 {
+	/**
+	 * Writer to catch logger output with.
+	 */
 	StringWriter stringWriter;
+
+	/**
+	 * Location to the bwa binary tool.
+	 */
 	String bwaTool;
+
+	/**
+	 * Location to the reference data needed by the bwa binary.
+	 */
 	String referenceData;
 
 	/**
@@ -171,7 +185,7 @@ public class PipeRunnerTester extends Tester
 
 		// Writes the records to stdout that align to the first 100 nucleotides of the reference genome.
 		// IMPORTANT: This is a 1-based leftmost mapping position!
-		System.out.println("### StringSink bwa output ###");
+		System.out.println("### StringSink bwa output (manual validation required) ###");
 		for (String line : lines)
 		{
 			// Skips lines starting with an "@".
@@ -228,7 +242,7 @@ public class PipeRunnerTester extends Tester
 		};
 
 		// Runs the pipeline.
-		System.out.println("### SamRecordSink bwa output ###");
+		System.out.println("### SamRecordSink bwa output (manual validation required) ###");
 		PipeRunner.startPipeline(inputData, sink,
 				new ProcessBuilder(getClassLoader().getResource("tools/bwa").getPath(), "mem", "-p", "-M",
 						getClassLoader().getResource("reference_data/chr1_20000000-21000000.fa").getPath(), "-")

@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 /**
  * Test to validate whether the {@link WorkDirSymlinkManager} works correctly.
  */
-public class WorkDirSymLinkManagerTester extends Tester
+public class WorkDirSymlinkManagerTester extends Tester
 {
 	private FileSystem fileSys;
 	private Path bwaRefFasta;

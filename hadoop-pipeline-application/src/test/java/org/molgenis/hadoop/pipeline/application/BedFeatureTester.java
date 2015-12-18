@@ -6,8 +6,20 @@ import org.testng.Assert;
 
 import htsjdk.tribble.bed.BEDFeature;
 
+/**
+ * Superclass for testers using BED files containing generic code.
+ */
 public class BedFeatureTester extends Tester
 {
+	/**
+	 * Compares two {@link ArrayList}{@code s} with {@link BEDFeature}{@code s} using
+	 * {@link Assert#assertEquals(Object[], Object[])}.
+	 * 
+	 * @param actualBed
+	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 * @param expectedBed
+	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 */
 	protected void compareActualBedWithExpectedBed(ArrayList<BEDFeature> actualBed, ArrayList<BEDFeature> expectedBed)
 	{
 		// Compares expected data with actual data.
