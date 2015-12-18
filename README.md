@@ -23,7 +23,8 @@ Before using the tool, be sure that the following has been done:
 
 * A `.bed` file containing the grouping regions for the SAM records after BWA alignment. If a record fits into multiple groups, an individual record will be added to all the groups it has a (partial) overlap in. For more information about the bed-format, see [this](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) page.
 
-	* IMPORTANT: The bed file shoulde be UTF-8 compliant!
+	* Be sure that the given contig name, start position and end position are valid compared to the reference sequence data.
+	* The bed file should be UTF-8 compliant.
 
 * A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file by the job (this to reduce application running time).
 
