@@ -588,4 +588,26 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
+
+	/**
+	 * Test for when all {@link BEDFeature}{@code s} are from a different contig than the {@link SAMRecord}.
+	 */
+	@Test
+	public void testWithMultipleBedsEvenArrayLengthNoneOnSameContig()
+	{
+		// Prepares/executes bed with record matching.
+		inputGroups.add(new SimpleBEDFeature(211, 220, "1"));
+		inputGroups.add(new SimpleBEDFeature(221, 230, "1"));
+		inputGroups.add(new SimpleBEDFeature(231, 240, "1"));
+		inputGroups.add(new SimpleBEDFeature(241, 250, "1"));
+		inputGroups.add(new SimpleBEDFeature(251, 260, "1"));
+		inputGroups.add(new SimpleBEDFeature(261, 270, "1"));
+		grouper = new SamRecordGroupsRetriever(inputGroups);
+
+		// Expected output should be empty, so no additional adjustments are made to the expected output.
+
+		// Executes and runs comparison.
+		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+	}
 }

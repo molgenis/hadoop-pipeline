@@ -40,7 +40,7 @@ public class SamRecordGroupsRetriever
 	 * @param record
 	 *            {@link SAMRecord} to be used to find the {@link BEDFeature}{@code s} that are within range of it.
 	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >} the {@link BEDFeature}{@code s} within range of the
-	 *         given {@link SAMRecord}.
+	 *         given {@link SAMRecord}. If no matches were found, returns an empty {@link ArrayList}.
 	 */
 	ArrayList<BEDFeature> retrieveGroupsWithinRange(SAMRecord record)
 	{
@@ -48,6 +48,12 @@ public class SamRecordGroupsRetriever
 
 		// Retrieves the groups that match the contig of the SAMRecord.
 		ArrayList<BEDFeature> contigGroups = getGroupsOfContig(record);
+
+		// If there are no groups for the contig of the SAMRecord, immediately returns the empty ArrayList.
+		if (contigGroups.size() == 0)
+		{
+			return contigGroups;
+		}
 
 		// Starting from the first BEDFeature which has it's end value higher or equal to the SAMRecord start value,
 		// continues through the remaining BEDFeatures until a BEDFeature is found which start value is higher than the
