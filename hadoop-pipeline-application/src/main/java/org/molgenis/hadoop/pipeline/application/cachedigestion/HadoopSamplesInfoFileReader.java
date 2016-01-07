@@ -3,6 +3,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 
@@ -10,19 +11,19 @@ import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
  * Reads a samples information file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}
  * .
  */
-public class HadoopSamplesInfoFileReader extends HadoopFileReader<ArrayList<Sample>>
+public class HadoopSamplesInfoFileReader extends HadoopFileReader<List<Sample>>
 {
 	/**
 	 * Reads an {@link InputStream} and digests each line of it into a {@link Sample}, which is added to the
-	 * {@link ArrayList} that is returned when done.
+	 * {@link List} that is returned when done.
 	 * 
-	 * @return {@link ArrayList}{@code <}{@link Sample}{@code >}
+	 * @return {@link List}{@code <}{@link Sample}{@code >}
 	 */
 	@Override
-	public ArrayList<Sample> read(InputStream inputStream) throws IOException
+	public List<Sample> read(InputStream inputStream) throws IOException
 	{
 		// Stores the samples.
-		final ArrayList<Sample> samples = new ArrayList<Sample>();
+		final List<Sample> samples = new ArrayList<Sample>();
 
 		StringSink sink = new StringSink()
 		{
@@ -72,7 +73,7 @@ public class HadoopSamplesInfoFileReader extends HadoopFileReader<ArrayList<Samp
 					String flowcell = lineSplits[flowcellPos];
 					int lane = Integer.parseInt(lineSplits[lanePos]);
 
-					// Adds the data to the ArrayList.
+					// Adds the data to the List.
 					samples.add(new Sample(externalSampleId, sequencer, sequencingStartDate, run, flowcell, lane));
 				}
 				catch (NumberFormatException | ArrayIndexOutOfBoundsException e)

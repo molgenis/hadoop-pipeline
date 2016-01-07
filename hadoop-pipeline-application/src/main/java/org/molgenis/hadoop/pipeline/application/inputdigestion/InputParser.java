@@ -2,6 +2,7 @@ package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -24,7 +25,7 @@ public abstract class InputParser
 	/**
 	 * Directories with input files.
 	 */
-	private ArrayList<Path> inputDirs = new ArrayList<Path>();
+	private List<Path> inputDirs = new ArrayList<Path>();
 
 	/**
 	 * Location results can be written to.
@@ -101,12 +102,12 @@ public abstract class InputParser
 		this.toolsArchiveLocation = new Path(toolsArchiveLocation);
 	}
 
-	public ArrayList<Path> getInputDirs()
+	public List<Path> getInputDirs()
 	{
 		return inputDirs;
 	}
 
-	protected void setInputDirs(ArrayList<Path> inputDirs)
+	protected void setInputDirs(List<Path> inputDirs)
 	{
 		this.inputDirs = inputDirs;
 	}

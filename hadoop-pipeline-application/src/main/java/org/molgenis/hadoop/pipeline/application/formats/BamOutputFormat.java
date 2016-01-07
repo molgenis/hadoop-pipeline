@@ -1,8 +1,8 @@
 package org.molgenis.hadoop.pipeline.application.formats;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -69,7 +69,7 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 
 		// Retrieves the samples stored in the samples information file and adds them as SAMReadGroupRecords (@RG tags).
 		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
-		ArrayList<Sample> samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
+		List<Sample> samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 		for (Sample sample : samples)
 		{
 			samFileHeader.addReadGroup(sample.getAsReadGroupRecord());

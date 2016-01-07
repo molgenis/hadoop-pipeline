@@ -1,7 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
@@ -49,7 +49,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	/**
 	 * The possible samples an input split can belong to.
 	 */
-	private ArrayList<Sample> samples;
+	private List<Sample> samples;
 
 	/**
 	 * Function called at the beginning of a task.
@@ -86,7 +86,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 						samWritable.set(item);
 
 						// Retrieves all keys for the value.
-						ArrayList<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
+						List<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
 
 						// Writes a key-value pair for each key found that matched with the SAMRecord alignment
 						// position.
@@ -124,7 +124,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[8]));
-		ArrayList<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
+		List<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.

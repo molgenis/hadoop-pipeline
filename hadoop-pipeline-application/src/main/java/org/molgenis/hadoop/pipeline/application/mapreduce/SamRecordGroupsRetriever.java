@@ -17,39 +17,38 @@ public class SamRecordGroupsRetriever
 	/**
 	 * Stores the groups to which a {@link SAMRecord} can match to.
 	 */
-	ArrayList<BEDFeature> groups;
+	List<BEDFeature> groups;
 
 	/**
 	 * Create a new instance using a set of {@link BEDFeature}{@code s} which can be used for retrieving the
 	 * {@link BEDFeature}{@code s} a specific {@link SAMRecord} belongs to.
 	 * 
 	 * @param groups
-	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >} groups to be used for matching with a
+	 *            {@link List}{@code <}{@link BEDFeature}{@code >} groups to be used for matching with a
 	 *            {@link SAMRecord}.
 	 */
-	SamRecordGroupsRetriever(ArrayList<BEDFeature> groups)
+	SamRecordGroupsRetriever(List<BEDFeature> groups)
 	{
 		this.groups = requireNonNull(groups);
 	}
 
 	/**
-	 * Returns an {@link ArrayList} containing all {@ BEDFeature}{@code s} which range match with the given
-	 * {@link SAMRecord}. These also include {@link BEDFeature}{@code s} which partially match with the given
-	 * {@link SAMRecord}.
+	 * Returns a {@link List} containing all {@ BEDFeature}{@code s} which range match with the given {@link SAMRecord}.
+	 * These also include {@link BEDFeature}{@code s} which partially match with the given {@link SAMRecord}.
 	 * 
 	 * @param record
 	 *            {@link SAMRecord} to be used to find the {@link BEDFeature}{@code s} that are within range of it.
-	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >} the {@link BEDFeature}{@code s} within range of the
-	 *         given {@link SAMRecord}. If no matches were found, returns an empty {@link ArrayList}.
+	 * @return {@link List}{@code <}{@link BEDFeature}{@code >} the {@link BEDFeature}{@code s} within range of the
+	 *         given {@link SAMRecord}. If no matches were found, returns an empty {@link List}.
 	 */
-	ArrayList<BEDFeature> retrieveGroupsWithinRange(SAMRecord record)
+	List<BEDFeature> retrieveGroupsWithinRange(SAMRecord record)
 	{
-		ArrayList<BEDFeature> matchingGroups = new ArrayList<BEDFeature>();
+		List<BEDFeature> matchingGroups = new ArrayList<BEDFeature>();
 
 		// Retrieves the groups that match the contig of the SAMRecord.
-		ArrayList<BEDFeature> contigGroups = getGroupsOfContig(record);
+		List<BEDFeature> contigGroups = getGroupsOfContig(record);
 
-		// If there are no groups for the contig of the SAMRecord, immediately returns the empty ArrayList.
+		// If there are no groups for the contig of the SAMRecord, immediately returns the empty List.
 		if (contigGroups.size() == 0)
 		{
 			return contigGroups;
@@ -59,7 +58,7 @@ public class SamRecordGroupsRetriever
 		// continues through the remaining BEDFeatures until a BEDFeature is found which start value is higher than the
 		// SAMRecord end value or if no remaining BEDFeatures are present. If the search for the first BEDFeature
 		// returned null, skips looking for any other BEDFeatures that might match and simply returns and empty
-		// ArrayList.
+		// List.
 		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, contigGroups);
 
 		// Checks if a single match was found. Skips further looking.
@@ -85,12 +84,12 @@ public class SamRecordGroupsRetriever
 	 * 
 	 * @param record
 	 *            {@link SAMRecord}
-	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >} containing groups where the
+	 * @return {@link List}{@code <}{@link BEDFeature}{@code >} containing groups where the
 	 *         {@link BEDFeature#getContig()} matches the {@link SAMRecord#getContig()}.
 	 */
-	private ArrayList<BEDFeature> getGroupsOfContig(SAMRecord record)
+	private List<BEDFeature> getGroupsOfContig(SAMRecord record)
 	{
-		ArrayList<BEDFeature> contigGroups = new ArrayList<BEDFeature>();
+		List<BEDFeature> contigGroups = new ArrayList<BEDFeature>();
 
 		for (BEDFeature group : groups)
 		{
