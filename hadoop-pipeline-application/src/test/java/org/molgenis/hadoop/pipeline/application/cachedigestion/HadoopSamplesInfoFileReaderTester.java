@@ -69,7 +69,7 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	}
 
 	/**
-	 * Test when the header of th csv file is missing a field.
+	 * Test when the header of the csv file is missing a field.
 	 * 
 	 * @throws IOException
 	 */
@@ -77,6 +77,17 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	public void testHeaderMissingRunColumn() throws IOException
 	{
 		reader.read(getClassLoader().getResource("samplesheets/header_missing_run_column.csv").getFile());
+	}
+
+	/**
+	 * Test when the header of the csv file is an empty line.
+	 * 
+	 * @throws IOException
+	 */
+	@Test(expectedExceptions = IOException.class)
+	public void testHeaderIsAnEmptyLine() throws IOException
+	{
+		reader.read(getClassLoader().getResource("samplesheets/header_empty_line.csv").getFile());
 	}
 
 	/**
