@@ -1,8 +1,8 @@
 package org.molgenis.hadoop.pipeline.application.formats;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -62,7 +62,7 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 		// Retrieves the tools data stored in the tools archive info.xml file.
 		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
 				+ "/tools/info.xml";
-		HashMap<String, SAMProgramRecord> tools = new HadoopToolsXmlReader().read(toolsArchiveInfoXml);
+		Map<String, SAMProgramRecord> tools = new HadoopToolsXmlReader().read(toolsArchiveInfoXml);
 
 		// Add the @PG tags for the tools within the tools archive that were used (define manually!!!).
 		samFileHeader.addProgramRecord(tools.get("bwa"));

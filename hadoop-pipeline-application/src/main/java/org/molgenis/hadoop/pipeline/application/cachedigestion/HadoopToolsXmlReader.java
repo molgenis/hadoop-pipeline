@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
@@ -23,7 +23,7 @@ import htsjdk.samtools.SAMProgramRecord;
  * Digests an XML {@link InputStream} formatted according to the {@link Schema} from
  * {@code src/main/resources/tools_archive_info.xsd} (and within the jar after compiling).
  */
-public class HadoopToolsXmlReader extends HadoopXmlReader<HashMap<String, SAMProgramRecord>>
+public class HadoopToolsXmlReader extends HadoopXmlReader<Map<String, SAMProgramRecord>>
 {
 	/**
 	 * Stores the attribute that stores the file name in each tool node within the XML file.
@@ -39,10 +39,10 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<HashMap<String, SAMPro
 	 * Reads and digests an XML-formatted {@link inputStream} that adheres to the format as defined in the
 	 * {@link Scheme} found in {@code src/main/resources/tools_archive_info.xsd}.
 	 * 
-	 * @return {@link ArrayList}{@code <}{@link Tool}{@code >}
+	 * @return {@link Map}{@code <}{@link String}{@code ,}{@link SAMProgramRecord}{@code >}
 	 */
 	@Override
-	public HashMap<String, SAMProgramRecord> read(InputStream inputStream) throws IOException
+	public Map<String, SAMProgramRecord> read(InputStream inputStream) throws IOException
 	{
 		try
 		{
@@ -62,12 +62,12 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<HashMap<String, SAMPro
 	 * 
 	 * @param dom
 	 *            {@link Document}
-	 * @return {@link ArrayList}{@code <}{@link SAMProgramRecord}{@code >}
+	 * @return {@link Map}{@code <}{@link String}{@code ,}{@link SAMProgramRecord}{@code >}
 	 */
-	private HashMap<String, SAMProgramRecord> digestDomStructure(Document dom)
+	private Map<String, SAMProgramRecord> digestDomStructure(Document dom)
 	{
-		// ArrayList to store digested data in.
-		HashMap<String, SAMProgramRecord> tools = new HashMap<String, SAMProgramRecord>();
+		// Map to store digested data in.
+		Map<String, SAMProgramRecord> tools = new HashMap<String, SAMProgramRecord>();
 
 		// Retrieve root node and it's children.
 		Element rootNode = dom.getDocumentElement();
