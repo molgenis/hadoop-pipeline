@@ -17,10 +17,9 @@ enum ToolChildNode
 	 */
 	static ToolChildNode getEnum(String fieldString)
 	{
-
 		for (ToolChildNode value : ToolChildNode.values())
 		{
-			if (value.toString().toLowerCase().equals(fieldString.toLowerCase()))
+			if (value.toString().equals(fieldString.toUpperCase()))
 			{
 				return value;
 			}
