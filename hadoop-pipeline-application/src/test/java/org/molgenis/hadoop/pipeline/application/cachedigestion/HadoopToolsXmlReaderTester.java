@@ -1,7 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.Assert;
@@ -40,7 +40,7 @@ public class HadoopToolsXmlReaderTester extends Tester
 	@Test
 	public void testSingleValidTool() throws IOException
 	{
-		HashMap<String, SAMProgramRecord> tools = reader
+		Map<String, SAMProgramRecord> tools = reader
 				.read(getClassLoader().getResource("tools_archive_xml_files/single_valid_tool.xml").getFile());
 
 		Assert.assertEquals(tools.containsKey("bwa"), true);
@@ -57,7 +57,7 @@ public class HadoopToolsXmlReaderTester extends Tester
 	@Test
 	public void testMultipleValidTools() throws IOException
 	{
-		HashMap<String, SAMProgramRecord> tools = reader
+		Map<String, SAMProgramRecord> tools = reader
 				.read(getClassLoader().getResource("tools_archive_xml_files/multiple_valid_tools.xml").getFile());
 
 		Assert.assertEquals(tools.containsKey("tool.sh"), true);

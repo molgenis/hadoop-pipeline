@@ -2,6 +2,7 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
 import org.testng.annotations.AfterMethod;
@@ -37,14 +38,14 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 	SAMRecord record2;
 
 	/**
-	 * {@link ArrayList} with {@link BEDFeature}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
+	 * {@link List} with {@link BEDFeature}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
 	 */
-	ArrayList<BEDFeature> inputGroups;
+	List<BEDFeature> inputGroups;
 
 	/**
 	 * Stores the expected output.
 	 */
-	ArrayList<BEDFeature> expectedOutputGroups;
+	List<BEDFeature> expectedOutputGroups;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
@@ -76,7 +77,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		// Creates a new ArrayList to be filled with BEDFeatures that can be used to compare with the SAMRecord.
+		// Creates a new List to be filled with BEDFeatures that can be used to compare with the SAMRecord.
 		inputGroups = new ArrayList<BEDFeature>();
 		expectedOutputGroups = new ArrayList<BEDFeature>();
 
@@ -102,7 +103,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -120,7 +121,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -137,7 +138,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -155,7 +156,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -173,7 +174,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -191,12 +192,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are in range of the
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are in range of the
 	 * {@link SAMRecord}.
 	 */
 	@Test
@@ -214,13 +215,13 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are in range of
-	 * the {@link SAMRecord}.
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are in range of the
+	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllWithinRange()
@@ -238,12 +239,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups = inputGroups;
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are before the
 	 * {@link SAMRecord}.
 	 */
 	@Test
@@ -260,12 +261,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are before the
 	 * {@link SAMRecord}.
 	 */
 	@Test
@@ -283,12 +284,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are after the
 	 * {@link SAMRecord}.
 	 */
 	@Test
@@ -305,12 +306,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are after the
 	 * {@link SAMRecord}.
 	 */
 	@Test
@@ -328,13 +329,13 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some are on range of
-	 * the {@link SAMRecord} while others are before or after it.
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which some are on range of the
+	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthSomeBeforeInAfterRecord()
@@ -351,13 +352,13 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(1, 4));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some are on range of
-	 * the {@link SAMRecord} while others are before or after it.
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which some are on range of the
+	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthSomeBeforeInAfterRecord()
@@ -375,12 +376,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(1, 5));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the first
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which only the first
 	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
 	 */
 	@Test
@@ -398,12 +399,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.add(inputGroups.get(0));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the first
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which only the first
 	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
 	 */
 	@Test
@@ -422,12 +423,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.add(inputGroups.get(0));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the last
+	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which only the last
 	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
 	 */
 	@Test
@@ -445,12 +446,12 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.add(inputGroups.get(inputGroups.size() - 1));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link ArrayList} containing {@link BEDFeature}{@code s}, of which only the last
+	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which only the last
 	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
 	 */
 	@Test
@@ -469,14 +470,14 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.add(inputGroups.get(inputGroups.size() - 1));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
-	 * match a different contig (so should not match even though the positions might be within range). There are an odd
-	 * number of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
+	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
+	 * a different contig (so should not match even though the positions might be within range). There are an odd number
+	 * of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthThreeOnSameContigOfWhichAllInRange()
@@ -497,13 +498,13 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
-	 * match a different contig (so should not match even though the positions might be within range). There are an even
+	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
+	 * a different contig (so should not match even though the positions might be within range). There are an even
 	 * number of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
@@ -524,15 +525,15 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(6, 8));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
-	 * match a different contig (so should not match even though the positions might be within range). There are an odd
-	 * number of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the
-	 * {@link SAMRecord}, while others are before or after it.
+	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
+	 * a different contig (so should not match even though the positions might be within range). There are an odd number
+	 * of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the {@link SAMRecord},
+	 * while others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
@@ -554,13 +555,13 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link ArrayList} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s}
-	 * match a different contig (so should not match even though the positions might be within range). There are an even
+	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
+	 * a different contig (so should not match even though the positions might be within range). There are an even
 	 * number of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the
 	 * {@link SAMRecord}, while others are before or after it.
 	 */
@@ -585,7 +586,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		expectedOutputGroups.addAll(inputGroups.subList(7, 11));
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -607,7 +608,7 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		ArrayList<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
 	}
 }

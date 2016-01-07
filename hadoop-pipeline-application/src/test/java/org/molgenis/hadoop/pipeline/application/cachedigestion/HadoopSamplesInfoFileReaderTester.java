@@ -2,6 +2,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.Assert;
@@ -47,7 +48,7 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	@Test
 	public void testValidSamplesheet() throws IOException
 	{
-		ArrayList<Sample> actualSamples = reader
+		List<Sample> actualSamples = reader
 				.read(getClassLoader().getResource("samplesheets/samplesheet.csv").getFile());
 
 		Assert.assertEquals(actualSamples, expectedValidSamples);
@@ -61,7 +62,7 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	@Test
 	public void testValidMinimalSamplesheet() throws IOException
 	{
-		ArrayList<Sample> actualSamples = reader
+		List<Sample> actualSamples = reader
 				.read(getClassLoader().getResource("samplesheets/valid_minimal.csv").getFile());
 
 		Assert.assertEquals(actualSamples, expectedValidSamples);
@@ -122,11 +123,11 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	public void testSampleRunAndSequencingStartDateSwapped() throws IOException
 	{
 		@SuppressWarnings("unchecked")
-		ArrayList<Sample> expectedSamples = (ArrayList<Sample>) expectedValidSamples.clone();
+		List<Sample> expectedSamples = (List<Sample>) expectedValidSamples.clone();
 		expectedSamples.remove(1);
 		expectedSamples.add(1, new Sample("sample2", "SN163", 648, 150616, "AHKYLMADXX", 2));
 
-		ArrayList<Sample> actualSamples = reader.read(
+		List<Sample> actualSamples = reader.read(
 				getClassLoader().getResource("samplesheets/sample_run_sequencingStartDate_swapped.csv").getFile());
 
 		Assert.assertEquals(actualSamples, expectedSamples);

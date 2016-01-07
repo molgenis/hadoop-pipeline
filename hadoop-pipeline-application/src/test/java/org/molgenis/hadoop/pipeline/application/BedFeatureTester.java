@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.testng.Assert;
 
@@ -16,11 +17,11 @@ public class BedFeatureTester extends Tester
 	 * {@link Assert#assertEquals(Object[], Object[])}.
 	 * 
 	 * @param actualBed
-	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 *            {@link List}{@code <}{@link BEDFeature}{@code >}
 	 * @param expectedBed
-	 *            {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 *            {@link List}{@code <}{@link BEDFeature}{@code >}
 	 */
-	protected void compareActualBedWithExpectedBed(ArrayList<BEDFeature> actualBed, ArrayList<BEDFeature> expectedBed)
+	protected void compareActualBedWithExpectedBed(List<BEDFeature> actualBed, List<BEDFeature> expectedBed)
 	{
 		// Compares expected data with actual data.
 		Assert.assertEquals(actualBed.size(), expectedBed.size());

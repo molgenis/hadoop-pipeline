@@ -2,6 +2,7 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
 import org.testng.annotations.BeforeClass;
@@ -23,12 +24,12 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	/**
 	 * Expected bed valid results.
 	 */
-	private ArrayList<BEDFeature> expectedValidBed;
+	private List<BEDFeature> expectedValidBed;
 
 	/**
 	 * Expected valid results when the 4th line does not have an end value.
 	 */
-	private ArrayList<BEDFeature> expectedBedNoEndValueForFourthLine;
+	private List<BEDFeature> expectedBedNoEndValueForFourthLine;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
@@ -60,7 +61,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testValidBedFile() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -76,7 +77,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testUnsortedBedFile() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/unsorted_contig-start-end.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -92,7 +93,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineEndingWithATab() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -108,7 +109,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineWithoutEndValue() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -124,7 +125,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineWithoutEndValueThatEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -165,7 +166,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineThatAlsoContainsNameField() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
@@ -181,7 +182,7 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineThatAlsoContainsNameFieldAndEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		ArrayList<BEDFeature> actualBed = reader
+		List<BEDFeature> actualBed = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
