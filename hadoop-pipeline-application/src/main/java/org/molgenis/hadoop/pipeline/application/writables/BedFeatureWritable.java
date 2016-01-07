@@ -73,9 +73,9 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	@Override
 	public int compareTo(BedFeatureWritable o)
 	{
-		int c = this.get().getContig().compareTo(o.get().getContig());
-		if (c == 0) c = this.get().getStart() - o.get().getStart();
-		if (c == 0) c = this.get().getEnd() - o.get().getEnd();
+		int c = bedFeature.getContig().compareTo(o.bedFeature.getContig());
+		if (c == 0) c = bedFeature.getStart() - o.bedFeature.getStart();
+		if (c == 0) c = bedFeature.getEnd() - o.bedFeature.getEnd();
 		return c;
 	}
 
@@ -84,9 +84,26 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + bedFeature.getContig().hashCode();
+		result = prime * result + ((bedFeature.getContig() == null) ? 0 : bedFeature.getContig().hashCode());
 		result = prime * result + bedFeature.getStart();
 		result = prime * result + bedFeature.getEnd();
 		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		BedFeatureWritable other = (BedFeatureWritable) obj;
+		if (bedFeature.getContig() == null)
+		{
+			if (other.bedFeature.getContig() != null) return false;
+		}
+		else if (!bedFeature.getContig().equals(other.bedFeature.getContig())) return false;
+		if (bedFeature.getStart() != other.bedFeature.getStart()) return false;
+		if (bedFeature.getEnd() != other.bedFeature.getEnd()) return false;
+		return true;
 	}
 }
