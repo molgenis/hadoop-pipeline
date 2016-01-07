@@ -6,7 +6,6 @@ import java.util.Iterator;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
@@ -18,11 +17,6 @@ import htsjdk.tribble.bed.BEDFeature;
 public class HadoopPipelineReducer
 		extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
 {
-	/**
-	 * Logger to write information to.
-	 */
-	private static final Logger logger = Logger.getLogger(HadoopPipelineReducer.class);
-
 	/**
 	 * Collector for reducer output.
 	 */
