@@ -3,6 +3,7 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -10,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
-import org.molgenis.hadoop.pipeline.application.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
@@ -119,16 +119,16 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	 */
 	private void digestCache(Context context) throws IllegalArgumentException, IOException
 	{
-		bwaTool = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0])) + "/tools/bwa";
-		alignmentReferenceFastaFile = HdfsFileMetaDataHandler.retrieveFileName(context.getCacheFiles()[0]);
+		bwaTool = FilenameUtils.getName(context.getCacheArchives()[0].toString()) + "/tools/bwa";
+		alignmentReferenceFastaFile = FilenameUtils.getName(context.getCacheFiles()[0].toString());
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
-		String bedFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[8]));
+		String bedFile = FilenameUtils.getName(context.getCacheFiles()[8].toString());
 		List<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
-		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
+		String samplesInfoFile = FilenameUtils.getName(context.getCacheFiles()[9].toString());
 		samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 	}
 
@@ -147,8 +147,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	private boolean validateInputFileType(String inputSplitPath) throws IOException
 	{
 		// Retrieves the file name.
-		String[] pathParts = inputSplitPath.split("/");
-		String fileName = pathParts[pathParts.length - 1];
+		String fileName = FilenameUtils.getName(inputSplitPath);
 
 		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
 		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_"))
@@ -179,15 +178,15 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	 */
 	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
 	{
-		// Splits the path into individual directories with the last item being the file name.
-		String[] pathParts = inputSplitPath.split("/");
+		// Retrieves the parent directory name from the input split file.
+		String sampleDirName = FilenameUtils.getName(FilenameUtils.getPathNoEndSeparator(inputSplitPath));
 
 		// Goes through each available sample for comparison.
 		for (Sample sample : samples)
 		{
 			// If the sample comparison name equals the last directory in the input split path,
 			// returns the sample.
-			if (sample.getComparisonName().equals(pathParts[pathParts.length - 2]))
+			if (sample.getComparisonName().equals(sampleDirName))
 			{
 				return sample;
 			}

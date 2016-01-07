@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -11,7 +12,6 @@ import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopRefSeqDictReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopToolsXmlReader;
-import org.molgenis.hadoop.pipeline.application.cachedigestion.HdfsFileMetaDataHandler;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.seqdoop.hadoop_bam.BAMOutputFormat;
 import org.seqdoop.hadoop_bam.KeyIgnoringBAMOutputFormat;
@@ -55,12 +55,12 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 		SAMFileHeader samFileHeader = new SAMFileHeader();
 
 		// Adds @SQ tags data to the SAMFileHeader.
-		String alignmentReferenceDictFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[7]));
+		String alignmentReferenceDictFile = FilenameUtils.getName(context.getCacheFiles()[7].toString());
 		SAMSequenceDictionary seqDict = new HadoopRefSeqDictReader().read(alignmentReferenceDictFile);
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the tools data stored in the tools archive info.xml file.
-		String toolsArchiveInfoXml = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheArchives()[0]))
+		String toolsArchiveInfoXml = FilenameUtils.getName(context.getCacheArchives()[0].toString())
 				+ "/tools/info.xml";
 		Map<String, SAMProgramRecord> tools = new HadoopToolsXmlReader().read(toolsArchiveInfoXml);
 
@@ -68,7 +68,7 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 		samFileHeader.addProgramRecord(tools.get("bwa"));
 
 		// Retrieves the samples stored in the samples information file and adds them as SAMReadGroupRecords (@RG tags).
-		String samplesInfoFile = HdfsFileMetaDataHandler.retrieveFileName((context.getCacheFiles()[9]));
+		String samplesInfoFile = FilenameUtils.getName(context.getCacheFiles()[9].toString());
 		List<Sample> samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 		for (Sample sample : samples)
 		{
