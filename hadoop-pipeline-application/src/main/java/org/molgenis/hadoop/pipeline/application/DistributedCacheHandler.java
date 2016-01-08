@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.net.URI;
 
@@ -29,7 +31,7 @@ public class DistributedCacheHandler
 	 */
 	DistributedCacheHandler(Job context)
 	{
-		this.context = context;
+		this.context = requireNonNull(context);
 
 		// Safety measure so the added JobContext is a Job which can be used to add files to the DistributedCache.
 		isJob = true;
@@ -45,7 +47,7 @@ public class DistributedCacheHandler
 	 */
 	public DistributedCacheHandler(JobContext context)
 	{
-		this.context = context;
+		this.context = requireNonNull(context);
 	}
 
 	public boolean isJob()
