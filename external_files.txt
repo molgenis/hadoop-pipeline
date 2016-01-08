@@ -1,4 +1,4 @@
-# VERSION: 2015-12-16
+# VERSION: 2016-01-08
 a hadoop-pipeline-application/src/test/resources/bed_files
 a hadoop-pipeline-application/src/test/resources/bed_files/chr1_20000000-21000000.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig-start-end-name_normal-end.bed
@@ -30,6 +30,7 @@ a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa.pac
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa.sa
 a hadoop-pipeline-application/src/test/resources/samplesheets
+a hadoop-pipeline-application/src/test/resources/samplesheets/header_empty_line.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/header_missing_run_column.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field_comma-ended.csv
