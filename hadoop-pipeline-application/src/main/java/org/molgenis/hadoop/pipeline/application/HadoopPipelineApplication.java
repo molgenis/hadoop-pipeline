@@ -99,23 +99,9 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setJarByClass(HadoopPipelineApplication.class);
 		job.setJobName("HadoopPipelineApplication");
 
-		// Adds distributed cache files. If any adjustments are made, a manual validation of the Mapper, Reducer &
-		// OutputFormat are required!!!
-
-		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-		job.addCacheArchive(parser.getToolsArchiveLocation().toUri());
-
-		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
-		job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaBwtFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaFaiFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaPacFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceFastaSaFile().toUri());
-		job.addCacheFile(parser.getAlignmentReferenceDictFile().toUri());
-		job.addCacheFile(parser.getBedFile().toUri());
-		job.addCacheFile(parser.getSamplesInfoFile().toUri());
+		// Adds needed files to the distributed cache.
+		DistributedCacheHandler cacheHandler = new DistributedCacheHandler(job);
+		cacheHandler.addCacheToJob(parser);
 
 		// Sets input/output paths.
 		for (Path inputPath : parser.getInputDirs())

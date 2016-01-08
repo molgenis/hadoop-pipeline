@@ -8,6 +8,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
+import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
@@ -119,16 +120,18 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	 */
 	private void digestCache(Context context) throws IllegalArgumentException, IOException
 	{
-		bwaTool = FilenameUtils.getName(context.getCacheArchives()[0].toString()) + "/tools/bwa";
-		alignmentReferenceFastaFile = FilenameUtils.getName(context.getCacheFiles()[0].toString());
+		DistributedCacheHandler cacheHandler = new DistributedCacheHandler(context);
+
+		bwaTool = cacheHandler.getBwaToolFromToolsArchive();
+		alignmentReferenceFastaFile = cacheHandler.getReferenceFastaFile();
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
-		String bedFile = FilenameUtils.getName(context.getCacheFiles()[8].toString());
+		String bedFile = cacheHandler.getBedFile();
 		List<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
-		String samplesInfoFile = FilenameUtils.getName(context.getCacheFiles()[9].toString());
+		String samplesInfoFile = cacheHandler.getSamplesInfoFile();
 		samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 	}
 

@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopRefSeqDictReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
@@ -52,23 +52,24 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 	 */
 	private SAMFileHeader retrieveSamFileHeader(TaskAttemptContext context) throws IllegalArgumentException, IOException
 	{
+		DistributedCacheHandler cacheHandler = new DistributedCacheHandler(context);
+
 		SAMFileHeader samFileHeader = new SAMFileHeader();
 
 		// Adds @SQ tags data to the SAMFileHeader.
-		String alignmentReferenceDictFile = FilenameUtils.getName(context.getCacheFiles()[7].toString());
+		String alignmentReferenceDictFile = cacheHandler.getReferenceDictFile();
 		SAMSequenceDictionary seqDict = new HadoopRefSeqDictReader().read(alignmentReferenceDictFile);
 		samFileHeader.setSequenceDictionary(seqDict);
 
 		// Retrieves the tools data stored in the tools archive info.xml file.
-		String toolsArchiveInfoXml = FilenameUtils.getName(context.getCacheArchives()[0].toString())
-				+ "/tools/info.xml";
+		String toolsArchiveInfoXml = cacheHandler.getInfoXmlFileFromToolsArchive();
 		Map<String, SAMProgramRecord> tools = new HadoopToolsXmlReader().read(toolsArchiveInfoXml);
 
 		// Add the @PG tags for the tools within the tools archive that were used (define manually!!!).
 		samFileHeader.addProgramRecord(tools.get("bwa"));
 
 		// Retrieves the samples stored in the samples information file and adds them as SAMReadGroupRecords (@RG tags).
-		String samplesInfoFile = FilenameUtils.getName(context.getCacheFiles()[9].toString());
+		String samplesInfoFile = cacheHandler.getSamplesInfoFile();
 		List<Sample> samples = new HadoopSamplesInfoFileReader().read(samplesInfoFile);
 		for (Sample sample : samples)
 		{
