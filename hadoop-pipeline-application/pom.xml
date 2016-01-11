@@ -80,9 +80,9 @@
 		<dependency>
 			<groupId>org.seqdoop</groupId>
 			<artifactId>hadoop-bam</artifactId>
-			<version>7.1.0</version>
+			<version>7.3.0</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
@@ -96,5 +96,11 @@
 			<classifier>hadoop2</classifier>
 			<scope>test</scope>
 		</dependency>
+		<!-- Possibly for TestNG MRUnit MultipleOutputs testing, though currently bugged: https://issues.apache.org/jira/browse/MRUNIT-213 -->
+		<!-- <dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-testng</artifactId>
+			<version>1.6.3</version>
+		</dependency> -->
 	</dependencies>
 </project>

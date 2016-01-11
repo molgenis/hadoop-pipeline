@@ -1,6 +1,8 @@
 package org.molgenis.hadoop.pipeline.application.inputdigestion;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -16,19 +18,14 @@ public abstract class InputParser
 	private FileSystem fileSys;
 
 	/**
-	 * Switch that only allows the MapReduce phase to start if all required files exist.
-	 */
-	private boolean continueApplication = false;
-
-	/**
 	 * Location of the .tar.gz archive containing the required tools.
 	 */
 	private Path toolsArchiveLocation;
 
 	/**
-	 * Location with input files.
+	 * Directories with input files.
 	 */
-	private Path inputDir;
+	private List<Path> inputDirs = new ArrayList<Path>();
 
 	/**
 	 * Location results can be written to.
@@ -70,14 +67,24 @@ public abstract class InputParser
 	 */
 	private Path alignmentReferenceFastaSaFile;
 
+	/**
+	 * Location of the dictionary belonging to the BWA index files for alignment.
+	 */
+	private Path alignmentReferenceDictFile;
+
+	/**
+	 * Location to the BED file containing the grouping for the SAM records.
+	 */
+	private Path bedFile;
+
+	/**
+	 * The file containing information about the samples.
+	 */
+	private Path samplesInfoFile;
+
 	protected void setFileSys(FileSystem fileSys)
 	{
 		this.fileSys = fileSys;
-	}
-
-	public boolean isContinueApplication()
-	{
-		return continueApplication;
 	}
 
 	public Path getToolsArchiveLocation()
@@ -95,19 +102,34 @@ public abstract class InputParser
 		this.toolsArchiveLocation = new Path(toolsArchiveLocation);
 	}
 
-	public Path getInputDir()
+	public List<Path> getInputDirs()
 	{
-		return inputDir;
+		return inputDirs;
 	}
 
-	protected void setInputDir(Path inputDir)
+	protected void setInputDirs(List<Path> inputDirs)
 	{
-		this.inputDir = inputDir;
+		this.inputDirs = inputDirs;
 	}
 
-	protected void setInputDir(String inputDir)
+	protected void setInputDirs(String[] inputDirs)
 	{
-		this.inputDir = new Path(inputDir);
+		this.inputDirs.clear();
+
+		for (String inputDir : inputDirs)
+		{
+			addInputDir(inputDir);
+		}
+	}
+
+	protected void addInputDir(String inputDir)
+	{
+		addInputDir(new Path(inputDir));
+	}
+
+	protected void addInputDir(Path inputDir)
+	{
+		this.inputDirs.add(inputDir);
 	}
 
 	public Path getOutputDir()
@@ -131,10 +153,12 @@ public abstract class InputParser
 	}
 
 	/**
-	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
-	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac, .sa & .dict).
+	 * These associated files should be in the same directory as the {@code alignmentReferenceFastaFile} and should have
+	 * the same file name prefix.
 	 * 
 	 * @param alignmentReferenceFastaFile
+	 *            {@link Path} location of alignment reference fasta file.
 	 */
 	protected void setAlignmentReferenceFastaFiles(Path alignmentReferenceFastaFile)
 	{
@@ -146,13 +170,16 @@ public abstract class InputParser
 		alignmentReferenceFastaFaiFile = new Path(mainFastaFile + ".fai");
 		alignmentReferenceFastaPacFile = new Path(mainFastaFile + ".pac");
 		alignmentReferenceFastaSaFile = new Path(mainFastaFile + ".sa");
+		alignmentReferenceDictFile = new Path(mainFastaFile.replaceAll("\\.fa(sta)?$", "") + ".dict");
 	}
 
 	/**
-	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac & .sa). These
-	 * associated files should be in the same directory as the {@code alignmentReferenceFastaFile}.
+	 * Sets the {@code alignmentReferenceFastaFile} and associated files (.amb, .ann, .bwt, .fai, .pac, .sa & .dict).
+	 * These associated files should be in the same directory as the {@code alignmentReferenceFastaFile} and should have
+	 * the same file name prefix.
 	 * 
 	 * @param alignmentReferenceFastaFile
+	 *            {@link String} location of alignment reference fasta file.
 	 */
 	protected void setAlignmentReferenceFastaFiles(String alignmentReferenceFastaFile)
 	{
@@ -163,6 +190,7 @@ public abstract class InputParser
 		alignmentReferenceFastaFaiFile = new Path(alignmentReferenceFastaFile + ".fai");
 		alignmentReferenceFastaPacFile = new Path(alignmentReferenceFastaFile + ".pac");
 		alignmentReferenceFastaSaFile = new Path(alignmentReferenceFastaFile + ".sa");
+		alignmentReferenceDictFile = new Path(alignmentReferenceFastaFile.replaceAll("\\.fa(sta)?$", "") + ".dict");
 	}
 
 	public Path getAlignmentReferenceFastaAmbFile()
@@ -195,75 +223,142 @@ public abstract class InputParser
 		return alignmentReferenceFastaSaFile;
 	}
 
+	public Path getAlignmentReferenceDictFile()
+	{
+		return alignmentReferenceDictFile;
+	}
+
+	public Path getBedFile()
+	{
+		return bedFile;
+	}
+
+	protected void setBedFile(Path bedFile)
+	{
+		this.bedFile = bedFile;
+	}
+
+	protected void setBedFile(String bedFile)
+	{
+		this.bedFile = new Path(bedFile);
+	}
+
+	public Path getSamplesInfoFile()
+	{
+		return samplesInfoFile;
+	}
+
+	protected void setSamplesInfoFile(Path samplesInfoFile)
+	{
+		this.samplesInfoFile = samplesInfoFile;
+	}
+
+	protected void setSamplesInfoFile(String samplesInfoFile)
+	{
+		this.samplesInfoFile = new Path(samplesInfoFile);
+	}
+
 	/**
-	 * Checks whether all required files exist. If one of the required files could not be found, a print statement to
-	 * stderr is given regarding the missing file(s). If all required files are present, {@code isContinueApplication()}
-	 * is set to {@code true}.
+	 * Checks whether all required input parameters are valid. For each invalid parameter, an error message is written
+	 * (unless otherwise specified by in-line code comments).
 	 * 
+	 * @return {@code true} if all parameters are correct, otherwise {@code false}.
 	 * @throws IOException
 	 */
-	protected void checkValidityArguments() throws IOException
+	protected boolean checkValidityArguments() throws IOException
 	{
-		// Is set to true if one argument is invalid.
-		boolean invalidInput = false;
+		// Is set to false if at least one argument is invalid.
+		boolean validInput = true;
 
-		// Checks user input files whether they are present.
+		// Validates tools archive.
 		if (!checkIfPathIsFile(toolsArchiveLocation))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Tools archive path is invalid.");
 		}
-		if (!checkIfPathIsDir(inputDir))
+
+		// Checks if there are any input directories given.
+		if (inputDirs.size() < 1)
 		{
-			invalidInput = true;
-			System.err.println("Input directory does not exist.");
+			validInput = false;
+			System.err.println("No input directories were given.");
 		}
+		// If there are any input directories, validates each input directory.
+		else
+		{
+			for (Path inputDir : inputDirs)
+			{
+				if (!checkIfPathIsDir(inputDir))
+				{
+					validInput = false;
+					System.err.println("The following input directory does not exist: " + inputDir);
+				}
+			}
+		}
+
+		// Validates that the output directory does not exist, and if it doesn't, also checks that the parent directory
+		// does exist.
 		if (!checkIfPathParentIsDir(outputDir))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Output directory parent does not exist.");
 		}
 		else if (checkIfPathIsDir(outputDir))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println("Output directory already exists.");
 		}
+
+		// Checks whether the alignment reference fasta file exists.
 		if (!checkIfPathIsFile(alignmentReferenceFastaFile))
 		{
-			invalidInput = true;
-			System.err.println("BWA index fasta file is not present.");
+			validInput = false;
+			System.err.println("BWA index fasta file is not present (skipping check on aditional index files).");
 		}
-		// Only check for accompanying bwa index files if original fasta file is found.
+		// Only check for accompanying bwa index files if reference fasta file is valid.
 		else if (!checkIfPathIsFile(alignmentReferenceFastaAmbFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaAnnFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaBwtFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaFaiFile)
 				|| !checkIfPathIsFile(alignmentReferenceFastaPacFile)
-				|| !checkIfPathIsFile(alignmentReferenceFastaSaFile))
+				|| !checkIfPathIsFile(alignmentReferenceFastaSaFile) || !checkIfPathIsFile(alignmentReferenceDictFile))
 		{
-			invalidInput = true;
+			validInput = false;
 			System.err.println(
-					"Additional BWA index files are incomplete. Please be sure the following files are present as well: "
+					"Additional BWA index/dict files are incomplete. Please be sure the following files are present as well: "
 							+ System.lineSeparator() + getAlignmentReferenceFastaAmbFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaAnnFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaBwtFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaFaiFile() + System.lineSeparator()
 							+ getAlignmentReferenceFastaPacFile() + System.lineSeparator()
-							+ getAlignmentReferenceFastaSaFile());
+							+ getAlignmentReferenceFastaSaFile() + System.lineSeparator()
+							+ getAlignmentReferenceDictFile());
 		}
 
-		// If no invalid input is found, continueApplication is set to true.
-		if (!invalidInput)
+		// Checks validity bed file.
+		if (!checkIfPathIsFile(bedFile))
 		{
-			continueApplication = true;
+			validInput = false;
+			System.err.println("BED file describing the grouping of the SAM records does not exist.");
 		}
+
+		// Checks validity samples info file.
+		if (!checkIfPathIsFile(samplesInfoFile))
+		{
+			validInput = false;
+			System.err.println("Samplesheet file containing information about the samples does not exist.");
+		}
+
+		// Returns whether input parameters were valid.
+		return validInput;
 	}
 
 	/**
 	 * Checks if a given location is an existing file.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path} exists and is a file, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathIsFile(Path fileLocation) throws IOException
@@ -275,7 +370,8 @@ public abstract class InputParser
 	 * Checks if a given location is an existing directory.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path} exists and is a directory, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathIsDir(Path fileLocation) throws IOException
@@ -287,7 +383,8 @@ public abstract class InputParser
 	 * Checks if a given location's parent is an existing directory.
 	 * 
 	 * @param fileLocation
-	 * @return boolean
+	 *            {@link Path}
+	 * @return boolean {@code true} if {@link Path#getParent()} exists and is a directory, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkIfPathParentIsDir(Path fileLocation) throws IOException

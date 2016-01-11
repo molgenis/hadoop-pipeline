@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- definition of simple elements -->
+	<xs:element name="id" type="xs:string" />
+	<xs:element name="name" type="xs:string" />
+	<xs:element name="version" type="xs:string" />
+	
+	<!-- definition of attributes -->
+	<xs:attribute name="fileName" type="xs:string"/>
+	
+	<!-- definition of complex elements -->
+	<xs:element name="tool">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="id" />
+				<xs:element ref="name" />
+				<xs:element ref="version" />
+			</xs:sequence>
+			<xs:attribute ref="fileName" use="required" />
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="tools">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tool" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

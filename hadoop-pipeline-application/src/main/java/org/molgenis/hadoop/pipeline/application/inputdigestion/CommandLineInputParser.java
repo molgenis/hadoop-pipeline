@@ -32,7 +32,9 @@ public class CommandLineInputParser extends InputParser
 	 * Initiates parsing of the command line.
 	 * 
 	 * @param fileSys
+	 *            {@link FileSystem} current {@link FileSystem}.
 	 * @param args
+	 *            {@link String}{@code []} user input.
 	 * @throws ParseException
 	 * @throws IOException
 	 */
@@ -44,7 +46,13 @@ public class CommandLineInputParser extends InputParser
 		createOptions();
 		retrieveParser(args);
 		digestCommandLine();
-		checkValidityArguments();
+
+		// If the user input arguments aren't all valid, a ParseException is thrown together with the help message.
+		if (!checkValidityArguments())
+		{
+			printHelpMessage();
+			throw new ParseException("Input arguments are invalid (see error messages for more information).");
+		}
 	}
 
 	/**
@@ -52,13 +60,12 @@ public class CommandLineInputParser extends InputParser
 	 */
 	public void printHelpMessage()
 	{
-		String helpHeader = "example: hadoop-pipeline-application -t /path/to/tools.tar.gz -i /path/to/inputDir/ -o /path/to/outputDir/ -bwa /path/to/bwa_reference_file.fasta";
-		String helpFooter = "Molgenis-hadoop";
+		String cmdSyntax = "yarn jar HadoopPipelineApplicationWithDependencies.jar [-D <property>=<value>]... -t <tools> -i <input> [-i <input>]... -o <output> -r <reference> -s <samples> -b <bed>";
+		String helpHeader = "";
+		String helpFooter = "Molgenis hadoop-pipeline";
 
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(80,
-				"hadoop-pipeline-application -t <hdfs location tools tar.gz archive> -i <hdfs dir with interlieved pair-ended fasta files> -o <hdfs output dir> -bwa <hdfs location BWA alignment reference fasta file>",
-				helpHeader, this.options, helpFooter, false);
+		formatter.printHelp(80, cmdSyntax, helpHeader, this.options, helpFooter, false);
 	}
 
 	/**
@@ -73,23 +80,43 @@ public class CommandLineInputParser extends InputParser
 				.create("t"));
 
 		options.addOption(OptionBuilder.withArgName("input").hasArg().isRequired(true)
-				.withDescription("Directory containing the input files.").create("i"));
+				.withDescription(
+						"Directory containing the input files. It is possible to use multiple -i arguments to add more"
+								+ " than 1 input directory or use subdirectories by adding"
+								+ " \"-D mapreduce.input.fileinputformat.input.dir.recursive=true\"")
+				.create("i"));
 
 		options.addOption(OptionBuilder.withArgName("output").hasArg().isRequired(true)
 				.withDescription(
-						"Directory in which the results should be stored. Note that the directory itself should not exist, though the parent directory should.")
+						"Directory in which the results should be stored. Note that the directory itself should not exist,"
+								+ " though the parent directory should.")
 				.create("o"));
 
-		options.addOption(OptionBuilder.withArgName("burrows_wheeler_align").hasArg().isRequired(true)
+		options.addOption(OptionBuilder.withArgName("reference").hasArg().isRequired(true)
 				.withDescription(
-						"BWA reference fasta file. Other BWA index file should be present as well using the same prefix.")
-				.create("bwa"));
+						"Burrows-Wheeler Alignment reference fasta file. Other BWA index file should be present as well"
+								+ " using the same prefix.")
+				.create("r"));
+
+		options.addOption(OptionBuilder.withArgName("bed").hasArg().isRequired(true)
+				.withDescription(
+						"BED formatted file describing how to group the aligned SAMRecords during the shuffle/sort phase.")
+				.create("b"));
+
+		options.addOption(OptionBuilder.withArgName("samples").hasArg().isRequired(true)
+				.withDescription(
+						"The samplesheet file containing information about (only) the samples that are being used. This file"
+								+ " should be a csv file that is comma-seperated and contains a header line with at least"
+								+ " the following fields; externalSampleID, sequencer, sequencingStartDate, run, flowcell & lane."
+								+ " The order of these fields does not matter and they are case-insensitive.")
+				.create("s"));
 	}
 
 	/**
 	 * Creates a parser for command line parsing.
 	 * 
 	 * @param args
+	 *            {@link String}{@code []}
 	 * @throws ParseException
 	 */
 	private void retrieveParser(String[] args) throws ParseException
@@ -110,17 +137,25 @@ public class CommandLineInputParser extends InputParser
 		{
 			setToolsArchiveLocation(commandLine.getOptionValue("t"));
 		}
-		if (commandLine.hasOption("i"))
+		if (commandLine.hasOption("i")) // Supports multiple input values.
 		{
-			setInputDir(commandLine.getOptionValue("i"));
+			setInputDirs(commandLine.getOptionValues("i"));
 		}
 		if (commandLine.hasOption("o"))
 		{
 			setOutputDir(commandLine.getOptionValue("o"));
 		}
-		if (commandLine.hasOption("bwa"))
+		if (commandLine.hasOption("r"))
 		{
-			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("bwa"));
+			setAlignmentReferenceFastaFiles(commandLine.getOptionValue("r"));
+		}
+		if (commandLine.hasOption("b"))
+		{
+			setBedFile(commandLine.getOptionValue("b"));
+		}
+		if (commandLine.hasOption("s"))
+		{
+			setSamplesInfoFile(commandLine.getOptionValue("s"));
 		}
 	}
 }

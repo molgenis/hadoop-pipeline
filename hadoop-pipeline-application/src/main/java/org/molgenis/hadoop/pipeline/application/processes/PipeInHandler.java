@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.hadoop.pipeline.application.exceptions.ProcessPipeException;
+import org.molgenis.hadoop.pipeline.application.exceptions.UncheckedIOException;
 
 /**
  * Writes the data stored in a {@code byte[]} to the {@link OutputStream}.
@@ -17,6 +17,7 @@ public class PipeInHandler implements Runnable
 	 * Stores the stream to write to.
 	 */
 	private OutputStream outputStream;
+
 	/**
 	 * Stores the data to be written to the stream.
 	 */
@@ -46,7 +47,7 @@ public class PipeInHandler implements Runnable
 		}
 		catch (IOException e)
 		{
-			throw new ProcessPipeException(e);
+			throw new UncheckedIOException(e);
 		}
 		finally
 		{

@@ -1,4 +1,20 @@
 #! /user/bin/env python3
+"""
+Name: FastqFileComparer.py
+Usage:
+        FastqFileComparer.py <gzipped fastq file 1> <gzipped fastq file 2>
+
+Description: Compares 2 gzipped fastq files whether they are equal. This is done by collecting (and sorting) all
+sequence headers, comparing if the number of collected sequence headers is equal and whether the actual sequence
+headers are equal (as the lists are sorted, if the files are equal the headers should be in the same position in the
+lists).
+
+IMPORTANT: Under normal circumstances it can be assumed that the halvade upload tool simply works correctly. This script
+is only added as extra validation for developers and should under normal circumstances not be needed. It should
+therefore be noted that this script will not validate individual user input for all kinds of possible mistakes (such as
+using a different/no archived files as input). Therefore Python knowledge and/or following the exact instructions
+present in the README file(s) should be followed.
+"""
 
 import sys
 import os

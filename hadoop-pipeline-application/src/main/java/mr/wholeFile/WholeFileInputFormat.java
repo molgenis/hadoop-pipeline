@@ -1,5 +1,3 @@
-package mr.wholeFile;
-
 /**
  * Copyright 2014, dimamayteacher
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,20 +25,25 @@ package mr.wholeFile;
  * https://code.google.com/p/hadoop-course/source/list). As all commits
  * were made with the author name "dimamayteacher", this name was filled in
  * as copyright owner.
+ * 
+ * Adjusted the code to use <Text, BytesWritable> instead of
+ * <NullWritable, BytesWritable>
  */
+
+package mr.wholeFile;
 
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
-public class WholeFileInputFormat extends FileInputFormat<NullWritable, BytesWritable>
+public class WholeFileInputFormat extends FileInputFormat<Text, BytesWritable>
 {
 
 	@Override
@@ -50,8 +53,8 @@ public class WholeFileInputFormat extends FileInputFormat<NullWritable, BytesWri
 	}
 
 	@Override
-	public RecordReader<NullWritable, BytesWritable> createRecordReader(InputSplit inputSplit,
-			TaskAttemptContext context) throws IOException, InterruptedException
+	public RecordReader<Text, BytesWritable> createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
+			throws IOException, InterruptedException
 	{
 		WholeFileRecordReader reader = new WholeFileRecordReader();
 		reader.initialize(inputSplit, context);

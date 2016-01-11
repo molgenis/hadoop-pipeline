@@ -1,10 +1,10 @@
-package org.molgenis.hadoop.pipeline.application.processes;
+package org.molgenis.hadoop.pipeline.application.inputstreamdigestion;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Abstract class describing required methods for a {@link PipeRunner}{@code 's} last {@link Process}{@code '}
- * {@link InputStream} digestion.
+ * Abstract class for the digestion of an {@link InputStream}, one {@code <T>} at a time.
  * 
  * @param <T>
  */
@@ -15,8 +15,9 @@ public abstract class Sink<T>
 	 * 
 	 * @param inputStream
 	 *            {@link InputStream}
+	 * @throws IOException
 	 */
-	public abstract void handleInputStream(InputStream inputStream);
+	public abstract void handleInputStream(InputStream inputStream) throws IOException;
 
 	/**
 	 * Digests a single {@code <T>item} from the {@link InputStream} digested by {@link #handleInputStream(InputStream)}
@@ -25,6 +26,7 @@ public abstract class Sink<T>
 	 * 
 	 * @param item
 	 *            {@code <T>}
+	 * @throws IOException
 	 */
-	protected abstract void digestStreamItem(T item);
+	protected abstract void digestStreamItem(T item) throws IOException;
 }

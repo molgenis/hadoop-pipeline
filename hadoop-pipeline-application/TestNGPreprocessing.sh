@@ -5,23 +5,23 @@
 #Function: Automation script to copy, extract and add correct rights to #
 #          tool binaries used for TestNG tests.                         #
 #                                                                       #
-#Usage: ExpressionSitesLocatorHadoop.sh                                 #
+#Usage:    TestNGPreprocessing.sh                                       #
 #########################################################################
 
 
 #########################################################################
 #Name:     main                                                         #
-#Function: Executes the script functionalites                           #
+#Function: Executes the script functionalities                          #
 #########################################################################
 function main {
 	# Go to the goal folder.
 	cd target/test-classes/
 	
-	# Copy the tool archives.
-	cp -R ../../../hadoop-pipeline-tools/* ./
+	# Copy the correct tool archives.
+	copyCorrectToolsArchive
 	
 	# Extract the correct binary.
-	extractCorrectToolsArchive
+	tar -zxvf tools.tar.gz tools/
 	
 	# Set the cirght permissions
 	chmod u+x tools/bwa
@@ -31,18 +31,19 @@ function main {
 }
 
 #########################################################################
-#Name:     extractCorrectToolsArchive                                   #
-#Function: Extracts a tool archive depending on the OS                  #
+#Name:     copyCorrectToolsArchive                                      #
+#Function: Copies a specific tools archive to the target/test-classes/  #
+#          folder depending on the OS                                   #
 #########################################################################
-function extractCorrectToolsArchive {
+function copyCorrectToolsArchive {
 	# Retrieve the operating system name.
 	unamestr=`uname`
 	
 	# Extract the correct archive.
 	if [[ "$unamestr" == 'Linux' ]]; then
-		tar -zxvf linux_tools.tar.gz tools/
+		cp ../../../hadoop-pipeline-tools/linux_tools.tar.gz tools.tar.gz
 	elif [[ "$unamestr" == 'Darwin' ]]; then
-		tar -zxvf mac_tools.tar.gz tools/
+		cp ../../../hadoop-pipeline-tools/mac_tools.tar.gz tools.tar.gz
 	else
 		echo "Your OS not supported. Please create a tools archive yourself (for more information, view the README.md in the 'hadoop-pipeline' folder."
 	fi

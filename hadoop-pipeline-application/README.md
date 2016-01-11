@@ -1,7 +1,10 @@
 # hadoop-pipeline-application
-The Hadoop MapReduce job jar. If you only want an executable jar, please review the general [README](../README.md) instead. This readme includes complete instruction so the TestNG tests and alike can also be ran.
+The Hadoop MapReduce job jar. If you only want an executable jar, please review the general [README](../README.md) instead. This readme includes information such as requirements for running the TestNG tests, updating the external library archive to a newer version and more.
 
-## Requirements
+
+## Running TestNG tests
+
+### Requirements
 A system running with the following programs runnable through the command line:
 
 * `git`
@@ -18,10 +21,10 @@ If the created tool archives do not work properly, please view the general [READ
 
 Within some TestNG tests a python script is used for testing the Process calling and input/output digestion. This is done by calling `python`, followed by the python script path and (where needed) some arguments. Note however that this python script has been tested to work with both Python v2.7.10 and Python v3.5.0, so it shouldn't matter whether the command `python` points to python2 or python3.
 
-## Preperations
+### Preperations
 1. use `git clone https://github.com/svandenhoek/hadoop-pipeline.git` to create a clone of the git repository.
-2. Download the `hadoop-pipeline.tar.gz` from [here](https://molgenis26.target.rug.nl/downloads/hadoop/).
-3. Extract the `hadoop-pipeline.tar.gz` to the exact same location as the created git clone (so that the directories will overlap with each other and the files will be placed in the correct locations).
+2. Download the most recent version of the hadoop-pipeline `.tar.gz` archive from [here](https://molgenis26.target.rug.nl/downloads/hadoop/).
+3. Extract the content of `hadoop-pipeline.tar.gz` into directory of the cloned repository (so that the subdirectories will overlap with each other and the files will be placed in the correct location).
 4. Go to the  `hadoop-pipeline-application` directory.
 5. Use `mvn install`.
 6. Execute `sh TestNGPreprocessing.sh`.
@@ -29,6 +32,12 @@ Within some TestNG tests a python script is used for testing the Process calling
 An executable jar is created and the TestNG tests can now be executed.
 
 IMPORTANT: Whenever doing `mvn clean`, follow the steps starting from step 5 before doing any TestNG tests again!
+
+## Updating the external files archive
+
+When updating to a newer version of the application, sometimes a newer version of the external files archive is needed for testing the application. In this case, first remove all folders/files that were added when the archive was extracted into the repository folder (an `external_files.txt` was extracted into the main repository folder containing info about which folders/files were added with it). Then, extract the new external files archive over the repository folder.
+
+Alternatively, simply create a new clone elsewhere and follow the steps as mentioned in _Preperations_.
 
 ## Troubleshooting
 
@@ -75,3 +84,15 @@ If the above also works, try switching to a different python version (so change 
 For UNIX systems where python can't run on, there is another fix as well. If `tr` (translate characters) is available through the command line, you can replace the usage of the python script with using `tr` instead. This can be done as follows:
 
 Replace code occurences with `ProcessBuilder("python", getClassLoader().getResource("CharacterReplacer.py").getPath(), "<character>", "<character>")` within TestNG classes with `ProcessBuilder("tr", "<character>", "<character>")`.
+
+---
+
+__Problem:__
+After updating all TestNG tests still don't run properly.
+
+__Solution:__
+Please compare the `external_files.txt` (based on git) with the `archive_files.txt` (based on the extracted external files archive) whether the correct external tools archive was used. Ideally, the files should be identical. However, in most cases a newer external files archive should work with an older git commit (though this is not guaranteed).
+
+If these info files are the same, either check if the actual files which should be present are actually there or just remove all of them right away and extract the archive again over the repository directory.
+
+If the above also fails, it is suggested to create a new clone combined with the most recent extern files archive.
