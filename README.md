@@ -26,7 +26,16 @@ Before using the tool, be sure that the following has been done:
 	* Be sure that the given contig name, start position and end position are valid compared to the reference sequence data.
 	* The bed file should be UTF-8 compliant.
 
-* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file by the job (this to reduce application running time).
+* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file by the job (this to reduce application running time). While this file can contain all sorts of information, it should at least contain columns with the following headers:
+	
+	* externalSampleID
+	* sequencer
+	* sequencingStartDate
+	* run
+	* flowcell
+	* lane
+
+	The actual column order (or whether there are columns in between) does not matter.
 
 ### Preparing the halvade upload tool
 1. Create a local clone of [https://github.com/ddcap/halvade.git](https://github.com/ddcap/halvade.git).
