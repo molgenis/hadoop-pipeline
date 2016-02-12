@@ -5,3 +5,6 @@ src/test/resources/*
 !src/test/resources/character_replacer/
 .classpath
 .project
+
+#directory name that can be used to locally create UML diagrams
+uml-diagrams/

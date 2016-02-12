@@ -218,3 +218,7 @@ I get an error similar to that shown below.
 
 __Solution:__
 Try increasing the time before Hadoop ends a mapper/reducer if it has not contacted the context yet. This can be done by increasing the `mapreduce.task.timeout` value (either in the cluster config files or by using `-D`).
+
+## Developer notes
+
+A class UML design was generated using the [Eclipse](https://eclipse.org/) plugin from [ObjectAid](http://www.objectaid.com/). This design can be found on the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/). Do note that the image was software-generated, so no guarantee is given about the correctness of the image. Nevertheless, it should allow for a good initial overview of how the created Hadoop application tool functions.
