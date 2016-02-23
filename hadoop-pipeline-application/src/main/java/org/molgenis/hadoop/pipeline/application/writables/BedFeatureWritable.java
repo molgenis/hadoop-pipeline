@@ -40,13 +40,15 @@ public class BedFeatureWritable implements WritableComparable<BedFeatureWritable
 	}
 
 	/**
-	 * Store a {@link BEDFeature} as {@link Writable}.
+	 * Store a {@link BEDFeature} as {@link Writable}. Unlike defined in {@link htsjdk.samtools.util.Locatable}, this
+	 * means the implementation of {@link BEDFeature#getContig()} may not return {@code null}!
 	 * 
 	 * @param bedFeature
 	 *            {@link BEDFeature}
 	 */
 	public BedFeatureWritable(BEDFeature bedFeature)
 	{
+		// Validates individual fields as htsjdk.samtools.util.Locatable allows for null values in the specification.
 		requireNonNull(bedFeature.getContig());
 		requireNonNull(bedFeature.getStart());
 		requireNonNull(bedFeature.getEnd());
