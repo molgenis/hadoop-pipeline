@@ -15,7 +15,7 @@ import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfo
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
@@ -24,7 +24,8 @@ import htsjdk.tribble.bed.BEDFeature;
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable>
+public class HadoopPipelineMapper
+		extends Mapper<Text, BytesWritable, BedFeatureSamRecordStartWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -93,7 +94,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 						// position.
 						for (BEDFeature key : groups)
 						{
-							context.write(new BedFeatureWritable(key), samWritable);
+							context.write(new BedFeatureSamRecordStartWritable(key, item), samWritable);
 						}
 					}
 					catch (InterruptedException e)

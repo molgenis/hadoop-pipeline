@@ -19,7 +19,9 @@ import org.molgenis.hadoop.pipeline.application.formats.BamOutputFormat;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.partitioners.BedFeatureSamRecordGroupingComparator;
+import org.molgenis.hadoop.pipeline.application.partitioners.BedFeatureSamRecordPartitioner;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -110,6 +112,11 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		}
 		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
+		// Sets custom partitioner & grouping comparator so it only uses the natural key.
+		// Sort comparator uses default behavior, so uses compareTo of Writable (composite key).
+		job.setPartitionerClass(BedFeatureSamRecordPartitioner.class);
+		job.setGroupingComparatorClass(BedFeatureSamRecordGroupingComparator.class);
+
 		// Sets Mapper/Reducer.
 		job.setMapperClass(HadoopPipelineMapper.class);
 		job.setReducerClass(HadoopPipelineReducer.class);
@@ -119,7 +126,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setOutputFormatClass(BamOutputFormat.class);
 
 		// Sets Mapper/Reducer output key/value.
-		job.setMapOutputKeyClass(BedFeatureWritable.class);
+		job.setMapOutputKeyClass(BedFeatureSamRecordStartWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);
