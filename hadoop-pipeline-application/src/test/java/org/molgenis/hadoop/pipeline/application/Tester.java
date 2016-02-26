@@ -20,7 +20,8 @@ import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
- * Superclass for the TestNG tests containing general code.
+ * Superclass for the TestNG tests containing general code. Furthermore, it contains some generic testing methods that
+ * are used among multiple test packages.
  */
 public abstract class Tester
 {

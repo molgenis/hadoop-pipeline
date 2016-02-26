@@ -2,7 +2,6 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.hadoop.mrunit.TestDriver;
@@ -27,28 +26,10 @@ public class HadoopPipelineTester extends Tester
 	private TestDriver<?, ?, ?> driver;
 
 	/**
-	 * Expected results bwa when using readgroup example L2. Can be generated with a terminal using:
-	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:2\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L2\tSM:sample2"
-	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L2.sam}
+	 * SAMFileHeader to add to the reads for comparison as it is lost when the mapper results are written to the
+	 * context. Only adds the @SQ tag which is vital as otherwise exceptions are thrown during comparison.
 	 */
-	private ArrayList<SAMRecord> bwaResultsL2;
-
-	/**
-	 * Expected results bwa when using readgroup example L5. Can be generated with a terminal using:
-	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:5\tPL:illumina\tLB:150702_SN163_649_BHJYNKADXX_L5\tSM:sample3"
-	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L5.sam}
-	 */
-	private ArrayList<SAMRecord> bwaResultsL5;
-
-	/**
-	 * {@link SAMFileHeader} for storing sequence information so that {@link SAMRecord#getSAMString()} can be used
-	 * (after {@link SAMRecord#setHeader(SAMFileHeader)} is used).
-	 */
-	private SAMFileHeader samFileHeader;
+	private SAMFileHeader samFileHeader = new SAMFileHeader();
 
 	TestDriver<?, ?, ?> getDriver()
 	{
@@ -60,35 +41,6 @@ public class HadoopPipelineTester extends Tester
 		this.driver = driver;
 	}
 
-	ArrayList<SAMRecord> getBwaResultsL2()
-	{
-		return bwaResultsL2;
-	}
-
-	ArrayList<SAMRecord> getBwaResultsL5()
-	{
-		return bwaResultsL5;
-	}
-
-	/**
-	 * Returns an {@link ArrayList} that stores the data from both {@link #getBwaResultsL2()} and
-	 * {@link #getBwaResultsL5()}.
-	 * 
-	 * @return {@link ArrayList}{@code <}{@link SAMRecord}{@code >}
-	 */
-	ArrayList<SAMRecord> getAllBwaResults()
-	{
-		ArrayList<SAMRecord> allResults = new ArrayList<SAMRecord>();
-		allResults.addAll(bwaResultsL2);
-		allResults.addAll(bwaResultsL5);
-		return allResults;
-	}
-
-	SAMFileHeader getSamFileHeader()
-	{
-		return samFileHeader;
-	}
-
 	/**
 	 * Loads/generates general data needed for testing.
 	 * 
@@ -97,10 +49,6 @@ public class HadoopPipelineTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		bwaResultsL2 = readSamFile("expected_bwa_outputs_mini/output_mini_L2.sam");
-		bwaResultsL5 = readSamFile("expected_bwa_outputs_mini/output_mini_L5.sam");
-
-		samFileHeader = new SAMFileHeader();
 		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
 		// @SQ\tSN:1\tLN:1000001
 		samFileHeader
@@ -116,6 +64,11 @@ public class HadoopPipelineTester extends Tester
 	public void beforeMethod() throws URISyntaxException
 	{
 		addCacheToDriver();
+	}
+
+	void setHeaderForRecord(SAMRecord record)
+	{
+		record.setHeader(samFileHeader);
 	}
 
 	/**
