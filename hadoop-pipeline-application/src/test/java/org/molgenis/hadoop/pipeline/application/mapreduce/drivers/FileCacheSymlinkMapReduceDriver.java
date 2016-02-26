@@ -5,18 +5,19 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mrunit.mapreduce.MapDriver;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
 
 /**
- * {@link MapDriver} that also creates symlinks in the current working directory to the tmp folder storing the MRUnit
- * testing distributed cache.
+ * {@link MapReduceDriver} that also creates symlinks in the current working directory to the tmp folder storing the
+ * MRUnit testing distributed cache.
  */
 @SuppressWarnings("deprecation")
-public final class FileCacheSymlinkMapDriver<K1, V1, K2, V2> extends MapDriver<K1, V1, K2, V2>
+public class FileCacheSymlinkMapReduceDriver<K1, V1, K2, V2, K3, V3> extends MapReduceDriver<K1, V1, K2, V2, K3, V3>
 {
-	public FileCacheSymlinkMapDriver(Mapper<K1, V1, K2, V2> mapper)
+	public FileCacheSymlinkMapReduceDriver(Mapper<K1, V1, K2, V2> mapper, Reducer<K2, V2, K3, V3> reducer)
 	{
-		super(mapper);
+		super(mapper, reducer);
 	}
 
 	@Override

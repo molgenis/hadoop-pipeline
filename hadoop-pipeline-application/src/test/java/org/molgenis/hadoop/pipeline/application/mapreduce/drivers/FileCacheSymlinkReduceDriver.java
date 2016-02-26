@@ -14,9 +14,9 @@ import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 @SuppressWarnings("deprecation")
 public class FileCacheSymlinkReduceDriver<K1, V1, K2, V2> extends ReduceDriver<K1, V1, K2, V2>
 {
-	public FileCacheSymlinkReduceDriver(Reducer<K1, V1, K2, V2> m)
+	public FileCacheSymlinkReduceDriver(Reducer<K1, V1, K2, V2> reducer)
 	{
-		super(m);
+		super(reducer);
 	}
 
 	@Override
