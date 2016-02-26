@@ -67,7 +67,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	}
 
 	/**
-	 * Generates a new {@link FileCacheSymlinkMapDriver} for testing the {@link HadoopPipelineMapper}.
+	 * Preparations for a single map test.
 	 * 
 	 * @throws URISyntaxException
 	 */
