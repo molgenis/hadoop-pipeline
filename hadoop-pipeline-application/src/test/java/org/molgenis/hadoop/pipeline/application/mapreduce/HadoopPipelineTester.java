@@ -1,14 +1,12 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import org.apache.hadoop.mrunit.TestDriver;
+import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
+import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
@@ -29,7 +27,7 @@ public class HadoopPipelineTester extends Tester
 	 * SAMFileHeader to add to the reads for comparison as it is lost when the mapper results are written to the
 	 * context. Only adds the @SQ tag which is vital as otherwise exceptions are thrown during comparison.
 	 */
-	private SAMFileHeader samFileHeader = new SAMFileHeader();
+	private SAMFileHeader samFileHeader;
 
 	TestDriver<?, ?, ?> getDriver()
 	{
@@ -42,41 +40,35 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Loads/generates general data needed for testing.
-	 * 
-	 * @throws IOException
+	 * Generates a {@code samFileHeader} that can be set for {@link SAMRecord}{@code s} which were serialized using the
+	 * {@link SAMRecordWritable}. In this way, {@link SAMRecord#getSAMString()} can be used again.
 	 */
-	@BeforeClass
-	public void beforeClass() throws IOException
+	public void generateSamFileHeader()
 	{
-		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
-		// @SQ\tSN:1\tLN:1000001
+		samFileHeader = new SAMFileHeader();
 		samFileHeader
 				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
 	}
 
 	/**
-	 * Generates a new {@link FileCacheSymlinkMapDriver} for testing the {@link HadoopPipelineMapper}.
+	 * Sets the header created in {@link #generateSamFileHeader()} for the {@link SAMRecord}. If
+	 * {@link #generateSamFileHeader()} was not called yet, do that first!
 	 * 
-	 * @throws URISyntaxException
+	 * @param record
+	 *            {@link SAMRecord}
 	 */
-	@BeforeMethod
-	public void beforeMethod() throws URISyntaxException
-	{
-		addCacheToDriver();
-	}
-
 	void setHeaderForRecord(SAMRecord record)
 	{
 		record.setHeader(samFileHeader);
 	}
 
 	/**
-	 * Adds needed files to the {@link MapDriver} chache.
+	 * Adds needed files to the {@link MapDriver} cache. Be sure the order is exactly the same as in
+	 * {@link DistributedCacheHandler}!
 	 * 
 	 * @throws URISyntaxException
 	 */
-	private void addCacheToDriver() throws URISyntaxException
+	void addCacheToDriver() throws URISyntaxException
 	{
 		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
 		driver.addCacheArchive(getClassLoader().getResource("tools.tar.gz").toURI());

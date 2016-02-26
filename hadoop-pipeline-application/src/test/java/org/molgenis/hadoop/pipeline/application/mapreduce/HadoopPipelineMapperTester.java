@@ -10,6 +10,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.molgenis.hadoop.pipeline.application.TestFile;
+import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
@@ -22,7 +24,9 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.tribble.bed.BEDFeature;
 
 /**
- * Tester for {@link HadoopPipelineMapper}.
+ * Tester for {@link HadoopPipelineMapper}. Note that it only tests the key:value outputs of the mapper, so any custom
+ * grouping comparators that are used within the whole process are not tested. For tests that include these as well,
+ * please refer to the {@link HadoopPipelineMapReduceTester}.
  */
 public class HadoopPipelineMapperTester extends HadoopPipelineTester
 {
@@ -32,23 +36,29 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	private MapDriver<Text, BytesWritable, BedFeatureSamRecordStartWritable, SAMRecordWritable> mDriver;
 
 	/**
-	 * The fastq data to be digested (test set L1).
+	 * Mini test input dataset.
+	 */
+	private BytesWritable fastqDataMiniL1;
+
+	/**
+	 * Test input dataset.
 	 */
 	private BytesWritable fastqDataL1;
 
 	/**
-	 * The SAM data when L1 is aligned using: /path/to/bwa mem -p -M -R
-	 * "@RG\tID:1\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L1\tSM:sample1"
-	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
+	 * Aligned reads results belonging to the mini test input dataset.
+	 */
+	private List<SAMRecord> alignedReadsMiniL1;
+
+	/**
+	 * Aligned reads results belonging to the test input dataset.
 	 */
 	private List<SAMRecord> alignedReadsL1;
 
 	/**
 	 * A list containing grouping information.
 	 */
-	private List<BEDFeature> groupsSet1;
+	private List<BEDFeature> groups;
 
 	/**
 	 * Loads/generates general data needed for testing.
@@ -58,12 +68,13 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		super.beforeClass();
+		fastqDataMiniL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_MINI_L1));
+		fastqDataL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_L1));
+		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
+		alignedReadsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
+		groups = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
 
-		fastqDataL1 = new BytesWritable(
-				readFileAsByteArray("input_fastq/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"));
-		alignedReadsL1 = readSamFile("expected_bwa_outputs/output_L1.sam");
-		groupsSet1 = readBedFile("bed_files/chr1_20000000-21000000.bed");
+		generateSamFileHeader();
 	}
 
 	/**
@@ -79,7 +90,28 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 				mapper);
 		setDriver(mDriver);
 
-		super.beforeMethod();
+		addCacheToDriver();
+	}
+
+	/**
+	 * Tests the {@link HadoopPipelineMapper} with a few reads to allow for faster bug-fixing if something would go
+	 * wrong with the full dataset.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testValidMapperRunWithMiniInputData() throws IOException
+	{
+		// Generate expected output.
+		List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
+				alignedReadsMiniL1, groups);
+
+		// Run mapper.
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataMiniL1);
+		List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
+
+		// Validate output.
+		validateOutput(output, expectedResults);
 	}
 
 	/**
@@ -88,11 +120,11 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * @throws IOException
 	 */
 	@Test
-	public void testMapperWithSingleSample() throws IOException
+	public void testValidMapperRun() throws IOException
 	{
 		// Generate expected output.
 		List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
-				alignedReadsL1, groupsSet1);
+				alignedReadsL1, groups);
 
 		// Run mapper.
 		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataL1);
@@ -181,6 +213,47 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		}
 
 		return expectedMapperOutput;
+	}
+
+	/**
+	 * Writes the pairs to stdout for manual validation.
+	 * 
+	 * @param pairsList
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
+	 */
+	private void printOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> pairsList)
+	{
+		printOutput(pairsList, pairsList.size());
+	}
+
+	/**
+	 * Writes the pairs to stdout for manual validation.
+	 * 
+	 * @param pairsList
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
+	 * @param limit
+	 *            {@code int} the number of pairs to write to stdout.
+	 */
+	private void printOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> pairsList, int limit)
+	{
+		// If the limit is higher than the actual list size, resets the limit.
+		if (limit > pairsList.size()) limit = pairsList.size();
+
+		System.out.format("%-36s%s%n", "region", "SAMRecord");
+		System.out.format("%-8s %-8s %-8s%n", "contig", "start", "end");
+
+		// Prints the results.
+		for (int i = 0; i < limit; i++)
+		{
+			BEDFeature group = pairsList.get(i).getFirst().get();
+			SAMRecord record = pairsList.get(i).getSecond().get();
+			setHeaderForRecord(record);
+
+			System.out.format("%8s:%8d:%8d%10s%s%n", group.getContig(), group.getStart(), group.getEnd(), "",
+					record.getSAMString().trim());
+		}
 	}
 
 	/**

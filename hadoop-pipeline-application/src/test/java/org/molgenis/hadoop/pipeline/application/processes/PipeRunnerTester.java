@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.apache.log4j.WriterAppender;
+import org.molgenis.hadoop.pipeline.application.TestFile;
+import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
@@ -47,8 +49,8 @@ public class PipeRunnerTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		fastqDataL1 = readFileAsByteArray("input_fastq/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz");
-		expectedBwaResultsL1 = readSamFile("expected_bwa_outputs/output_L1.sam");
+		fastqDataL1 = TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_L1);
+		expectedBwaResultsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
 	}
 
 	/**
