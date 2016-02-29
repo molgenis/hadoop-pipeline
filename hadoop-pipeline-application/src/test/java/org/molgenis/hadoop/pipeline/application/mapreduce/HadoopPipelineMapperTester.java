@@ -281,7 +281,8 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 			// header), making it incomplete and the comparison fail. The SAMString is the vital part that is used when
 			// generating the output files and I/O PipeRunner processes, so should be valid. The header information is
 			// generated using distributed cache data within the reducer/output writer, so mapper output is expected to
-			// be missing this header information.
+			// be missing this header information. Other header information is not compared as this is manually added
+			// (as the SAMRecordWritable removes the header information during serialization).
 			setHeaderForRecord(output.get(i).getSecond().get());
 			Assert.assertEquals(output.get(i).getSecond().get().getSAMString(),
 					expectedResults.get(i).getSecond().get().getSAMString());
