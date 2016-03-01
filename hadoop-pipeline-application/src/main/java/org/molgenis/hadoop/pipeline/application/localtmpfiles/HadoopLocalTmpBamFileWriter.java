@@ -1,6 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.localtmpfiles;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
@@ -15,12 +16,19 @@ import htsjdk.samtools.util.ProgressLoggerInterface;
 /**
  * Creates a bam file locally on the node.
  */
-public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFileWriter> implements SAMFileWriter
+public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFileWriter, SAMRecord>
+		implements SAMFileWriter, WritableWriter<SAMRecordWritable>
 {
 	/**
 	 * Header of the bam file.
 	 */
 	SAMFileHeader header;
+
+	@Override
+	public SAMFileHeader getFileHeader()
+	{
+		return header;
+	}
 
 	/**
 	 * Generates a new {@link HadoopLocalTmpBamFileWriter} instance.
@@ -40,41 +48,55 @@ public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFil
 	}
 
 	/**
-	 * Adds a {@link SAMRecord} to the tmp file.
+	 * Add a {@link SAMRecord} to the {@link SAMFileWriter}. Does exactly the same as {@link #add(SAMRecord)}, but is
+	 * added to be conform with {@link SAMFileWriter}.
 	 */
 	@Override
 	public void addAlignment(SAMRecord alignment)
 	{
-		writer.addAlignment(alignment);
+		add(alignment);
 	}
 
 	/**
-	 * Adds a {@link SAMRecord} to the tmp file.
-	 */
-	public void addAlignment(SAMRecordWritable alignment)
-	{
-		writer.addAlignment(alignment.get());
-	}
-
-	/**
-	 * Retrieve the {@link SAMFileHeader}.
+	 * Add a {@link SAMRecord} to the {@link SAMFileWriter}.
 	 */
 	@Override
-	public SAMFileHeader getFileHeader()
+	public void add(SAMRecord item)
 	{
-		return header;
+		writer.addAlignment(item);
+	}
+
+	/**
+	 * Add a {@link SAMRecordWritable} to the {@link SAMFileWriter}.
+	 */
+	@Override
+	public void addWritable(SAMRecordWritable item)
+	{
+		add(item.get());
+	}
+
+	/**
+	 * Add multiple {@link SAMRecordWritable}{@code s} to the {link SAMFileWriter}.
+	 */
+	@Override
+	public void addWritables(Iterator<SAMRecordWritable> items)
+	{
+		while (items.hasNext())
+		{
+			addWritable(items.next());
+		}
 	}
 
 	@Override
 	public void setProgressLogger(ProgressLoggerInterface progress)
 	{
-		// No progress logger is used, so method does nothing.
+		writer.setProgressLogger(progress);
 	}
 
 	@Override
 	public void close()
 	{
-		// Overrides close() of TmpFileWriter as SAMFileWriter requires no exceptions to be thrown.
+		// Overrides close() of HadoopLocalTmpFileWriter as SAMFileWriter requires no exceptions to be thrown.
 		writer.close();
 	}
 }
