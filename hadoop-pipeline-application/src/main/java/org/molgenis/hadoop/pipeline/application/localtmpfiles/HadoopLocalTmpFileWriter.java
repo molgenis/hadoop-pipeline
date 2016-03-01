@@ -9,10 +9,10 @@ import org.apache.hadoop.fs.FileUtil;
 /**
  * Abstract class for creating/writing to node-local temporary files on a Hadoop cluster.
  * 
- * @param <K>
+ * @param <T>
  *            extends {@link Closeable}
  */
-public abstract class HadoopLocalTmpFileWriter<K extends Closeable> implements Closeable
+public abstract class HadoopLocalTmpFileWriter<T extends Closeable> implements Closeable
 {
 	/**
 	 * The created temporary file.
@@ -22,7 +22,7 @@ public abstract class HadoopLocalTmpFileWriter<K extends Closeable> implements C
 	/**
 	 * The writer used to write to the file.
 	 */
-	K writer;
+	T writer;
 
 	File getFile()
 	{
