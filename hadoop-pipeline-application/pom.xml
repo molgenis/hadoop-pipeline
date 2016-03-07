@@ -90,17 +90,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.mrunit</groupId>
 			<artifactId>mrunit</artifactId>
 			<version>1.1.0</version>
 			<classifier>hadoop2</classifier>
 			<scope>test</scope>
 		</dependency>
-		<!-- Possibly for TestNG MRUnit MultipleOutputs testing, though currently bugged: https://issues.apache.org/jira/browse/MRUNIT-213 -->
-		<!-- <dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-testng</artifactId>
-			<version>1.6.3</version>
-		</dependency> -->
 	</dependencies>
 </project>
