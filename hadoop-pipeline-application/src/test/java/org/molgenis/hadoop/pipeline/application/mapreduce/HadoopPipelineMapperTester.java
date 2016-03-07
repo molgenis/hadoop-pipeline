@@ -203,12 +203,8 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 			// assert on BEDFeature would compare whether memory address is the same.
 			Assert.assertEquals(output.get(i).getFirst(), expectedResults.get(i).getFirst());
 
-			// assert on SAMRecord SAMString as SAMRecordWritable removes certain data from each record (such as the
-			// header), making it incomplete and the comparison fail. The SAMString is the vital part that is used when
-			// generating the output files and I/O PipeRunner processes, so should be valid. The header information is
-			// generated using distributed cache data within the reducer/output writer, so mapper output is expected to
-			// be missing this header information. Other header information is not compared as this is manually added
-			// (as the SAMRecordWritable removes the header information during serialization).
+			// Adds a header to the SAMRecords so that getSAMString works again and compares whether this String is
+			// equal compared to what is expected. See also the JavaDoc from setHeaderForRecord().
 			setHeaderForRecord(output.get(i).getSecond().get());
 			Assert.assertEquals(output.get(i).getSecond().get().getSAMString(),
 					expectedResults.get(i).getSecond().get().getSAMString());

@@ -10,6 +10,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.mapreduce.MapReduceDriver;
+import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
@@ -17,12 +18,19 @@ import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymli
 import org.molgenis.hadoop.pipeline.application.partitioners.BedFeatureSamRecordGroupingComparator;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.tribble.bed.BEDFeature;
 
+/**
+ * Tests the whole MapReduce process as a whole. Includes the {@link HadoopPipelineMapper},
+ * {@link HadoopPipelineReducer} and {@link BedFeatureSamRecordGroupingComparator}. IMPORTANT: Tests in this class are
+ * disabled until a fix is found for {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
+ */
 public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 {
 	/**
@@ -56,8 +64,6 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 		fastqDataMiniL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_MINI_L1));
 		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
 		groups = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
-
-		generateSamFileHeader();
 	}
 
 	/**
@@ -80,21 +86,44 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 		addCacheToDriver();
 	}
 
-	// /**
-	// * Tests the {@link HadoopPipelineMapper} when a single sample is given.
-	// *
-	// * @throws IOException
-	// */
-	// @Test
-	// public void testMapperWithSingleSample() throws IOException
-	// {
-	// // Run MapReduce job.
-	// mrDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataL1);
-	// List<Pair<NullWritable, SAMRecordWritable>> output = mrDriver.run();
-	//
-	// mrDriver.runTest();
-	//
-	// // Validate output.
-	// validateOutput(output, expectedResults);
-	// }
+	/**
+	 * Tests the {@link HadoopPipelineMapper} when a single sample is given. Disabled until a fix is found for
+	 * {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
+	 *
+	 * @throws IOException
+	 */
+	@Test(enabled = false)
+	public void testMapReduceJobWithSingleSample() throws IOException
+	{
+		// TODO: Add test.
+	}
+
+	/**
+	 * Compares the output from the driver with the expected output. Note that the {@link SAMRecordWritable}{@code s}
+	 * from the expected output are ignored during comparison (as the actual output discarded these, but in the expected
+	 * data it is still needed for sorting to simulate the "shuffle & sort" phase between the mapper and reducer. This
+	 * sorting should be done using {@link #sortMapperOutput(List)} before calling this method.
+	 * 
+	 * @param output
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link NullWritable}{@code , } {@link SAMRecordWritable}
+	 *            {@code >>}
+	 * @param expectedResults
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>}
+	 */
+	private void validateOutput(List<Pair<NullWritable, SAMRecordWritable>> output,
+			List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> expectedResults)
+	{
+		Assert.assertEquals(output.size(), expectedResults.size());
+
+		// Compares the actual output data with the expected output data.
+		for (int i = 0; i < output.size(); i++)
+		{
+			// Adds a header to the SAMRecords so that getSAMString works again and compares whether this String is
+			// equal compared to what is expected. See also the JavaDoc from setHeaderForRecord().
+			setHeaderForRecord(output.get(i).getSecond().get());
+			Assert.assertEquals(output.get(i).getSecond().get().getSAMString(),
+					expectedResults.get(i).getSecond().get().getSAMString());
+		}
+	}
 }

@@ -3,6 +3,8 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.io.NullWritable;
@@ -10,6 +12,7 @@ import org.apache.hadoop.mrunit.TestDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
 import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
@@ -56,8 +59,13 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Sets the header created in {@link #generateSamFileHeader()} for the {@link SAMRecord}. If
-	 * {@link #generateSamFileHeader()} was not called yet, do that first!
+	 * Sets the header created in {@link #generateSamFileHeader()} for the {@link SAMRecord}. As
+	 * {@link SAMRecordWritable} removes the {@link SAMFileHeader} from each {@link SAMRecord} during serialization,
+	 * some vital information needs to be added again before {@link SAMRecord#getSAMString()} can be used again. In the
+	 * actual application this header information is generated using
+	 * {@link SamFileHeaderGenerator#retrieveSamFileHeader(org.apache.hadoop.mapreduce.TaskAttemptContext)}. The
+	 * {@link SAMRecord#getSAMString()} is the vital part that is used when generating the output files and I/O
+	 * PipeRunner processes, so is the most important part to be checked whether it is valid.
 	 *
 	 * @param record
 	 *            {@link SAMRecord}
@@ -164,6 +172,30 @@ public class HadoopPipelineTester extends Tester
 		}
 
 		return expectedMapperOutput;
+	}
+
+	/**
+	 * Sorts the mapper output similar to the shuffle & sort phase using the composite key.
+	 * 
+	 * @param output
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
+	 */
+	void sortMapperOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> output)
+	{
+		Collections.sort(output, new Comparator<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>>()
+		{
+			/**
+			 * Sorts the {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+			 * {@link SAMRecordWritable}{@code >>} based only on the key ({@link BedFeatureSamRecordStartWritable}).
+			 */
+			@Override
+			public int compare(Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable> o1,
+					Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable> o2)
+			{
+				return o1.getFirst().compareTo(o2.getFirst());
+			};
+		});
 	}
 
 	/**
