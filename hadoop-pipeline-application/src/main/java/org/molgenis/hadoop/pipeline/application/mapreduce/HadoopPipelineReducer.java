@@ -6,7 +6,7 @@ import java.util.Iterator;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.tribble.bed.BEDFeature;
@@ -15,7 +15,7 @@ import htsjdk.tribble.bed.BEDFeature;
  * Hadoop MapReduce Job reducer.
  */
 public class HadoopPipelineReducer
-		extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
+		extends Reducer<BedFeatureSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
 {
 	/**
 	 * Collector for reducer output.
@@ -36,7 +36,7 @@ public class HadoopPipelineReducer
 	 * Function run on a key with an {@link Iterable} containing the values belonging to that key.
 	 */
 	@Override
-	protected void reduce(BedFeatureWritable key, Iterable<SAMRecordWritable> values, Context context)
+	protected void reduce(BedFeatureSamRecordStartWritable key, Iterable<SAMRecordWritable> values, Context context)
 			throws IOException, InterruptedException
 	{
 		// Retrieve the BEDFeature from the Writable.
@@ -46,7 +46,8 @@ public class HadoopPipelineReducer
 		Iterator<SAMRecordWritable> iterator = values.iterator();
 		while (iterator.hasNext())
 		{
-			outputCollector.write(NullWritable.get(), iterator.next(), generateOutputFileName(bedFeature));
+			outputCollector.write("recordsPerRegion", NullWritable.get(), iterator.next(),
+					generateOutputFileName(bedFeature));
 		}
 	}
 
