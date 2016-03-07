@@ -19,7 +19,7 @@ public class BedFeatureSamRecordGroupingComparator extends WritableComparator
 	@SuppressWarnings("rawtypes")
 	@Override
 	/**
-	 * This comparator controls which keys are grouped together into a single call to the reduce() method
+	 * This comparator controls which keys are grouped together into a single call to the reduce() method.
 	 */
 	public int compare(WritableComparable first, WritableComparable second)
 	{
