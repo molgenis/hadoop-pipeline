@@ -133,7 +133,7 @@ public class HadoopPipelineTester extends Tester
 		{
 			BEDFeature group = pairsList.get(i).getFirst().get();
 			SAMRecord record = pairsList.get(i).getSecond().get();
-			// setHeaderForRecord(record); // Requires mocks?
+			setHeaderForRecord(record);
 
 			System.out.format("%8s:%8d:%8d%10s%s%n", group.getContig(), group.getStart(), group.getEnd(), "",
 					record.getSAMString().trim());
