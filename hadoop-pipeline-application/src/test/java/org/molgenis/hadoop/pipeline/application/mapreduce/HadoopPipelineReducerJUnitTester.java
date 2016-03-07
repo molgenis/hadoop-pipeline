@@ -29,9 +29,10 @@ import htsjdk.tribble.bed.BEDFeature;
 import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
- * As {@link MultipleOutputs} requires {@code @RunWith(}{@link PowerMockRunner}{@code .class}) and did not work (after
- * some initial efforts) using TestNG (see https://issues.apache.org/jira/browse/MRUNIT-213), JUnit was used for this
- * test. Do note that {@link #addCacheToDriver()} cannot be used (without some fixes first) as this causes a
+ * Tester for the {@link HadoopPipelineReducer}. As {@link MultipleOutputs} requires {@code @RunWith(}
+ * {@link PowerMockRunner}{@code .class}) and did not work (after some initial efforts) using TestNG (see
+ * https://issues.apache.org/jira/browse/MRUNIT-213), JUnit was used for this test. Do note that
+ * {@link #addCacheToDriver()} cannot be used (without some fixes first) as this causes a
  * {@link javax.security.auth.login.LoginException}{@code : Can't find user name}. As the current implementation of the
  * {@link HadoopPipelineReducer} does not use the {@link DistributedCacheHandler} (and the custom
  * {@link FileCacheSymlinkReduceDriver} is therefore not needed), this does not cause any problems.
