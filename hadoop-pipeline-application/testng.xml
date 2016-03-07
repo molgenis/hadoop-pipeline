@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="AllTests">
+	<test name="TestNGTests">
+		<packages>
+			<package name="org.molgenis.hadoop.pipeline.*"/>
+		</packages>
+	</test>
+	<test name="JUnitTests" junit="true">
+		<packages>
+			<package name="org.molgenis.hadoop.pipeline.*"/>
+		</packages>
+	</test>
+</suite> 
