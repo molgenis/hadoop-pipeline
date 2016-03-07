@@ -35,6 +35,16 @@ public class HadoopPipelineTester extends Tester
 	 */
 	private static SAMFileHeader samFileHeader;
 
+	/**
+	 * Runs some initial vital code for static variables/methods.
+	 */
+	static
+	{
+		samFileHeader = new SAMFileHeader();
+		samFileHeader
+				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
+	}
+
 	TestDriver<?, ?, ?> getDriver()
 	{
 		return driver;
@@ -43,17 +53,6 @@ public class HadoopPipelineTester extends Tester
 	void setDriver(TestDriver<?, ?, ?> driver)
 	{
 		this.driver = driver;
-	}
-
-	/**
-	 * Generates a {@code samFileHeader} that can be set for {@link SAMRecord}{@code s} which were serialized using the
-	 * {@link SAMRecordWritable}. In this way, {@link SAMRecord#getSAMString()} can be used again.
-	 */
-	public static void generateSamFileHeader()
-	{
-		samFileHeader = new SAMFileHeader();
-		samFileHeader
-				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
 	}
 
 	/**
@@ -93,7 +92,7 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Writes the pairs to stdout for manual validation.
+	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
 	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
@@ -105,13 +104,13 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Writes the pairs to stdout for manual validation.
+	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
 	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param limit
-	 *            {@code int} the number of pairs to write to stdout.
+	 *            {@code int} - The number of pairs to write to stdout.
 	 */
 	void printOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> pairsList, int limit)
 	{
@@ -134,12 +133,12 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Generates the expected output data.
+	 * Generates the expected {@link HadoopPipelineMapper} output.
 	 * 
 	 * @param bwaOutput
-	 *            {@link List}{@code <}{@link SAMRecord}{@code >} bwa output used to base expected output on.
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >} - The bwa output used to base expected output on.
 	 * @param groups
-	 *            {@link List}{@code <}{@link BEDFeature}{@code >} groups used for defining keys.
+	 *            {@link List}{@code <}{@link BEDFeature}{@code >} - The groups used for defining keys.
 	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
 	 *         {@link SAMRecordWritable} {@code >>}
 	 */
@@ -167,6 +166,17 @@ public class HadoopPipelineTester extends Tester
 		return expectedMapperOutput;
 	}
 
+	/**
+	 * Filter out all key:value pairs from (expected) mapper output that do not match to the given
+	 * {@code regionToKeepWritable}.
+	 * 
+	 * @param mapperOutput
+	 *            {@link List}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }{@link SAMRecordWritable}
+	 *            {@code >>}
+	 * @param regionToKeep
+	 *            {@link BedFeatureSamRecordStartWritable}
+	 * @return {@link List}{@code <}{@link SAMRecordWritable}{@code >}
+	 */
 	public List<SAMRecordWritable> filterMapperOutput(
 			List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> mapperOutput,
 			BedFeatureSamRecordStartWritable regionToKeepWritable)
@@ -189,6 +199,13 @@ public class HadoopPipelineTester extends Tester
 		return recordsToKeep;
 	}
 
+	/**
+	 * Converts a {@link SAMRecord} to a {@link SAMRecordWritable}.
+	 * 
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @return {@link SAMRecordWritable}
+	 */
 	private SAMRecordWritable convertSamRecordToWritable(SAMRecord record)
 	{
 		SAMRecordWritable writable = new SAMRecordWritable();
@@ -196,11 +213,27 @@ public class HadoopPipelineTester extends Tester
 		return writable;
 	}
 
+	/**
+	 * Generates a {@link BedFeatureSamRecordStartWritable}.
+	 * 
+	 * @param region
+	 *            {@link BEDFeature}
+	 * @param recordStart
+	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
+	 * @return {@link BedFeatureSamRecordStartWritable}
+	 */
 	BedFeatureSamRecordStartWritable generateBedFeatureSamRecordStartWritable(BEDFeature region, int recordStart)
 	{
 		return new BedFeatureSamRecordStartWritable(region, generateSamRecordWithStart(recordStart));
 	}
 
+	/**
+	 * Generate a {@link SAMRecord} with only a value for {@link SAMRecord#getStart()}.
+	 * 
+	 * @param recordStart
+	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
+	 * @return {@link SAMRecord}
+	 */
 	private SAMRecord generateSamRecordWithStart(int recordStart)
 	{
 		SAMRecord record = new SAMRecord(null);
@@ -208,6 +241,14 @@ public class HadoopPipelineTester extends Tester
 		return record;
 	}
 
+	/**
+	 * Generates the expected {@link HadoopPipelineReducer} output.
+	 * 
+	 * @param records
+	 *            {@link List}{@code <}{@link SAMRecordWritable}{@code >}
+	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link NullWritable}{@code , }{@link SAMRecordWritable}
+	 *         {@code >>}
+	 */
 	List<Pair<NullWritable, SAMRecordWritable>> generateExpectedReducerOutput(List<SAMRecordWritable> records)
 	{
 		List<Pair<NullWritable, SAMRecordWritable>> expectedReducerOutput = new ArrayList<Pair<NullWritable, SAMRecordWritable>>();

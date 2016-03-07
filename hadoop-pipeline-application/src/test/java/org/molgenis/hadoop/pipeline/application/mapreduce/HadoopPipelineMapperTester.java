@@ -72,8 +72,6 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
 		alignedReadsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
 		groups = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
-
-		generateSamFileHeader();
 	}
 
 	/**
