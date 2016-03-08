@@ -1,5 +1,7 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
+import static java.util.Objects.requireNonNull;
+
 import htsjdk.samtools.SAMReadGroupRecord;
 
 /**
@@ -114,6 +116,10 @@ public class Sample
 	 */
 	Sample(String externalSampleId, String sequencer, int sequencingStartDate, int run, String flowcell, int lane)
 	{
+		requireNonNull(externalSampleId);
+		requireNonNull(sequencer);
+		requireNonNull(flowcell);
+
 		this.externalSampleId = externalSampleId;
 		this.sequencer = sequencer;
 		this.sequencingStartDate = sequencingStartDate;
