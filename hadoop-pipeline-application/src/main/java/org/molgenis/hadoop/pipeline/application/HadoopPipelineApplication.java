@@ -11,6 +11,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -91,6 +92,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		logger.debug("mapreduce.input.fileinputformat.input.dir.recursive: "
 				+ getConf().get("mapreduce.input.fileinputformat.input.dir.recursive"));
 
+		// Retrieves file system.
 		FileSystem fileSys = FileSystem.get(getConf());
 
 		// Digests application-specific command line arguments. Throws an Exception if the input arguments are invalid.
@@ -112,6 +114,10 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		}
 		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
+		// Define MultipleOutputs used to write results back to HDFS.
+		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", BamOutputFormat.class, NullWritable.class,
+				SAMRecordWritable.class);
+
 		// Sets custom partitioner & grouping comparator so it only uses the natural key.
 		// Sort comparator uses default behavior, so uses compareTo of Writable (composite key).
 		job.setPartitionerClass(BedFeatureSamRecordPartitioner.class);
@@ -125,7 +131,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setInputFormatClass(WholeFileInputFormat.class);
 		job.setOutputFormatClass(BamOutputFormat.class);
 
-		// Sets Mapper/Reducer output key/value.
+		// Sets Mapper/Reducer output keys/values.
 		job.setMapOutputKeyClass(BedFeatureSamRecordStartWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
