@@ -5,77 +5,77 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
+
 import htsjdk.samtools.SAMRecord;
-import htsjdk.tribble.bed.BEDFeature;
 
 /**
- * Can retrieve the {@link BEDFeature}{@code s} a {@link SAMRecord} belongs to when grouping a {@link SAMRecord} on
- * their alignment position and the {@link BEDFeature}{@code s} defining the ranges for each individual group.
+ * Can retrieve the {@link Region}{@code s} a {@link SAMRecord} belongs to when grouping a {@link SAMRecord} on their
+ * alignment position and the {@link Region}{@code s} defining the ranges for each individual group.
  */
 public class SamRecordGroupsRetriever
 {
 	/**
 	 * Stores the groups to which a {@link SAMRecord} can match to.
 	 */
-	List<BEDFeature> groups;
+	List<Region> regions;
 
 	/**
-	 * Create a new instance using a set of {@link BEDFeature}{@code s} which can be used for retrieving the
-	 * {@link BEDFeature}{@code s} a specific {@link SAMRecord} belongs to.
+	 * Create a new instance using a set of {@link Region}{@code s} which can be used for retrieving the {@link Region}
+	 * {@code s} a specific {@link SAMRecord} belongs to.
 	 * 
 	 * @param groups
-	 *            {@link List}{@code <}{@link BEDFeature}{@code >} groups to be used for matching with a
-	 *            {@link SAMRecord}.
+	 *            {@link List}{@code <}{@link Region}{@code >} groups to be used for matching with a {@link SAMRecord}.
 	 */
-	SamRecordGroupsRetriever(List<BEDFeature> groups)
+	SamRecordGroupsRetriever(List<Region> regions)
 	{
-		this.groups = requireNonNull(groups);
+		this.regions = requireNonNull(regions);
 	}
 
 	/**
-	 * Returns a {@link List} containing all {@ BEDFeature}{@code s} which range match with the given {@link SAMRecord}.
-	 * These also include {@link BEDFeature}{@code s} which partially match with the given {@link SAMRecord}.
+	 * Returns a {@link List} containing all {@ Region}{@code s} which range match with the given {@link SAMRecord}.
+	 * These also include {@link Region}{@code s} which partially match with the given {@link SAMRecord}.
 	 * 
 	 * @param record
-	 *            {@link SAMRecord} to be used to find the {@link BEDFeature}{@code s} that are within range of it.
-	 * @return {@link List}{@code <}{@link BEDFeature}{@code >} the {@link BEDFeature}{@code s} within range of the
-	 *         given {@link SAMRecord}. If no matches were found, returns an empty {@link List}.
+	 *            {@link SAMRecord} - To be used to find the {@link Region}{@code s} that are within range of it.
+	 * @return {@link List}{@code <}{@link Region}{@code >} - The {@link Region}{@code s} within range of the given
+	 *         {@link SAMRecord}. If no matches were found, returns an empty {@link List}.
 	 */
-	List<BEDFeature> retrieveGroupsWithinRange(SAMRecord record)
+	List<Region> retrieveGroupsWithinRange(SAMRecord record)
 	{
-		List<BEDFeature> matchingGroups = new ArrayList<BEDFeature>();
+		List<Region> matchingRegions = new ArrayList<>();
 
 		// Retrieves the groups that match the contig of the SAMRecord.
-		List<BEDFeature> contigGroups = getGroupsOfContig(record);
+		List<Region> contigRegions = getGroupsOfContig(record);
 
 		// If there are no groups for the contig of the SAMRecord, immediately returns the empty List.
-		if (contigGroups.size() == 0)
+		if (contigRegions.size() == 0)
 		{
-			return contigGroups;
+			return contigRegions;
 		}
 
-		// Starting from the first BEDFeature which has it's end value higher or equal to the SAMRecord start value,
-		// continues through the remaining BEDFeatures until a BEDFeature is found which start value is higher than the
-		// SAMRecord end value or if no remaining BEDFeatures are present. If the search for the first BEDFeature
-		// returned null, skips looking for any other BEDFeatures that might match and simply returns and empty
+		// Starting from the first Region which has it's end value higher or equal to the SAMRecord start value,
+		// continues through the remaining Region until a Region is found which start value is higher than the
+		// SAMRecord end value or if no remaining Region are present. If the search for the first Region
+		// returned null, skips looking for any other Region that might match and simply returns and empty
 		// List.
-		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, contigGroups);
+		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, contigRegions);
 
 		// Checks if a single match was found. Skips further looking.
 		if (firstGroupIndex != null)
 		{
-			// Goes through the following BEDFeatures looking for additional matches.
-			for (int i = firstGroupIndex; i < contigGroups.size(); i++)
+			// Goes through the following Region looking for additional matches.
+			for (int i = firstGroupIndex; i < contigRegions.size(); i++)
 			{
-				BEDFeature group = contigGroups.get(i);
+				Region group = contigRegions.get(i);
 				if (group.getStart() > record.getEnd())
 				{
 					break;
 				}
-				matchingGroups.add(group);
+				matchingRegions.add(group);
 			}
 		}
-		return matchingGroups;
+		return matchingRegions;
 	}
 
 	/**
@@ -84,21 +84,21 @@ public class SamRecordGroupsRetriever
 	 * 
 	 * @param record
 	 *            {@link SAMRecord}
-	 * @return {@link List}{@code <}{@link BEDFeature}{@code >} containing groups where the
-	 *         {@link BEDFeature#getContig()} matches the {@link SAMRecord#getContig()}.
+	 * @return {@link List}{@code <}{@link Region}{@code >} containing groups where the {@link Region#getContig()}
+	 *         matches the {@link SAMRecord#getContig()}.
 	 */
-	private List<BEDFeature> getGroupsOfContig(SAMRecord record)
+	private List<Region> getGroupsOfContig(SAMRecord record)
 	{
-		List<BEDFeature> contigGroups = new ArrayList<BEDFeature>();
+		List<Region> contigRegions = new ArrayList<>();
 
-		for (BEDFeature group : groups)
+		for (Region region : regions)
 		{
-			if (record.getContig().equals(group.getContig()))
+			if (record.getContig().equals(region.getContig()))
 			{
-				contigGroups.add(group);
+				contigRegions.add(region);
 			}
 		}
-		return contigGroups;
+		return contigRegions;
 	}
 
 	/**
@@ -110,19 +110,19 @@ public class SamRecordGroupsRetriever
 	 *            used for position comparison with the given {@code recordStart}.
 	 * @return {@code int} value if position was found, otherwise {@code null}.
 	 */
-	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(SAMRecord record, List<BEDFeature> list)
+	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(SAMRecord record, List<Region> list)
 	{
 		return retrieveFirstGroupWithEndHigherThanRecordStart(record.getStart(), list, 0, list.size());
 	}
 
 	/**
-	 * Recursive function that returns the {@code index} as {@link Integer} of the first {@link BEDFeature} that has a
-	 * {@link BEDFeature#getEnd()} that is higher than the {@link SAMRecord#getStart()}.
+	 * Recursive function that returns the {@code index} as {@link Integer} of the first {@link Region} that has a
+	 * {@link Region#getEnd()} that is higher than the {@link SAMRecord#getStart()}.
 	 * 
 	 * @param recordStart
 	 *            {@code final} {@link Integer} value stored in {@link SAMRecord#getStart()}.
 	 * @param list
-	 *            {@link List}{@code <}{@link BEDFeature}{@code >} used for position comparison with the given
+	 *            {@link List}{@code <}{@link Region}{@code >} used for position comparison with the given
 	 *            {@code recordStart}.
 	 * @param low
 	 *            {@code int} bottom position to be used for {@code list}.
@@ -130,7 +130,7 @@ public class SamRecordGroupsRetriever
 	 *            {@code int} upper position to be used for {@code list}.
 	 * @return {@code int} value if position was found, otherwise {@code null}.
 	 */
-	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(final Integer recordStart, List<BEDFeature> list,
+	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(final Integer recordStart, List<Region> list,
 			int low, int high)
 	{
 		// Retrieves basic information for further usage.
@@ -140,11 +140,11 @@ public class SamRecordGroupsRetriever
 		// Retrieves end value of the group present in the middle of the list.
 		int middleGroupEnd = list.get(middle).getEnd();
 
-		// If middle is lower than 1, the remaining List only contains 1 remaining BEDFeature. Ignores comparisons using
+		// If middle is lower than 1, the remaining List only contains 1 remaining Region. Ignores comparisons using
 		// multiple list elements.
 		if (size < 2)
 		{
-			// If the only remaining BEDfeature has a higher end value than the record start, returns it's position.
+			// If the only remaining Region has a higher end value than the record start, returns it's position.
 			if (middleGroupEnd >= recordStart)
 			{
 				return middle;
@@ -177,7 +177,7 @@ public class SamRecordGroupsRetriever
 				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, 0, middle);
 			}
 		}
-		// Returns null if the last remaining BEDFeature does not have an end value higher than the sam record start
+		// Returns null if the last remaining Region does not have an end value higher than the sam record start
 		// value.
 		return null;
 	}

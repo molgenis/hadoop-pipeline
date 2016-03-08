@@ -2,6 +2,7 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.io.NullWritable;
@@ -17,16 +18,15 @@ import org.junit.runner.RunWith;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkReduceDriver;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
-import htsjdk.tribble.bed.BEDFeature;
-import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
  * Tester for the {@link HadoopPipelineReducer}. As {@link MultipleOutputs} requires {@code @RunWith(}
@@ -44,7 +44,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapReduceDriver allowing the mapper to be tested.
 	 */
-	private ReduceDriver<BedFeatureSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> rDriver;
+	private ReduceDriver<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> rDriver;
 
 	/**
 	 * Aligned reads results belonging to the mini test input dataset.
@@ -54,13 +54,13 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	/**
 	 * A list containing grouping information.
 	 */
-	private static List<BEDFeature> groups;
+	private static List<Region> regions;
 
 	@BeforeClass
 	public static void beforeClass() throws IOException
 	{
 		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
-		groups = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
+		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
 	}
 
 	/**
@@ -71,8 +71,8 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	 */
 	public void beforeMethod() throws URISyntaxException
 	{
-		Reducer<BedFeatureSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
-		rDriver = new ReduceDriver<BedFeatureSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
+		Reducer<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
+		rDriver = new ReduceDriver<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
 				reducer);
 		setDriver(rDriver);
 	}
@@ -101,11 +101,11 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 		beforeMethod();
 
 		// Generate input.
-		List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
-				alignedReadsMiniL1, groups);
-		sortMapperOutput(mapperOutput);
-		BedFeatureSamRecordStartWritable inputKey = generateBedFeatureSamRecordStartWritable(
-				new FullBEDFeature("1", 800001, 1000000), 812735);
+		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
+				alignedReadsMiniL1, regions);
+		Collections.sort(mapperOutput);
+		RegionSamRecordStartWritable inputKey = generateRegionSamRecordStartWritable(new Region("1", 800001, 1000000),
+				812735);
 		List<SAMRecordWritable> inputValues = filterMapperOutput(mapperOutput, inputKey);
 
 		// Generate expected output.

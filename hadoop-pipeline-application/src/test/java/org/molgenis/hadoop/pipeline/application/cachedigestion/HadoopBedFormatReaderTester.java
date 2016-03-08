@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
+import org.molgenis.hadoop.pipeline.application.Tester;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import htsjdk.tribble.bed.BEDFeature;
-import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
  * Tester for {@link HadoopBedFormatFileReader}.
  */
-public class HadoopBedFormatReaderTester extends BedFeatureTester
+public class HadoopBedFormatReaderTester extends Tester
 {
 	/**
 	 * Reader to be tested.
@@ -22,14 +20,14 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	private HadoopBedFormatFileReader reader;
 
 	/**
-	 * Expected bed valid results.
+	 * Regions that are expected as output.
 	 */
-	private List<BEDFeature> expectedValidBed;
+	private List<Region> expectedRegions;
 
 	/**
-	 * Expected valid results when the 4th line does not have an end value.
+	 * egions that are expected as output when the 4th line of the bed file does not have an end value.
 	 */
-	private List<BEDFeature> expectedBedNoEndValueForFourthLine;
+	private List<Region> expectedRegionsNoEndValueForFourthLine;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
@@ -39,16 +37,17 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 		// IMPORTANT:
 		// BED-format is 0-based, start is inclusive, end is exclusive!
 		// BEDFeature is 1-based, start is inclusive, end is inclusive!
-		expectedValidBed = new ArrayList<BEDFeature>();
-		expectedValidBed.add(new FullBEDFeature("1", 1, 200000));
-		expectedValidBed.add(new FullBEDFeature("1", 200001, 400000));
-		expectedValidBed.add(new FullBEDFeature("1", 400001, 600000));
-		expectedValidBed.add(new FullBEDFeature("1", 600001, 800000));
-		expectedValidBed.add(new FullBEDFeature("1", 800001, 1000000));
+		// Region is generated from a BEDFeature.
+		expectedRegions = new ArrayList<Region>();
+		expectedRegions.add(new Region("1", 1, 200000));
+		expectedRegions.add(new Region("1", 200001, 400000));
+		expectedRegions.add(new Region("1", 400001, 600000));
+		expectedRegions.add(new Region("1", 600001, 800000));
+		expectedRegions.add(new Region("1", 800001, 1000000));
 
 		// Creates a different expected ArrayList when the 4th line does not contain an end value.
-		expectedBedNoEndValueForFourthLine = new ArrayList<BEDFeature>(expectedValidBed);
-		expectedBedNoEndValueForFourthLine.set(3, new FullBEDFeature("1", 600001, 600001));
+		expectedRegionsNoEndValueForFourthLine = new ArrayList<Region>(expectedRegions);
+		expectedRegionsNoEndValueForFourthLine.set(3, new Region("1", 600001, 600001));
 
 	}
 
@@ -61,11 +60,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testValidBedFile() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
+		Assert.assertEquals(actualRegions, expectedRegions);
 	}
 
 	/**
@@ -77,11 +76,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testUnsortedBedFile() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/unsorted_contig-start-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
+		Assert.assertEquals(actualRegions, expectedRegions);
 	}
 
 	/**
@@ -93,11 +92,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineEndingWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
+		Assert.assertEquals(actualRegions, expectedRegions);
 	}
 
 	/**
@@ -109,11 +108,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineWithoutEndValue() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedBedNoEndValueForFourthLine);
+		Assert.assertEquals(actualRegions, expectedRegionsNoEndValueForFourthLine);
 	}
 
 	/**
@@ -125,11 +124,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineWithoutEndValueThatEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedBedNoEndValueForFourthLine);
+		Assert.assertEquals(actualRegions, expectedRegionsNoEndValueForFourthLine);
 	}
 
 	/**
@@ -166,11 +165,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineThatAlsoContainsNameField() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
+		Assert.assertEquals(actualRegions, expectedRegions);
 	}
 
 	/**
@@ -182,11 +181,11 @@ public class HadoopBedFormatReaderTester extends BedFeatureTester
 	public void testBedFileWithLineThatAlsoContainsNameFieldAndEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<BEDFeature> actualBed = reader
+		List<Region> actualRegions = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		compareActualBedWithExpectedBed(actualBed, expectedValidBed);
+		Assert.assertEquals(actualRegions, expectedRegions);
 
 	}
 }

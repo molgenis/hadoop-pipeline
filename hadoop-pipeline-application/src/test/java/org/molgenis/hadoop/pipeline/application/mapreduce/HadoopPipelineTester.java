@@ -3,8 +3,6 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.io.NullWritable;
@@ -12,15 +10,15 @@ import org.apache.hadoop.mrunit.TestDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
-import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Contains general code of Mapper/Reducer testing.
@@ -103,10 +101,10 @@ public class HadoopPipelineTester extends Tester
 	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 */
-	void printOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> pairsList)
+	void printOutput(List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> pairsList)
 	{
 		printOutput(pairsList, pairsList.size());
 	}
@@ -115,12 +113,12 @@ public class HadoopPipelineTester extends Tester
 	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param limit
 	 *            {@code int} - The number of pairs to write to stdout.
 	 */
-	void printOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> pairsList, int limit)
+	void printOutput(List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> pairsList, int limit)
 	{
 		// If the limit is higher than the actual list size, resets the limit.
 		if (limit > pairsList.size()) limit = pairsList.size();
@@ -131,7 +129,7 @@ public class HadoopPipelineTester extends Tester
 		// Prints the results.
 		for (int i = 0; i < limit; i++)
 		{
-			BEDFeature group = pairsList.get(i).getFirst().get();
+			Region group = pairsList.get(i).getFirst().get();
 			SAMRecord record = pairsList.get(i).getSecond().get();
 			setHeaderForRecord(record);
 
@@ -146,28 +144,39 @@ public class HadoopPipelineTester extends Tester
 	 * @param bwaOutput
 	 *            {@link List}{@code <}{@link SAMRecord}{@code >} - The bwa output used to base expected output on.
 	 * @param groups
-	 *            {@link List}{@code <}{@link BEDFeature}{@code >} - The groups used for defining keys.
-	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Region}{@code >} - The groups used for defining keys.
+	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
 	 *         {@link SAMRecordWritable} {@code >>}
 	 */
-	List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> generateExpectedMapperOutput(
-			List<SAMRecord> bwaOutput, List<BEDFeature> groups)
+	List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> generateExpectedMapperOutput(List<SAMRecord> bwaOutput,
+			List<Region> regions)
 	{
-		List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>>();
+		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
 
-		for (SAMRecord record : bwaOutput)
+		for (int i = 0; i < bwaOutput.size(); i += 2)
 		{
-			for (BEDFeature group : groups)
+			SAMRecord record1 = bwaOutput.get(i);
+			SAMRecord record2 = bwaOutput.get(i + 1);
+
+			List<Region> outputRegions = new ArrayList<>();
+
+			for (Region region : regions)
 			{
-				if (record.getContig().equals(group.getContig())
-						&& ((record.getStart() >= group.getStart() && record.getStart() <= group.getEnd())
-								|| (record.getEnd() >= group.getStart() && record.getEnd() <= group.getEnd())))
+				// At least 1 of the read pair should match the contig name.
+				if (record1.getContig().equals(region.getContig()) || record2.getContig().equals(region.getContig()))
 				{
-					SAMRecordWritable writable = new SAMRecordWritable();
-					writable.set(record);
-					expectedMapperOutput.add(new Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>(
-							new BedFeatureSamRecordStartWritable(group, record), writable));
+					// If record1 or record2 is in range of the region, the region is added to the outputRegions.
+					if (!checkIfRecordIsInRegionRange(outputRegions, record1, region))
+					{
+						checkIfRecordIsInRegionRange(outputRegions, record2, region);
+					}
 				}
+			}
+
+			for (Region region : outputRegions)
+			{
+				addRecordToExpectedMapperOutput(expectedMapperOutput, record1, region);
+				addRecordToExpectedMapperOutput(expectedMapperOutput, record2, region);
 			}
 		}
 
@@ -175,27 +184,47 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Sorts the mapper output similar to the shuffle & sort phase using the composite key.
+	 * Checks whether the given {@code record} is in range of the {@code region}. If so, the {@code region} is added to
+	 * the {@code outputRegions}.
 	 * 
-	 * @param output
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
-	 *            {@link SAMRecordWritable}{@code >>}
+	 * @param outputRegions
+	 *            {@link List}{@code <}{@link Region}{@code >}
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @param region
+	 *            {@link Region}
+	 * @return {@code boolean} - True if a {@code record} was added to {@code outputRegions}, otherwise false.
 	 */
-	void sortMapperOutput(List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> output)
+	private boolean checkIfRecordIsInRegionRange(List<Region> outputRegions, SAMRecord record, Region region)
 	{
-		Collections.sort(output, new Comparator<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>>()
+		if ((record.getStart() >= region.getStart() && record.getStart() <= region.getEnd())
+				|| (record.getEnd() >= region.getStart() && record.getEnd() <= region.getEnd()))
 		{
-			/**
-			 * Sorts the {@link List}{@code <}{@link Pair}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }
-			 * {@link SAMRecordWritable}{@code >>} based only on the key ({@link BedFeatureSamRecordStartWritable}).
-			 */
-			@Override
-			public int compare(Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable> o1,
-					Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable> o2)
-			{
-				return o1.getFirst().compareTo(o2.getFirst());
-			};
-		});
+			outputRegions.add(region);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Adds the {code record} to the {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>}
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @param region
+	 *            {@link Region}
+	 */
+	private void addRecordToExpectedMapperOutput(
+			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
+			Region region)
+	{
+		SAMRecordWritable writable = new SAMRecordWritable();
+		writable.set(record);
+		expectedMapperOutput.add(new Pair<RegionSamRecordStartWritable, SAMRecordWritable>(
+				new RegionSamRecordStartWritable(region, record), writable));
 	}
 
 	/**
@@ -203,22 +232,22 @@ public class HadoopPipelineTester extends Tester
 	 * {@code regionToKeepWritable}.
 	 * 
 	 * @param mapperOutput
-	 *            {@link List}{@code <}{@link BedFeatureSamRecordStartWritable}{@code , }{@link SAMRecordWritable}
+	 *            {@link List}{@code <}{@link RegionSamRecordStartWritable}{@code , }{@link SAMRecordWritable}
 	 *            {@code >>}
 	 * @param regionToKeep
-	 *            {@link BedFeatureSamRecordStartWritable}
+	 *            {@link RegionSamRecordStartWritable}
 	 * @return {@link List}{@code <}{@link SAMRecordWritable}{@code >}
 	 */
 	public List<SAMRecordWritable> filterMapperOutput(
-			List<Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable>> mapperOutput,
-			BedFeatureSamRecordStartWritable regionToKeepWritable)
+			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> mapperOutput,
+			RegionSamRecordStartWritable regionToKeepWritable)
 	{
 		ArrayList<SAMRecordWritable> recordsToKeep = new ArrayList<>();
-		BEDFeature regionToKeep = regionToKeepWritable.get();
+		Region regionToKeep = regionToKeepWritable.get();
 
-		for (Pair<BedFeatureSamRecordStartWritable, SAMRecordWritable> outputItem : mapperOutput)
+		for (Pair<RegionSamRecordStartWritable, SAMRecordWritable> outputItem : mapperOutput)
 		{
-			BEDFeature recordRegion = outputItem.getFirst().get();
+			Region recordRegion = outputItem.getFirst().get();
 			SAMRecord record = outputItem.getSecond().get();
 			if (recordRegion.getContig().equals(regionToKeep.getContig())
 					&& recordRegion.getStart() == regionToKeep.getStart()
@@ -246,17 +275,17 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Generates a {@link BedFeatureSamRecordStartWritable}.
+	 * Generates a {@link RegionSamRecordStartWritable}.
 	 * 
 	 * @param region
-	 *            {@link BEDFeature}
+	 *            {@link Region}
 	 * @param recordStart
 	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
-	 * @return {@link BedFeatureSamRecordStartWritable}
+	 * @return {@link RegionSamRecordStartWritable}
 	 */
-	BedFeatureSamRecordStartWritable generateBedFeatureSamRecordStartWritable(BEDFeature region, int recordStart)
+	RegionSamRecordStartWritable generateRegionSamRecordStartWritable(Region region, int recordStart)
 	{
-		return new BedFeatureSamRecordStartWritable(region, generateSamRecordWithStart(recordStart));
+		return new RegionSamRecordStartWritable(region, generateSamRecordWithStart(recordStart));
 	}
 
 	/**

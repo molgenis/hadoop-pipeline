@@ -20,9 +20,9 @@ import org.molgenis.hadoop.pipeline.application.formats.BamOutputFormat;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
-import org.molgenis.hadoop.pipeline.application.partitioners.BedFeatureSamRecordGroupingComparator;
-import org.molgenis.hadoop.pipeline.application.partitioners.BedFeatureSamRecordPartitioner;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordGroupingComparator;
+import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordPartitioner;
+import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -120,8 +120,8 @@ public class HadoopPipelineApplication extends Configured implements Tool
 
 		// Sets custom partitioner & grouping comparator so it only uses the natural key.
 		// Sort comparator uses default behavior, so uses compareTo of Writable (composite key).
-		job.setPartitionerClass(BedFeatureSamRecordPartitioner.class);
-		job.setGroupingComparatorClass(BedFeatureSamRecordGroupingComparator.class);
+		job.setPartitionerClass(RegionSamRecordPartitioner.class);
+		job.setGroupingComparatorClass(RegionSamRecordGroupingComparator.class);
 
 		// Sets Mapper/Reducer.
 		job.setMapperClass(HadoopPipelineMapper.class);
@@ -132,7 +132,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setOutputFormatClass(BamOutputFormat.class);
 
 		// Sets Mapper/Reducer output keys/values.
-		job.setMapOutputKeyClass(BedFeatureSamRecordStartWritable.class);
+		job.setMapOutputKeyClass(RegionSamRecordStartWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);

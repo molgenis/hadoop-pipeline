@@ -33,13 +33,19 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 			SAMRecordIterator samIterator = samReader.iterator();
 			while (samIterator.hasNext())
 			{
-				digestStreamItem(samIterator.next());
+				digestStreamItems(samIterator.next(), samIterator.next());
 			}
 		}
 		finally
 		{
 			IOUtils.closeQuietly(samReader);
 		}
+	}
+
+	protected void digestStreamItems(SAMRecord first, SAMRecord second) throws IOException
+	{
+		digestStreamItem(first);
+		digestStreamItem(second);
 	}
 
 	/**
@@ -51,4 +57,28 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	 */
 	@Override
 	protected abstract void digestStreamItem(SAMRecord item) throws IOException;
+
+	/**
+	 * Quick validation whether two {@link SAMRecord}{@code s} are mates using (some) supplied {@code getters} from the
+	 * instances themself.
+	 * 
+	 * @param first
+	 *            {@link SAMRecord}
+	 * @param second
+	 *            {@link SAMRecord}
+	 * @return {@code boolean} - True if mates, false if not.
+	 */
+	protected boolean validateIfMates(SAMRecord first, SAMRecord second)
+	{
+		if (first.getMateReferenceName() == second.getReferenceName()
+				&& first.getReferenceName() == second.getMateReferenceName()
+				&& first.getMateAlignmentStart() == second.getStart()
+				&& first.getStart() == second.getMateAlignmentStart()
+				&& first.getMateNegativeStrandFlag() == second.getReadNegativeStrandFlag()
+				&& first.getReadNegativeStrandFlag() == second.getMateNegativeStrandFlag())
+		{
+			return true;
+		}
+		return false;
+	}
 }

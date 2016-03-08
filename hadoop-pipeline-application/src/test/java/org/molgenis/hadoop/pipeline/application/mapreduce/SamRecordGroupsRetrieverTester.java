@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.hadoop.pipeline.application.BedFeatureTester;
+import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -14,13 +16,11 @@ import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.SAMSequenceRecord;
-import htsjdk.tribble.bed.BEDFeature;
-import htsjdk.tribble.bed.SimpleBEDFeature;
 
 /**
  * Tester for {@link SamRecordGroupsRetriever}.
  */
-public class SamRecordGroupsRetrieverTester extends BedFeatureTester
+public class SamRecordGroupsRetrieverTester extends Tester
 {
 	/**
 	 * Grouper to be tested.
@@ -38,14 +38,14 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 	SAMRecord record2;
 
 	/**
-	 * {@link List} with {@link BEDFeature}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
+	 * {@link List} with {@link Region}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
 	 */
-	List<BEDFeature> inputGroups;
+	List<Region> inputRegions;
 
 	/**
 	 * Stores the expected output.
 	 */
-	List<BEDFeature> expectedOutputGroups;
+	List<Region> expectedOutputGroups;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
@@ -77,9 +77,9 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		// Creates a new List to be filled with BEDFeatures that can be used to compare with the SAMRecord.
-		inputGroups = new ArrayList<BEDFeature>();
-		expectedOutputGroups = new ArrayList<BEDFeature>();
+		// Creates a new List to be filled with Region that can be used to compare with the SAMRecord.
+		inputRegions = new ArrayList<>();
+		expectedOutputGroups = new ArrayList<Region>();
 
 	}
 
@@ -91,449 +91,449 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that is just before the {@link SAMRecord}.
+	 * Test with a {@link Region} that is just before the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithSingleBedJustBeforeRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(89, 99, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 89, 99));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that is matches exactly with the start of the {@link SAMRecord}.
+	 * Test with a {@link Region} that is matches exactly with the start of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithSingleBedJustOnStartOfRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(90, 100, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 90, 100));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that is just after the {@link SAMRecord}.
+	 * Test with a {@link Region} that is just after the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithSingleBedJustAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(201, 211, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 201, 211));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that matches exactly with the end of the {@link SAMRecord}.
+	 * Test with a {@link Region} that matches exactly with the end of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithSingleBedJustOnEndOfRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(200, 210, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 200, 210));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that is in the middle of the {@link SAMRecord}.
+	 * Test with a {@link Region} that is in the middle of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithSingleBedWithinRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(150, 160, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 150, 160));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with a {@link BEDFeature} that overlaps the {@link SAMRecord} completely.
+	 * Test with a {@link Region} that overlaps the {@link SAMRecord} completely.
 	 */
 	@Test
 	public void testWithSingleBedCompletelyOverlappingRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(90, 210, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 90, 210));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are in range of the
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which all are in range of the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllWithinRange()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(98, 123, "1"));
-		inputGroups.add(new SimpleBEDFeature(124, 148, "1"));
-		inputGroups.add(new SimpleBEDFeature(149, 173, "1"));
-		inputGroups.add(new SimpleBEDFeature(174, 198, "1"));
-		inputGroups.add(new SimpleBEDFeature(199, 223, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 98, 123));
+		inputRegions.add(new Region("1", 124, 148));
+		inputRegions.add(new Region("1", 149, 173));
+		inputRegions.add(new Region("1", 174, 198));
+		inputRegions.add(new Region("1", 199, 223));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are in range of the
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which all are in range of the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllWithinRange()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
-		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
-		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 91, 110));
+		inputRegions.add(new Region("1", 111, 130));
+		inputRegions.add(new Region("1", 131, 150));
+		inputRegions.add(new Region("1", 151, 170));
+		inputRegions.add(new Region("1", 171, 190));
+		inputRegions.add(new Region("1", 191, 220));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// All input groups should be returned, so output is equal to input.
-		expectedOutputGroups = inputGroups;
+		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which all are before the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllBeforeRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(11, 20, "1"));
-		inputGroups.add(new SimpleBEDFeature(21, 30, "1"));
-		inputGroups.add(new SimpleBEDFeature(31, 40, "1"));
-		inputGroups.add(new SimpleBEDFeature(41, 50, "1"));
-		inputGroups.add(new SimpleBEDFeature(51, 60, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 11, 20));
+		inputRegions.add(new Region("1", 21, 30));
+		inputRegions.add(new Region("1", 31, 40));
+		inputRegions.add(new Region("1", 41, 50));
+		inputRegions.add(new Region("1", 51, 60));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are before the
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which all are before the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllBeforeRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(11, 20, "1"));
-		inputGroups.add(new SimpleBEDFeature(21, 30, "1"));
-		inputGroups.add(new SimpleBEDFeature(31, 40, "1"));
-		inputGroups.add(new SimpleBEDFeature(41, 50, "1"));
-		inputGroups.add(new SimpleBEDFeature(51, 60, "1"));
-		inputGroups.add(new SimpleBEDFeature(61, 70, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 11, 20));
+		inputRegions.add(new Region("1", 21, 30));
+		inputRegions.add(new Region("1", 31, 40));
+		inputRegions.add(new Region("1", 41, 50));
+		inputRegions.add(new Region("1", 51, 60));
+		inputRegions.add(new Region("1", 61, 70));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which all are after the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthAllAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(211, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(221, 230, "1"));
-		inputGroups.add(new SimpleBEDFeature(231, 240, "1"));
-		inputGroups.add(new SimpleBEDFeature(241, 250, "1"));
-		inputGroups.add(new SimpleBEDFeature(251, 260, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 211, 220));
+		inputRegions.add(new Region("1", 221, 230));
+		inputRegions.add(new Region("1", 231, 240));
+		inputRegions.add(new Region("1", 241, 250));
+		inputRegions.add(new Region("1", 251, 260));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which all are after the
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which all are after the
 	 * {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthAllAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(211, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(221, 230, "1"));
-		inputGroups.add(new SimpleBEDFeature(231, 240, "1"));
-		inputGroups.add(new SimpleBEDFeature(241, 250, "1"));
-		inputGroups.add(new SimpleBEDFeature(251, 260, "1"));
-		inputGroups.add(new SimpleBEDFeature(261, 270, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 211, 220));
+		inputRegions.add(new Region("1", 221, 230));
+		inputRegions.add(new Region("1", 231, 240));
+		inputRegions.add(new Region("1", 241, 250));
+		inputRegions.add(new Region("1", 251, 260));
+		inputRegions.add(new Region("1", 261, 270));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which some are on range of the
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which some are on range of the
 	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthSomeBeforeInAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(10, 60, "1"));
-		inputGroups.add(new SimpleBEDFeature(61, 110, "1"));
-		inputGroups.add(new SimpleBEDFeature(111, 160, "1"));
-		inputGroups.add(new SimpleBEDFeature(161, 210, "1"));
-		inputGroups.add(new SimpleBEDFeature(211, 260, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 10, 60));
+		inputRegions.add(new Region("1", 61, 110));
+		inputRegions.add(new Region("1", 111, 160));
+		inputRegions.add(new Region("1", 161, 210));
+		inputRegions.add(new Region("1", 211, 260));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(1, 4));
+		expectedOutputGroups.addAll(inputRegions.subList(1, 4));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which some are on range of the
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which some are on range of the
 	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthSomeBeforeInAfterRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(61, 90, "1"));
-		inputGroups.add(new SimpleBEDFeature(91, 120, "1"));
-		inputGroups.add(new SimpleBEDFeature(121, 150, "1"));
-		inputGroups.add(new SimpleBEDFeature(151, 180, "1"));
-		inputGroups.add(new SimpleBEDFeature(181, 210, "1"));
-		inputGroups.add(new SimpleBEDFeature(211, 240, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 61, 90));
+		inputRegions.add(new Region("1", 91, 120));
+		inputRegions.add(new Region("1", 121, 150));
+		inputRegions.add(new Region("1", 151, 180));
+		inputRegions.add(new Region("1", 181, 210));
+		inputRegions.add(new Region("1", 211, 240));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(1, 5));
+		expectedOutputGroups.addAll(inputRegions.subList(1, 5));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which only the first
-	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which only the first {@link Region} is
+	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthOnlyFirstWithinRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(196, 205, "1"));
-		inputGroups.add(new SimpleBEDFeature(206, 215, "1"));
-		inputGroups.add(new SimpleBEDFeature(216, 225, "1"));
-		inputGroups.add(new SimpleBEDFeature(226, 235, "1"));
-		inputGroups.add(new SimpleBEDFeature(236, 245, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 196, 205));
+		inputRegions.add(new Region("1", 206, 215));
+		inputRegions.add(new Region("1", 216, 225));
+		inputRegions.add(new Region("1", 226, 235));
+		inputRegions.add(new Region("1", 236, 245));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Only first item of input should be returned.
-		expectedOutputGroups.add(inputGroups.get(0));
+		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which only the first
-	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which only the first {@link Region}
+	 * is within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthOnlyFirstWithinRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(196, 205, "1"));
-		inputGroups.add(new SimpleBEDFeature(206, 215, "1"));
-		inputGroups.add(new SimpleBEDFeature(216, 225, "1"));
-		inputGroups.add(new SimpleBEDFeature(226, 235, "1"));
-		inputGroups.add(new SimpleBEDFeature(236, 245, "1"));
-		inputGroups.add(new SimpleBEDFeature(246, 255, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 196, 205));
+		inputRegions.add(new Region("1", 206, 215));
+		inputRegions.add(new Region("1", 216, 225));
+		inputRegions.add(new Region("1", 226, 235));
+		inputRegions.add(new Region("1", 236, 245));
+		inputRegions.add(new Region("1", 246, 255));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Only first item of input should be returned.
-		expectedOutputGroups.add(inputGroups.get(0));
+		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link BEDFeature}{@code s}, of which only the last
-	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which only the last {@link Region} is
+	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthOnlyLastWithinRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(56, 65, "1"));
-		inputGroups.add(new SimpleBEDFeature(66, 75, "1"));
-		inputGroups.add(new SimpleBEDFeature(76, 85, "1"));
-		inputGroups.add(new SimpleBEDFeature(86, 95, "1"));
-		inputGroups.add(new SimpleBEDFeature(96, 105, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 56, 65));
+		inputRegions.add(new Region("1", 66, 75));
+		inputRegions.add(new Region("1", 76, 85));
+		inputRegions.add(new Region("1", 86, 95));
+		inputRegions.add(new Region("1", 96, 105));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Only last item of input should be returned.
-		expectedOutputGroups.add(inputGroups.get(inputGroups.size() - 1));
+		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an even sized {@link List} containing {@link BEDFeature}{@code s}, of which only the last
-	 * {@link BEDFeature} is within range of the {@link SAMRecord}.
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which only the last {@link Region} is
+	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthOnlyLastWithinRecord()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(46, 55, "1"));
-		inputGroups.add(new SimpleBEDFeature(56, 65, "1"));
-		inputGroups.add(new SimpleBEDFeature(66, 75, "1"));
-		inputGroups.add(new SimpleBEDFeature(76, 85, "1"));
-		inputGroups.add(new SimpleBEDFeature(86, 95, "1"));
-		inputGroups.add(new SimpleBEDFeature(96, 105, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 46, 55));
+		inputRegions.add(new Region("1", 56, 65));
+		inputRegions.add(new Region("1", 66, 75));
+		inputRegions.add(new Region("1", 76, 85));
+		inputRegions.add(new Region("1", 86, 95));
+		inputRegions.add(new Region("1", 96, 105));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Only last item of input should be returned.
-		expectedOutputGroups.add(inputGroups.get(inputGroups.size() - 1));
+		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
-	 * a different contig (so should not match even though the positions might be within range). There are an odd number
-	 * of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
+	 * Test with an {@link List} containing {@link Region}{@code s}, of which some {@link Region}{@code s} match a
+	 * different contig (so should not match even though the positions might be within range). There are an odd number
+	 * of {@link Region} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthThreeOnSameContigOfWhichAllInRange()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
-		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
-		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "2"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 91, 110));
+		inputRegions.add(new Region("1", 111, 130));
+		inputRegions.add(new Region("1", 131, 150));
+		inputRegions.add(new Region("1", 151, 170));
+		inputRegions.add(new Region("1", 171, 190));
+		inputRegions.add(new Region("1", 191, 220));
+		inputRegions.add(new Region("2", 131, 150));
+		inputRegions.add(new Region("2", 151, 170));
+		inputRegions.add(new Region("2", 171, 190));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
+		expectedOutputGroups.addAll(inputRegions.subList(6, 9));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
-	 * a different contig (so should not match even though the positions might be within range). There are an even
-	 * number of {@link BEDFeature} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
+	 * Test with an {@link List} containing {@link Region}{@code s}, of which some {@link Region}{@code s} match a
+	 * different contig (so should not match even though the positions might be within range). There are an even number
+	 * of {@link Region} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthTwoOnSameContigOfWhichAllInRange()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(91, 110, "1"));
-		inputGroups.add(new SimpleBEDFeature(111, 130, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "1"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "1"));
-		inputGroups.add(new SimpleBEDFeature(171, 190, "1"));
-		inputGroups.add(new SimpleBEDFeature(191, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(131, 150, "2"));
-		inputGroups.add(new SimpleBEDFeature(151, 170, "2"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 91, 110));
+		inputRegions.add(new Region("1", 111, 130));
+		inputRegions.add(new Region("1", 131, 150));
+		inputRegions.add(new Region("1", 151, 170));
+		inputRegions.add(new Region("1", 171, 190));
+		inputRegions.add(new Region("1", 191, 220));
+		inputRegions.add(new Region("2", 131, 150));
+		inputRegions.add(new Region("2", 151, 170));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(6, 8));
+		expectedOutputGroups.addAll(inputRegions.subList(6, 8));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
-	 * a different contig (so should not match even though the positions might be within range). There are an odd number
-	 * of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the {@link SAMRecord},
-	 * while others are before or after it.
+	 * Test with an {@link List} containing {@link Region}{@code s}, of which some {@link Region}{@code s} match a
+	 * different contig (so should not match even though the positions might be within range). There are an odd number
+	 * of {@link Region} {@code s} that match the contig. Some of these are within range of the {@link SAMRecord}, while
+	 * others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsOddArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
@@ -543,27 +543,27 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		{
 			String iStr = Integer.toString(i);
 
-			inputGroups.add(new SimpleBEDFeature(10, 60, iStr));
-			inputGroups.add(new SimpleBEDFeature(61, 110, iStr));
-			inputGroups.add(new SimpleBEDFeature(111, 160, iStr));
-			inputGroups.add(new SimpleBEDFeature(161, 210, iStr));
-			inputGroups.add(new SimpleBEDFeature(211, 260, iStr));
+			inputRegions.add(new Region(iStr, 10, 60));
+			inputRegions.add(new Region(iStr, 61, 110));
+			inputRegions.add(new Region(iStr, 111, 160));
+			inputRegions.add(new Region(iStr, 161, 210));
+			inputRegions.add(new Region(iStr, 211, 260));
 		}
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(6, 9));
+		expectedOutputGroups.addAll(inputRegions.subList(6, 9));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test with an {@link List} containing {@link BEDFeature}{@code s}, of which some {@link BEDFeature}{@code s} match
-	 * a different contig (so should not match even though the positions might be within range). There are an even
-	 * number of {@link BEDFeature} {@code s} that match the contig. Some of these are within range of the
-	 * {@link SAMRecord}, while others are before or after it.
+	 * Test with an {@link List} containing {@link Region}{@code s}, of which some {@link Region}{@code s} match a
+	 * different contig (so should not match even though the positions might be within range). There are an even number
+	 * of {@link Region} {@code s} that match the contig. Some of these are within range of the {@link SAMRecord}, while
+	 * others are before or after it.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
@@ -573,42 +573,43 @@ public class SamRecordGroupsRetrieverTester extends BedFeatureTester
 		{
 			String iStr = Integer.toString(i);
 
-			inputGroups.add(new SimpleBEDFeature(61, 90, iStr));
-			inputGroups.add(new SimpleBEDFeature(91, 120, iStr));
-			inputGroups.add(new SimpleBEDFeature(121, 150, iStr));
-			inputGroups.add(new SimpleBEDFeature(151, 180, iStr));
-			inputGroups.add(new SimpleBEDFeature(181, 210, iStr));
-			inputGroups.add(new SimpleBEDFeature(211, 240, iStr));
+			inputRegions.add(new Region(iStr, 61, 90));
+			inputRegions.add(new Region(iStr, 91, 120));
+			inputRegions.add(new Region(iStr, 121, 150));
+			inputRegions.add(new Region(iStr, 151, 180));
+			inputRegions.add(new Region(iStr, 181, 210));
+			inputRegions.add(new Region(iStr, 211, 240));
 		}
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Sublist of input should be returned.
-		expectedOutputGroups.addAll(inputGroups.subList(7, 11));
+		expectedOutputGroups.addAll(inputRegions.subList(7, 11));
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
 	/**
-	 * Test for when all {@link BEDFeature}{@code s} are from a different contig than the {@link SAMRecord}.
+	 * Test for when all {@link Region}{@code s} are from a different contig than the {@link SAMRecord}.
 	 */
 	@Test
 	public void testWithMultipleBedsEvenArrayLengthNoneOnSameContig()
 	{
 		// Prepares/executes bed with record matching.
-		inputGroups.add(new SimpleBEDFeature(211, 220, "1"));
-		inputGroups.add(new SimpleBEDFeature(221, 230, "1"));
-		inputGroups.add(new SimpleBEDFeature(231, 240, "1"));
-		inputGroups.add(new SimpleBEDFeature(241, 250, "1"));
-		inputGroups.add(new SimpleBEDFeature(251, 260, "1"));
-		inputGroups.add(new SimpleBEDFeature(261, 270, "1"));
-		grouper = new SamRecordGroupsRetriever(inputGroups);
+		inputRegions.add(new Region("1", 211, 220));
+		inputRegions.add(new Region("1", 221, 230));
+		inputRegions.add(new Region("1", 231, 240));
+		inputRegions.add(new Region("1", 241, 250));
+		inputRegions.add(new Region("1", 251, 260));
+		inputRegions.add(new Region("1", 261, 270));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<BEDFeature> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
-		compareActualBedWithExpectedBed(actualOutputGroups, expectedOutputGroups);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+
 	}
 }

@@ -5,11 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.molgenis.hadoop.pipeline.application.TestFile.TestFileType;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -17,8 +19,6 @@ import htsjdk.samtools.SamInputResource;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
-import htsjdk.tribble.bed.BEDFeature;
-import htsjdk.tribble.bed.FullBEDFeature;
 
 /**
  * Reads in test files for usage within unit testing. Do note that depending on the {@link TestFileType} of a
@@ -97,27 +97,27 @@ public abstract class TestFileReader
 	}
 
 	/**
-	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link BEDFeature}{@code >}. Conversion from 0-based
-	 * bed-formatted file with an exclusive end to 1-based {@link BEDFeature} with an inclusive end is implemented by
-	 * adding 1 to the {@link BEDFeature#getStart()}. For more information about the difference between a bed-formatted
-	 * file and a {@link BEDFeature}, please view the Javadoc from {@link HadoopBedFormatFileReader#read(java.io.File)}.
+	 * Reads in the defined file as a {@link ArrayList}{@code <}{@link Region}{@code >}. Conversion from 0-based
+	 * bed-formatted file with an exclusive end to 1-based {@link Region} with an inclusive end is implemented by adding
+	 * 1 to the {@link Region#getStart()}. For more information about the difference between a bed-formatted file and a
+	 * {@link Region}, please view the Javadoc from {@link HadoopBedFormatFileReader#read(java.io.File)}.
 	 * 
 	 * IMPORTANT: {@link TestFile#getFileType()} must be {@link TestFileType#BED}.
 	 * 
 	 * @param file
 	 *            {@link TestFile}
-	 * @return {@link ArrayList}{@code <}{@link BEDFeature}{@code >}
+	 * @return {@link List}{@code <}{@link Region}{@code >}
 	 * @throws IOException
 	 * 
 	 * @see {@link HadoopBedFormatFileReader#read(java.io.File)}
 	 */
-	public static ArrayList<BEDFeature> readBedFile(TestFile file) throws IOException
+	public static List<Region> readBedFile(TestFile file) throws IOException
 	{
 		// Validates whether given test file is of correct format.
 		if (file.getFileType() != TestFileType.BED) throw new IOException();
 
 		// Digests file.
-		ArrayList<BEDFeature> groups = new ArrayList<BEDFeature>();
+		ArrayList<Region> regions = new ArrayList<>();
 		BufferedReader reader = null;
 		try
 		{
@@ -128,7 +128,7 @@ public abstract class TestFileReader
 			{
 				String[] splits = line.split("\\t");
 				// +1 for start: From 0-based exclusive end to 1-based inclusive end. See
-				groups.add(new FullBEDFeature(splits[0], Integer.parseInt(splits[1]) + 1, Integer.parseInt(splits[2])));
+				regions.add(new Region(splits[0], Integer.parseInt(splits[1]) + 1, Integer.parseInt(splits[2])));
 			}
 		}
 		finally
@@ -136,6 +136,6 @@ public abstract class TestFileReader
 			IOUtils.closeQuietly(reader);
 		}
 
-		return groups;
+		return regions;
 	}
 }

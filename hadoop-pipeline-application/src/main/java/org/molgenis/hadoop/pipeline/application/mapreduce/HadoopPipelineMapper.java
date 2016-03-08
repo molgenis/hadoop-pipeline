@@ -1,7 +1,9 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.io.BytesWritable;
@@ -12,20 +14,19 @@ import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
-import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper
-		extends Mapper<Text, BytesWritable, BedFeatureSamRecordStartWritable, SAMRecordWritable>
+public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -78,6 +79,31 @@ public class HadoopPipelineMapper
 
 			SamRecordSink sink = new SamRecordSink()
 			{
+				Set<Region> regionsSet;
+
+				@Override
+				protected void digestStreamItems(SAMRecord first, SAMRecord second) throws IOException
+				{
+					// Valides whether the 2 SAMRecords are a read pair.
+					if (!validateIfMates(first, second))
+					{
+						throw new IOException(
+								"No valid read pair: " + first.getSAMString() + " - " + second.getSAMString());
+					}
+
+					// Retrieves the regions the paired reads align to.
+					List<Region> regions1 = groupsRetriever.retrieveGroupsWithinRange(first);
+					List<Region> regions2 = groupsRetriever.retrieveGroupsWithinRange(second);
+
+					// Generates a set containing the unique regions only.
+					regionsSet = new HashSet<>();
+					regionsSet.addAll(regions1);
+					regionsSet.addAll(regions2);
+
+					// Runs the basic digestStreamItem(SAMRecord item) for both reads.
+					super.digestStreamItems(first, second);
+				}
+
 				@Override
 				public void digestStreamItem(SAMRecord item) throws IOException
 				{
@@ -87,14 +113,11 @@ public class HadoopPipelineMapper
 						SAMRecordWritable samWritable = new SAMRecordWritable();
 						samWritable.set(item);
 
-						// Retrieves all keys for the value.
-						List<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
-
-						// Writes a key-value pair for each key found that matched with the SAMRecord alignment
-						// position.
-						for (BEDFeature key : groups)
+						// Writes a key-value pair for each key present in the regionsSet (so this or the complement
+						// read aligned to).
+						for (Region key : regionsSet)
 						{
-							context.write(new BedFeatureSamRecordStartWritable(key, item), samWritable);
+							context.write(new RegionSamRecordStartWritable(key, item), samWritable);
 						}
 					}
 					catch (InterruptedException e)
@@ -128,7 +151,7 @@ public class HadoopPipelineMapper
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = cacheHandler.getBedFile();
-		List<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
+		List<Region> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
