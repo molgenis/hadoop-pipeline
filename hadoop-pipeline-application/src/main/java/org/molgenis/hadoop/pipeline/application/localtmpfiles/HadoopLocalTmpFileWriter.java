@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.fs.FileUtil;
+import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 
 /**
  * Abstract class for creating a node-local temporary files on a Hadoop cluster and writing to it.
@@ -15,6 +16,9 @@ import org.apache.hadoop.fs.FileUtil;
  * @param <T2>
  *            - The instance type to be used when giving data to the {@link HadoopLocalTmpFileWriter} for writing to the
  *            Hadoop tmp file.
+ * 
+ * @deprecated Still untested! Possible solution for creating local files if binaries tools would be supported in
+ *             {@link PipeRunner} that do not support I/O streaming (but require a file as input).
  */
 public abstract class HadoopLocalTmpFileWriter<T1 extends Closeable, T2> implements Closeable
 {

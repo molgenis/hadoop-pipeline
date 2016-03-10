@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
+import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
@@ -15,6 +16,9 @@ import htsjdk.samtools.util.ProgressLoggerInterface;
 
 /**
  * Creates a bam file locally on the node.
+ * 
+ * @deprecated Still untested! Possible solution for creating local files if binaries tools would be supported in
+ *             {@link PipeRunner} that do not support I/O streaming (but require a file as input).
  */
 public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFileWriter, SAMRecord>
 		implements SAMFileWriter, WritableWriter<SAMRecordWritable>
