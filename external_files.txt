@@ -1,4 +1,4 @@
-# VERSION: 2016-03-08
+# VERSION: 2016-03-10
 a hadoop-pipeline-application/src/test/resources/bed_files
 a hadoop-pipeline-application/src/test/resources/bed_files/chr1_20000000-21000000.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig-start-end-name_normal-end.bed
@@ -12,8 +12,6 @@ a hadoop-pipeline-application/src/test/resources/bed_files/unsorted_contig-start
 a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs
 a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
 a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1_mini.sam
-a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L2.sam
-a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L5.sam
 a hadoop-pipeline-application/src/test/resources/extra_dict_files
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_length_field.dict
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_name_field.dict
