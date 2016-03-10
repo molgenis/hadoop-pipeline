@@ -13,6 +13,7 @@ import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
 import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.SamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
@@ -221,10 +222,8 @@ public class HadoopPipelineTester extends Tester
 			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
 			Region region)
 	{
-		SAMRecordWritable writable = new SAMRecordWritable();
-		writable.set(record);
 		expectedMapperOutput.add(new Pair<RegionSamRecordStartWritable, SAMRecordWritable>(
-				new RegionSamRecordStartWritable(region, record), writable));
+				new RegionSamRecordStartWritable(region, record), new SamRecordWritable(record)));
 	}
 
 	/**
@@ -253,25 +252,11 @@ public class HadoopPipelineTester extends Tester
 					&& recordRegion.getStart() == regionToKeep.getStart()
 					&& recordRegion.getEnd() == regionToKeep.getEnd())
 			{
-				recordsToKeep.add(convertSamRecordToWritable(record));
+				recordsToKeep.add(new SamRecordWritable(record));
 			}
 		}
 
 		return recordsToKeep;
-	}
-
-	/**
-	 * Converts a {@link SAMRecord} to a {@link SAMRecordWritable}.
-	 * 
-	 * @param record
-	 *            {@link SAMRecord}
-	 * @return {@link SAMRecordWritable}
-	 */
-	private SAMRecordWritable convertSamRecordToWritable(SAMRecord record)
-	{
-		SAMRecordWritable writable = new SAMRecordWritable();
-		writable.set(record);
-		return writable;
 	}
 
 	/**
