@@ -84,7 +84,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 				@Override
 				protected void digestStreamItems(SAMRecord first, SAMRecord second) throws IOException
 				{
-					// Valides whether the 2 SAMRecords are a read pair.
+					// Validates whether the 2 SAMRecords are a read pair.
 					if (!validateIfMates(first, second))
 					{
 						throw new IOException(
