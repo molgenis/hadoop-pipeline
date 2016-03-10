@@ -42,6 +42,16 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 		}
 	}
 
+	/**
+	 * Method allowing for digesting {@link SAMRecord}{@code s} per pair when overridden. By default, this method simply
+	 * calls {@link #digestStreamItem(SAMRecord)} for both {@link SAMRecord}{@code s}.
+	 * 
+	 * @param first
+	 *            {@link SAMRecord}
+	 * @param second
+	 *            {@link SAMRecord}
+	 * @throws IOException
+	 */
 	protected void digestStreamItems(SAMRecord first, SAMRecord second) throws IOException
 	{
 		digestStreamItem(first);
