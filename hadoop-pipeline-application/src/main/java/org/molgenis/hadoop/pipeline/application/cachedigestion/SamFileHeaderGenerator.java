@@ -8,6 +8,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 
 import htsjdk.samtools.SAMFileHeader;
+import htsjdk.samtools.SAMFileHeader.SortOrder;
 import htsjdk.samtools.SAMProgramRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 
@@ -52,5 +53,13 @@ public abstract class SamFileHeaderGenerator
 
 		// Returns the completed SAMFileHeader.
 		return samFileHeader;
+	}
+
+	public static SAMFileHeader retrieveSamFileHeader(TaskAttemptContext context, SortOrder order)
+			throws IllegalArgumentException, IOException
+	{
+		SAMFileHeader header = retrieveSamFileHeader(context);
+		header.setSortOrder(order);
+		return header;
 	}
 }

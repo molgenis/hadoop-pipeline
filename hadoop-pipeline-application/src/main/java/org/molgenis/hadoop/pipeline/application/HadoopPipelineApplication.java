@@ -16,7 +16,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
-import org.molgenis.hadoop.pipeline.application.formats.BamOutputFormat;
+import org.molgenis.hadoop.pipeline.application.formats.SortedBamOutputFormat;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
@@ -115,7 +115,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
 		// Define MultipleOutputs used to write results back to HDFS.
-		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", BamOutputFormat.class, NullWritable.class,
+		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", SortedBamOutputFormat.class, NullWritable.class,
 				SAMRecordWritable.class);
 
 		// Sets custom partitioner & grouping comparator so it only uses the natural key.
@@ -129,7 +129,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 
 		// Sets input/output formats.
 		job.setInputFormatClass(WholeFileInputFormat.class);
-		job.setOutputFormatClass(BamOutputFormat.class);
+		job.setOutputFormatClass(SortedBamOutputFormat.class);
 
 		// Sets Mapper/Reducer output keys/values.
 		job.setMapOutputKeyClass(RegionSamRecordStartWritable.class);
