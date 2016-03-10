@@ -1,8 +1,6 @@
 #!/user/bin/env python3
 
 import sys
-import fileinput
-
 
 def main():
     """
