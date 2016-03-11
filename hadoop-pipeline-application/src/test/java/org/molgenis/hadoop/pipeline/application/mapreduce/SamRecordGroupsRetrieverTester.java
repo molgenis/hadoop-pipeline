@@ -597,25 +597,6 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	}
 
 	/**
-	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which the {@link SAMRecord} are either
-	 * before or after it.
-	 */
-	@Test
-	public void testWithMultipleRegionsOddArrayLengthBeforeOrAfterRecord()
-	{
-		// Prepares/executes region with record matching.
-		inputRegions.add(new Region("1", 10, 60));
-		inputRegions.add(new Region("1", 211, 260));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
-
-		// Expected output should be empty, so no additional adjustments are made to the expected output.
-
-		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
-		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
-	}
-
-	/**
 	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which the {@link SAMRecord} are
 	 * either before or after it.
 	 */
