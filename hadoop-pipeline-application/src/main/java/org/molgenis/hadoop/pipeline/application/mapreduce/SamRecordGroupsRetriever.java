@@ -166,7 +166,7 @@ public class SamRecordGroupsRetriever
 			// afterwards.
 			else if (middleGroupEnd < recordStart)
 			{
-				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, middle, list.size());
+				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, middle, high);
 			}
 			// If the position before the middle position has a higher or equal end value than the record start
 			// position, makes a recursive call with the start of the list as the lowest index and the middle position
@@ -174,7 +174,7 @@ public class SamRecordGroupsRetriever
 			// Should be equal to: MiddleMinusOneGroupEnd >= recordStart
 			else
 			{
-				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, 0, middle);
+				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, low, middle);
 			}
 		}
 		// Returns null if the last remaining Region does not have an end value higher than the sam record start

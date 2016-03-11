@@ -30,7 +30,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	/**
 	 * A test {@link SAMRecord}.
 	 */
-	SAMRecord record;
+	SAMRecord source1;
 
 	/**
 	 * Another test {@link SAMRecord}.
@@ -50,28 +50,12 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		SAMFileHeader header = new SAMFileHeader();
-		SAMSequenceDictionary seqDict = new SAMSequenceDictionary();
-		seqDict.addSequence(new SAMSequenceRecord("1:1-301", 300));
-		header.setSequenceDictionary(seqDict);
-		record = new SAMRecord(header);
-
 		// Sets a record on contig 1 with range 100-200 (inclusive start/end).
-		record.setReferenceName("1");
-		record.setAlignmentStart(100);
-		record.setCigarString("101M");
-
-		SAMFileHeader header2 = new SAMFileHeader();
-		SAMSequenceDictionary seqDict2 = new SAMSequenceDictionary();
-		seqDict2.addSequence(new SAMSequenceRecord("1:1-301", 300));
-		seqDict2.addSequence(new SAMSequenceRecord("2:1-301", 300));
-		header2.setSequenceDictionary(seqDict2);
-		record2 = new SAMRecord(header2);
+		source1 = generateTestRecord("1", 100, "101M", new SAMSequenceRecord("1:1-301", 300));
 
 		// Sets a record on contig 2 with range 100-200 (inclusive start/end).
-		record2.setReferenceName("2");
-		record2.setAlignmentStart(100);
-		record2.setCigarString("101M");
+		record2 = generateTestRecord("2", 100, "101M", new SAMSequenceRecord("1:1-301", 300),
+				new SAMSequenceRecord("2:1-301", 300));
 	}
 
 	@BeforeMethod
@@ -94,16 +78,16 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that is just before the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithSingleBedJustBeforeRecord()
+	public void testWithSingleRegionJustBeforeRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 89, 99));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -111,9 +95,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that is matches exactly with the start of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithSingleBedJustOnStartOfRecord()
+	public void testWithSingleRegionJustOnStartOfRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 90, 100));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
@@ -121,7 +105,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -129,16 +113,16 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that is just after the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithSingleBedJustAfterRecord()
+	public void testWithSingleRegionJustAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 201, 211));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -146,9 +130,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that matches exactly with the end of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithSingleBedJustOnEndOfRecord()
+	public void testWithSingleRegionJustOnEndOfRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 200, 210));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
@@ -156,7 +140,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -164,9 +148,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that is in the middle of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithSingleBedWithinRecord()
+	public void testWithSingleRegionWithinRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 150, 160));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
@@ -174,7 +158,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -182,9 +166,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test with a {@link Region} that overlaps the {@link SAMRecord} completely.
 	 */
 	@Test
-	public void testWithSingleBedCompletelyOverlappingRecord()
+	public void testWithSingleRegionCompletelyOverlappingRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 90, 210));
 		grouper = new SamRecordGroupsRetriever(inputRegions);
 
@@ -192,7 +176,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -201,9 +185,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthAllWithinRange()
+	public void testWithMultipleRegionsOddArrayLengthAllWithinRange()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 98, 123));
 		inputRegions.add(new Region("1", 124, 148));
 		inputRegions.add(new Region("1", 149, 173));
@@ -215,7 +199,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -224,9 +208,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthAllWithinRange()
+	public void testWithMultipleRegionsEvenArrayLengthAllWithinRange()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 91, 110));
 		inputRegions.add(new Region("1", 111, 130));
 		inputRegions.add(new Region("1", 131, 150));
@@ -239,7 +223,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -248,9 +232,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthAllBeforeRecord()
+	public void testWithMultipleRegionsOddArrayLengthAllBeforeRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 11, 20));
 		inputRegions.add(new Region("1", 21, 30));
 		inputRegions.add(new Region("1", 31, 40));
@@ -261,7 +245,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -270,9 +254,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthAllBeforeRecord()
+	public void testWithMultipleRegionsEvenArrayLengthAllBeforeRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 11, 20));
 		inputRegions.add(new Region("1", 21, 30));
 		inputRegions.add(new Region("1", 31, 40));
@@ -284,7 +268,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -293,9 +277,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthAllAfterRecord()
+	public void testWithMultipleRegionsOddArrayLengthAllAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 211, 220));
 		inputRegions.add(new Region("1", 221, 230));
 		inputRegions.add(new Region("1", 231, 240));
@@ -306,7 +290,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -315,9 +299,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthAllAfterRecord()
+	public void testWithMultipleRegionsEvenArrayLengthAllAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 211, 220));
 		inputRegions.add(new Region("1", 221, 230));
 		inputRegions.add(new Region("1", 231, 240));
@@ -329,7 +313,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -338,9 +322,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthSomeBeforeInAfterRecord()
+	public void testWithMultipleRegionsOddArrayLengthSomeBeforeInAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 10, 60));
 		inputRegions.add(new Region("1", 61, 110));
 		inputRegions.add(new Region("1", 111, 160));
@@ -352,7 +336,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.addAll(inputRegions.subList(1, 4));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -361,9 +345,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * {@link SAMRecord} while others are before or after it.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthSomeBeforeInAfterRecord()
+	public void testWithMultipleRegionsEvenArrayLengthSomeBeforeInAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 61, 90));
 		inputRegions.add(new Region("1", 91, 120));
 		inputRegions.add(new Region("1", 121, 150));
@@ -376,7 +360,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.addAll(inputRegions.subList(1, 5));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -385,9 +369,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthOnlyFirstWithinRecord()
+	public void testWithMultipleRegionsOddArrayLengthOnlyFirstWithinRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 196, 205));
 		inputRegions.add(new Region("1", 206, 215));
 		inputRegions.add(new Region("1", 216, 225));
@@ -399,7 +383,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -408,9 +392,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * is within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthOnlyFirstWithinRecord()
+	public void testWithMultipleRegionsEvenArrayLengthOnlyFirstWithinRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 196, 205));
 		inputRegions.add(new Region("1", 206, 215));
 		inputRegions.add(new Region("1", 216, 225));
@@ -423,7 +407,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -432,9 +416,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthOnlyLastWithinRecord()
+	public void testWithMultipleRegionsOddArrayLengthOnlyLastWithinRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 56, 65));
 		inputRegions.add(new Region("1", 66, 75));
 		inputRegions.add(new Region("1", 76, 85));
@@ -446,7 +430,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -455,9 +439,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthOnlyLastWithinRecord()
+	public void testWithMultipleRegionsEvenArrayLengthOnlyLastWithinRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 46, 55));
 		inputRegions.add(new Region("1", 56, 65));
 		inputRegions.add(new Region("1", 66, 75));
@@ -470,7 +454,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -480,9 +464,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * of {@link Region} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthThreeOnSameContigOfWhichAllInRange()
+	public void testWithMultipleRegionsOddArrayLengthThreeOnSameContigOfWhichAllInRange()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 91, 110));
 		inputRegions.add(new Region("1", 111, 130));
 		inputRegions.add(new Region("1", 131, 150));
@@ -508,9 +492,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * of {@link Region} {@code s} that match the contig and all are within range of the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthTwoOnSameContigOfWhichAllInRange()
+	public void testWithMultipleRegionsEvenArrayLengthTwoOnSameContigOfWhichAllInRange()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 91, 110));
 		inputRegions.add(new Region("1", 111, 130));
 		inputRegions.add(new Region("1", 131, 150));
@@ -536,9 +520,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * others are before or after it.
 	 */
 	@Test
-	public void testWithMultipleBedsOddArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
+	public void testWithMultipleRegionsOddArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		for (int i = 1; i < 3; i++)
 		{
 			String iStr = Integer.toString(i);
@@ -566,9 +550,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * others are before or after it.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
+	public void testWithMultipleRegionsEvenArrayLengthSixOnSameContigOfWhichSomeBeforeInAfterRecord()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		for (int i = 1; i < 3; i++)
 		{
 			String iStr = Integer.toString(i);
@@ -594,9 +578,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	 * Test for when all {@link Region}{@code s} are from a different contig than the {@link SAMRecord}.
 	 */
 	@Test
-	public void testWithMultipleBedsEvenArrayLengthNoneOnSameContig()
+	public void testWithMultipleRegionsEvenArrayLengthNoneOnSameContig()
 	{
-		// Prepares/executes bed with record matching.
+		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 211, 220));
 		inputRegions.add(new Region("1", 221, 230));
 		inputRegions.add(new Region("1", 231, 240));
@@ -610,6 +594,123 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Executes and runs comparison.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record2);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
 
+	/**
+	 * Test with an odd sized {@link List} containing {@link Region}{@code s}, of which the {@link SAMRecord} are either
+	 * before or after it.
+	 */
+	@Test
+	public void testWithMultipleRegionsOddArrayLengthBeforeOrAfterRecord()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 10, 60));
+		inputRegions.add(new Region("1", 211, 260));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
+
+		// Expected output should be empty, so no additional adjustments are made to the expected output.
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test with an even sized {@link List} containing {@link Region}{@code s}, of which the {@link SAMRecord} are
+	 * either before or after it.
+	 */
+	@Test
+	public void testWithMultipleRegionsEvenArrayLengthBeforeOrAfterRecord()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 61, 90));
+		inputRegions.add(new Region("1", 211, 240));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
+
+		// Expected output should be empty, so no additional adjustments are made to the expected output.
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test when an unmapped read is used.
+	 */
+	@Test
+	public void testWithUnalignedRecord()
+	{
+		// Generates unmapped record.
+		SAMRecord record = generateTestRecord(null, null, null, new SAMSequenceRecord("1:1-301", 300));
+
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 150, 160));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
+
+		// Expected output should be empty, so no additional adjustments are made to the expected output.
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test where the first round of recursion takes lower half and the round step takes the upper half.
+	 */
+	@Test
+	public void testWithMultipleRegionsEvenArrayUsesRecursionTakingLowerPartFollowedByHigherPart()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 1, 40));
+		inputRegions.add(new Region("1", 41, 80));
+		inputRegions.add(new Region("1", 81, 120));
+		inputRegions.add(new Region("1", 121, 160));
+		inputRegions.add(new Region("1", 161, 200));
+		inputRegions.add(new Region("1", 201, 240));
+		grouper = new SamRecordGroupsRetriever(inputRegions);
+
+		// Sublist of input should be returned.
+		expectedOutputGroups = inputRegions.subList(2, 5);
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Generates a new {@link SAMRecord} that can be used for testing.
+	 * 
+	 * @param recordContig
+	 *            {@link String} - If {@code null}, {@link SAMRecord#setReferenceName(String)} will not be done.
+	 * @param recordStart
+	 *            {@link Integer} - If {@code null}, {@link SAMRecord#setAlignmentStart(String)} will not be done.
+	 * @param recordCigar
+	 *            {@link String} - If {@code null}, {@link SAMRecord#setCigarString(String)} will not be done.
+	 * @param recordSeqs
+	 *            1 or more {@link SAMSequenceRecord} - Used for the {@link SAMFileHeader}{@code 's}
+	 *            {@link SAMSequenceDictionary}.
+	 * @return {@link SAMRecord}
+	 */
+	private SAMRecord generateTestRecord(String recordReferenceName, Integer recordStart, String recordCigar,
+			SAMSequenceRecord... recordSeqs)
+	{
+		// Creates header objects.
+		SAMFileHeader header = new SAMFileHeader();
+		SAMSequenceDictionary seqDict = new SAMSequenceDictionary();
+
+		// Adds/sets sequence records.
+		for (int i = 0; i < recordSeqs.length; i++)
+		{
+			seqDict.addSequence(recordSeqs[i]);
+		}
+		header.setSequenceDictionary(seqDict);
+
+		// Creates SAMRecord.
+		SAMRecord record = new SAMRecord(header);
+		if (recordReferenceName != null) record.setReferenceName(recordReferenceName);
+		if (recordStart != null) record.setAlignmentStart(recordStart);
+		if (recordCigar != null) record.setCigarString(recordCigar);
+
+		return record;
 	}
 }
