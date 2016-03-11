@@ -30,37 +30,64 @@ public class Region implements Locatable, Comparable<Region>
 	 */
 	int end;
 
+	/**
+	 * The contig name of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 * 
+	 * @return {@link String} contig name of this region
+	 */
 	@Override
 	public String getContig()
 	{
 		return contig;
 	}
 
+	/**
+	 * The contig name of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 * 
+	 * @param contig
+	 *            {@link String}
+	 */
 	public void setContig(String contig)
 	{
-		this.contig = contig;
+		this.contig = requireNonNull(contig);
 	}
 
+	/**
+	 * The contig start of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 * 
+	 * @return {@code int} 1-based start position
+	 */
 	@Override
 	public int getStart()
 	{
 		return start;
 	}
 
+	/**
+	 * The contig start of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 */
 	public void setStart(int start)
 	{
-		this.start = start;
+		this.start = requireNonNull(start);
 	}
 
+	/**
+	 * The contig end of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 * 
+	 * @return {@code int} 1-based closed-ended position
+	 */
 	@Override
 	public int getEnd()
 	{
 		return end;
 	}
 
+	/**
+	 * The contig end of the region. Is stricter compared to {@link Locatable} as field may not be {@code null}.
+	 */
 	public void setEnd(int end)
 	{
-		this.end = end;
+		this.end = requireNonNull(end);
 	}
 
 	/**
@@ -68,11 +95,11 @@ public class Region implements Locatable, Comparable<Region>
 	 * {@code null}!
 	 * 
 	 * @param contig
-	 *            {@link String}
+	 *            {@link String} - The contig name.
 	 * @param start
-	 *            {@code int}
+	 *            {@code int} - 1-based inclusive position.
 	 * @param end
-	 *            {@code int}
+	 *            {@code int} - 1-based inclusive position.
 	 */
 	public Region(String contig, int start, int end)
 	{
