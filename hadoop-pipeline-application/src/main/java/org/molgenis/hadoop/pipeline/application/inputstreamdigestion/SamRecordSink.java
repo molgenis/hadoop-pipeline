@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -80,15 +81,12 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	 */
 	protected boolean validateIfMates(SAMRecord first, SAMRecord second)
 	{
-		if (first.getMateReferenceName() == second.getReferenceName()
-				&& first.getReferenceName() == second.getMateReferenceName()
+		// StringUtils also compares null (if both are null, they are equal).
+		return StringUtils.equals(first.getMateReferenceName(), second.getReferenceName())
+				&& StringUtils.equals(first.getReferenceName(), second.getMateReferenceName())
 				&& first.getMateAlignmentStart() == second.getStart()
 				&& first.getStart() == second.getMateAlignmentStart()
 				&& first.getMateNegativeStrandFlag() == second.getReadNegativeStrandFlag()
-				&& first.getReadNegativeStrandFlag() == second.getMateNegativeStrandFlag())
-		{
-			return true;
-		}
-		return false;
+				&& first.getReadNegativeStrandFlag() == second.getMateNegativeStrandFlag();
 	}
 }
