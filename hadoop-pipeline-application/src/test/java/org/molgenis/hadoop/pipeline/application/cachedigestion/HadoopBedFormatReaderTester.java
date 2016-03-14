@@ -2,7 +2,6 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.testng.Assert;
@@ -22,33 +21,36 @@ public class HadoopBedFormatReaderTester extends Tester
 	/**
 	 * Regions that are expected as output.
 	 */
-	private List<Region> expectedRegions;
+	private ContigRegionsMap expectedRegionsMap;
 
 	/**
 	 * egions that are expected as output when the 4th line of the bed file does not have an end value.
 	 */
-	private List<Region> expectedRegionsNoEndValueForFourthLine;
+	private ContigRegionsMap expectedRegionsMapNoEndValueForFourthLine;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
+		ContigRegionsMapBuilder builder = new ContigRegionsMapBuilder();
+
 		reader = new HadoopBedFormatFileReader();
 
 		// IMPORTANT:
 		// BED-format is 0-based, start is inclusive, end is exclusive!
 		// BEDFeature is 1-based, start is inclusive, end is inclusive!
 		// Region is generated from a BEDFeature.
-		expectedRegions = new ArrayList<Region>();
+		ArrayList<Region> expectedRegions = new ArrayList<Region>();
 		expectedRegions.add(new Region("1", 1, 200000));
 		expectedRegions.add(new Region("1", 200001, 400000));
 		expectedRegions.add(new Region("1", 400001, 600000));
 		expectedRegions.add(new Region("1", 600001, 800000));
 		expectedRegions.add(new Region("1", 800001, 1000000));
+		expectedRegionsMap = builder.addAndBuild(expectedRegions);
 
 		// Creates a different expected ArrayList when the 4th line does not contain an end value.
-		expectedRegionsNoEndValueForFourthLine = new ArrayList<Region>(expectedRegions);
+		ArrayList<Region> expectedRegionsNoEndValueForFourthLine = new ArrayList<Region>(expectedRegions);
 		expectedRegionsNoEndValueForFourthLine.set(3, new Region("1", 600001, 600001));
-
+		expectedRegionsMapNoEndValueForFourthLine = builder.addAndBuild(expectedRegionsNoEndValueForFourthLine);
 	}
 
 	/**
@@ -60,11 +62,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testValidBedFile() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegions);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMap);
 	}
 
 	/**
@@ -76,11 +78,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testUnsortedBedFile() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/unsorted_contig-start-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegions);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMap);
 	}
 
 	/**
@@ -92,11 +94,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testBedFileWithLineEndingWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegions);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMap);
 	}
 
 	/**
@@ -108,11 +110,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testBedFileWithLineWithoutEndValue() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegionsNoEndValueForFourthLine);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMapNoEndValueForFourthLine);
 	}
 
 	/**
@@ -124,11 +126,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testBedFileWithLineWithoutEndValueThatEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegionsNoEndValueForFourthLine);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMapNoEndValueForFourthLine);
 	}
 
 	/**
@@ -165,11 +167,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testBedFileWithLineThatAlsoContainsNameField() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_normal-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegions);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMap);
 	}
 
 	/**
@@ -181,11 +183,11 @@ public class HadoopBedFormatReaderTester extends Tester
 	public void testBedFileWithLineThatAlsoContainsNameFieldAndEndsWithATab() throws IOException
 	{
 		// Runs file reader.
-		List<Region> actualRegions = reader
+		ContigRegionsMap actualRegionsMap = reader
 				.read(getClassLoader().getResource("bed_files/line_contig-start-end-name_tab-end.bed").getFile());
 
 		// Compares actual data with expected data.
-		Assert.assertEquals(actualRegions, expectedRegions);
+		Assert.assertEquals(actualRegionsMap, expectedRegionsMap);
 
 	}
 }

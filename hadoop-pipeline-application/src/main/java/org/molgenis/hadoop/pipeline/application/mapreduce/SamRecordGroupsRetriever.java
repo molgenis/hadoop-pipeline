@@ -5,7 +5,10 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
+
+import com.google.common.collect.ImmutableList;
 
 import htsjdk.samtools.SAMRecord;
 
@@ -18,18 +21,19 @@ public class SamRecordGroupsRetriever
 	/**
 	 * Stores the groups to which a {@link SAMRecord} can match to.
 	 */
-	List<Region> regions;
+	ContigRegionsMap contigRegionsMap;
 
 	/**
 	 * Create a new instance using a set of {@link Region}{@code s} which can be used for retrieving the {@link Region}
 	 * {@code s} a specific {@link SAMRecord} belongs to.
 	 * 
-	 * @param groups
-	 *            {@link List}{@code <}{@link Region}{@code >} groups to be used for matching with a {@link SAMRecord}.
+	 * @param contigRegionsMap
+	 *            {@link ContigRegionsMap} - Storing the {@link Region}{@code s} to be used for matching with a
+	 *            {@link SAMRecord}.
 	 */
-	SamRecordGroupsRetriever(List<Region> regions)
+	SamRecordGroupsRetriever(ContigRegionsMap contigRegionsMap)
 	{
-		this.regions = requireNonNull(regions);
+		this.contigRegionsMap = requireNonNull(contigRegionsMap);
 	}
 
 	/**
@@ -43,15 +47,14 @@ public class SamRecordGroupsRetriever
 	 */
 	List<Region> retrieveGroupsWithinRange(SAMRecord record)
 	{
+		// Stores the regions that match the SAMRecord.
 		List<Region> matchingRegions = new ArrayList<>();
 
-		// Retrieves the groups that match the contig of the SAMRecord.
-		List<Region> contigRegions = getGroupsOfContig(record);
-
-		// If there are no groups for the contig of the SAMRecord, immediately returns the empty List.
-		if (contigRegions.size() == 0)
+		// Retrieves the Regions matching the SAMRecord contig. If none are found, returns an empty list.
+		ImmutableList<Region> regionsMatchingContig = contigRegionsMap.get(record.getContig());
+		if (regionsMatchingContig == null)
 		{
-			return contigRegions;
+			return matchingRegions;
 		}
 
 		// Starting from the first Region which has it's end value higher or equal to the SAMRecord start value,
@@ -59,15 +62,15 @@ public class SamRecordGroupsRetriever
 		// SAMRecord end value or if no remaining Region are present. If the search for the first Region
 		// returned null, skips looking for any other Region that might match and simply returns and empty
 		// List.
-		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, contigRegions);
+		Integer firstGroupIndex = retrieveFirstGroupWithEndHigherThanRecordStart(record, regionsMatchingContig);
 
 		// Checks if a single match was found. Skips further looking.
 		if (firstGroupIndex != null)
 		{
 			// Goes through the following Region looking for additional matches.
-			for (int i = firstGroupIndex; i < contigRegions.size(); i++)
+			for (int i = firstGroupIndex; i < regionsMatchingContig.size(); i++)
 			{
-				Region group = contigRegions.get(i);
+				Region group = regionsMatchingContig.get(i);
 				if (group.getStart() > record.getEnd())
 				{
 					break;
@@ -76,29 +79,6 @@ public class SamRecordGroupsRetriever
 			}
 		}
 		return matchingRegions;
-	}
-
-	/**
-	 * Filters the {@code groups} containing all possible groups for groups that match the contig of the given
-	 * {@link SAMRecord}.
-	 * 
-	 * @param record
-	 *            {@link SAMRecord}
-	 * @return {@link List}{@code <}{@link Region}{@code >} containing groups where the {@link Region#getContig()}
-	 *         matches the {@link SAMRecord#getContig()}.
-	 */
-	private List<Region> getGroupsOfContig(SAMRecord record)
-	{
-		List<Region> contigRegions = new ArrayList<>();
-
-		for (Region region : regions)
-		{
-			if (record.getContig().equals(region.getContig()))
-			{
-				contigRegions.add(region);
-			}
-		}
-		return contigRegions;
 	}
 
 	/**

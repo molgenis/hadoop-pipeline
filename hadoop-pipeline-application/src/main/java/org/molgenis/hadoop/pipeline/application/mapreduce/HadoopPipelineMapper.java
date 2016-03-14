@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
@@ -151,7 +152,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = cacheHandler.getBedFile();
-		List<Region> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
+		ContigRegionsMap possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.

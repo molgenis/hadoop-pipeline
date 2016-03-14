@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.Tester;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMapBuilder;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -43,6 +45,11 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	List<Region> inputRegions;
 
 	/**
+	 * Builder used to create the {@link ContigRegionsMap}.
+	 */
+	ContigRegionsMapBuilder builder;
+
+	/**
 	 * Stores the expected output.
 	 */
 	List<Region> expectedOutputGroups;
@@ -50,6 +57,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
+		// Initiates builder used to create the SamRecordGroupsRetriever input.
+		builder = new ContigRegionsMapBuilder();
+
 		// Sets a record on contig 1 with range 100-200 (inclusive start/end).
 		source1 = generateTestRecord("1", 100, "101M", new SAMSequenceRecord("1:1-301", 300));
 
@@ -64,7 +74,6 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Creates a new List to be filled with Region that can be used to compare with the SAMRecord.
 		inputRegions = new ArrayList<>();
 		expectedOutputGroups = new ArrayList<Region>();
-
 	}
 
 	@AfterMethod
@@ -72,6 +81,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Clears the grouper.
 		grouper = null;
+
+		// Clears the ContigRegionsMapBuilder.
+		builder.clear();
 	}
 
 	/**
@@ -82,7 +94,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 89, 99));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -99,7 +111,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 90, 100));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -117,7 +129,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 201, 211));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -134,7 +146,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 200, 210));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -152,7 +164,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 150, 160));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -170,7 +182,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 90, 210));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -193,7 +205,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 149, 173));
 		inputRegions.add(new Region("1", 174, 198));
 		inputRegions.add(new Region("1", 199, 223));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -217,7 +229,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 151, 170));
 		inputRegions.add(new Region("1", 171, 190));
 		inputRegions.add(new Region("1", 191, 220));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// All input groups should be returned, so output is equal to input.
 		expectedOutputGroups = inputRegions;
@@ -240,7 +252,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 31, 40));
 		inputRegions.add(new Region("1", 41, 50));
 		inputRegions.add(new Region("1", 51, 60));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -263,7 +275,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 41, 50));
 		inputRegions.add(new Region("1", 51, 60));
 		inputRegions.add(new Region("1", 61, 70));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -285,7 +297,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 231, 240));
 		inputRegions.add(new Region("1", 241, 250));
 		inputRegions.add(new Region("1", 251, 260));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -308,7 +320,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 241, 250));
 		inputRegions.add(new Region("1", 251, 260));
 		inputRegions.add(new Region("1", 261, 270));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -330,7 +342,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 111, 160));
 		inputRegions.add(new Region("1", 161, 210));
 		inputRegions.add(new Region("1", 211, 260));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(1, 4));
@@ -354,7 +366,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 151, 180));
 		inputRegions.add(new Region("1", 181, 210));
 		inputRegions.add(new Region("1", 211, 240));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(1, 5));
@@ -377,7 +389,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 216, 225));
 		inputRegions.add(new Region("1", 226, 235));
 		inputRegions.add(new Region("1", 236, 245));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Only first item of input should be returned.
 		expectedOutputGroups.add(inputRegions.get(0));
@@ -401,7 +413,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 226, 235));
 		inputRegions.add(new Region("1", 236, 245));
 		inputRegions.add(new Region("1", 246, 255));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Only first item of input should be returned.
 		expectedOutputGroups.add(inputRegions.get(0));
@@ -424,7 +436,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 76, 85));
 		inputRegions.add(new Region("1", 86, 95));
 		inputRegions.add(new Region("1", 96, 105));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Only last item of input should be returned.
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
@@ -448,7 +460,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 76, 85));
 		inputRegions.add(new Region("1", 86, 95));
 		inputRegions.add(new Region("1", 96, 105));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Only last item of input should be returned.
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
@@ -476,7 +488,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("2", 131, 150));
 		inputRegions.add(new Region("2", 151, 170));
 		inputRegions.add(new Region("2", 171, 190));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(6, 9));
@@ -503,7 +515,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 191, 220));
 		inputRegions.add(new Region("2", 131, 150));
 		inputRegions.add(new Region("2", 151, 170));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(6, 8));
@@ -533,7 +545,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 			inputRegions.add(new Region(iStr, 161, 210));
 			inputRegions.add(new Region(iStr, 211, 260));
 		}
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(6, 9));
@@ -564,7 +576,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 			inputRegions.add(new Region(iStr, 181, 210));
 			inputRegions.add(new Region(iStr, 211, 240));
 		}
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups.addAll(inputRegions.subList(7, 11));
@@ -587,7 +599,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 241, 250));
 		inputRegions.add(new Region("1", 251, 260));
 		inputRegions.add(new Region("1", 261, 270));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -606,7 +618,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 61, 90));
 		inputRegions.add(new Region("1", 211, 240));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -626,7 +638,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 150, 160));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
@@ -648,7 +660,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 121, 160));
 		inputRegions.add(new Region("1", 161, 200));
 		inputRegions.add(new Region("1", 201, 240));
-		grouper = new SamRecordGroupsRetriever(inputRegions);
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
 		expectedOutputGroups = inputRegions.subList(2, 5);

@@ -2,8 +2,6 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
@@ -15,7 +13,7 @@ import htsjdk.tribble.bed.BEDFeature;
 /**
  * Read a bed-formatted file that was added to the distributed cache of a {@link org.apache.hadoop.mapreduce.Job}.
  */
-public class HadoopBedFormatFileReader extends HadoopFileReader<List<Region>>
+public class HadoopBedFormatFileReader extends HadoopFileReader<ContigRegionsMap>
 {
 	/**
 	 * Turns a BED-formatted {@link InputStream} into an {@link List}{@code <}{@link Region}{@code >}. This BED-format
@@ -30,13 +28,13 @@ public class HadoopBedFormatFileReader extends HadoopFileReader<List<Region>>
 	 *      format1</a>
 	 */
 	@Override
-	public List<Region> read(InputStream inputStream) throws IOException
+	public ContigRegionsMap read(InputStream inputStream) throws IOException
 	{
 		// IMPORTANT:
 		// BED-format is 0-based, start is inclusive, end is exclusive!
 		// BEDFeature is 1-based, start is inclusive, end is inclusive!
 		final BEDCodec codec = new BEDCodec(StartOffset.ONE);
-		final List<Region> regions = new ArrayList<>();
+		final ContigRegionsMapBuilder map = new ContigRegionsMapBuilder();
 
 		StringSink sink = new StringSink()
 		{
@@ -52,15 +50,12 @@ public class HadoopBedFormatFileReader extends HadoopFileReader<List<Region>>
 				{
 					throw new IOException("No bed file instance could be created from: " + item);
 				}
-				regions.add(new Region(bedFeature.getContig(), bedFeature.getStart(), bedFeature.getEnd()));
+				map.add(new Region(bedFeature.getContig(), bedFeature.getStart(), bedFeature.getEnd()));
 			}
 		};
 
 		sink.handleInputStream(inputStream);
 
-		// Sorts the contigs (file should be sorted anyway but as added safety layer).
-		Collections.sort(regions);
-
-		return regions;
+		return map.build();
 	}
 }
