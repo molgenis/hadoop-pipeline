@@ -12,7 +12,8 @@ import com.google.common.collect.Ordering;
 
 /**
  * {@link Map} that for each contig contains a {@code key} representing the contig name combined with as {@code value}
- * an {@link ImmutableList} with all {@link Region}{@code s} having that contig name.
+ * an {@link ImmutableList} with all {@link Region}{@code s} having that contig name. Uses an {@link ImmutableList} to
+ * ensure that the {@link Region}{@code s} are sorted and indexable.
  */
 public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 {
