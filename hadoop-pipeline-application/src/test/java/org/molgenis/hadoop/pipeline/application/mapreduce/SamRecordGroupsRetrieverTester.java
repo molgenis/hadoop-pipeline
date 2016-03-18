@@ -648,15 +648,16 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	}
 
 	/**
-	 * Test where the first round of recursion takes lower half and the round step takes the upper half.
+	 * Test where the first round of recursion takes lower half (resulting in uneven subset), the next round takes the
+	 * higher half (resulting in an even subset of 2 elements) which are the border case of interest.
 	 */
 	@Test
-	public void testWithMultipleRegionsEvenArrayUsesRecursionTakingLowerPartFollowedByHigherPart()
+	public void testRecursionWithMultipleRegionsEvenArrayLowerToHigherToBorder()
 	{
 		// Prepares/executes region with record matching.
 		inputRegions.add(new Region("1", 1, 40));
-		inputRegions.add(new Region("1", 41, 80));
-		inputRegions.add(new Region("1", 81, 120));
+		inputRegions.add(new Region("1", 41, 80)); // border
+		inputRegions.add(new Region("1", 81, 120)); // border
 		inputRegions.add(new Region("1", 121, 160));
 		inputRegions.add(new Region("1", 161, 200));
 		inputRegions.add(new Region("1", 201, 240));
@@ -671,22 +672,75 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	}
 
 	/**
-	 * Test where the first round of recursion takes lower half and the round step takes the upper half.
+	 * Test where the first round of recursion takes higher half (resulting in even subset), the next round takes the
+	 * lower half (resulting in an even subset of 2 elements) which are the border case of interest.
 	 */
 	@Test
-	public void testWithMultipleRegionsEvenArrayUsesRecursionTakingHigherPartFollowedByLowerPart()
+	public void testRecursionWithMultipleRegionsEvenArrayHigherToLowerToBorder()
 	{
 		// Prepares/executes region with record matching.
-		inputRegions.add(new Region("1", 1, 20));
+		inputRegions.add(new Region("1", 1, 10));
+		inputRegions.add(new Region("1", 11, 20));
 		inputRegions.add(new Region("1", 21, 40));
 		inputRegions.add(new Region("1", 41, 60));
-		inputRegions.add(new Region("1", 61, 80));
-		inputRegions.add(new Region("1", 81, 120));
+		inputRegions.add(new Region("1", 61, 80)); // border
+		inputRegions.add(new Region("1", 81, 120)); // border
 		inputRegions.add(new Region("1", 121, 160));
+		inputRegions.add(new Region("1", 161, 200));
 		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
 		// Sublist of input should be returned.
-		expectedOutputGroups = inputRegions.subList(4, 6);
+		expectedOutputGroups = inputRegions.subList(5, 8);
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test where the first round of recursion takes lower half (resulting in uneven subset), the next round takes the
+	 * higher half (resulting in an even subset of 2 elements) which are the border case of interest.
+	 */
+	@Test
+	public void testRecursionWithMultipleRegionsUnEvenArrayLowerToHigherToBorder()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 1, 20));
+		inputRegions.add(new Region("1", 21, 80)); // border
+		inputRegions.add(new Region("1", 81, 120)); // border
+		inputRegions.add(new Region("1", 121, 160));
+		inputRegions.add(new Region("1", 161, 200));
+		inputRegions.add(new Region("1", 201, 240));
+		inputRegions.add(new Region("1", 241, 280));
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
+
+		// Sublist of input should be returned.
+		expectedOutputGroups = inputRegions.subList(2, 5);
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
+	 * Test where the first round of recursion takes higher half (resulting in even subset), the next round takes the
+	 * lower half (resulting in an even subset of 2 elements) which are the border case of interest.
+	 */
+	@Test
+	public void testRecursionWithMultipleRegionsUnEvenArrayHigherToLowerToBorder()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 11, 20));
+		inputRegions.add(new Region("1", 21, 40));
+		inputRegions.add(new Region("1", 41, 60));
+		inputRegions.add(new Region("1", 61, 80)); // border
+		inputRegions.add(new Region("1", 81, 120)); // border
+		inputRegions.add(new Region("1", 121, 160));
+		inputRegions.add(new Region("1", 161, 200));
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
+
+		// Sublist of input should be returned.
+		expectedOutputGroups = inputRegions.subList(4, 7);
 
 		// Executes and runs comparison.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
