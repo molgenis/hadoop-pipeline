@@ -11,7 +11,9 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -114,10 +116,6 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		}
 		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
-		// Define MultipleOutputs used to write results back to HDFS.
-		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", SortedBamOutputFormat.class, NullWritable.class,
-				SAMRecordWritable.class);
-
 		// Sets custom partitioner & grouping comparator so it only uses the natural key.
 		// Sort comparator uses default behavior, so uses compareTo of Writable (composite key).
 		job.setPartitionerClass(RegionSamRecordPartitioner.class);
@@ -127,9 +125,16 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setMapperClass(HadoopPipelineMapper.class);
 		job.setReducerClass(HadoopPipelineReducer.class);
 
-		// Sets input/output formats.
+		// Sets input format.
 		job.setInputFormatClass(WholeFileInputFormat.class);
-		job.setOutputFormatClass(SortedBamOutputFormat.class);
+
+		// Defines default output format as lazy so only files are generated when actually writing to context.
+		job.setOutputFormatClass(LazyOutputFormat.class);
+		LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class); // Not used so set to basic format.
+
+		// Sets a multiple outputs writer for writing different files from a single reducer.
+		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", SortedBamOutputFormat.class, NullWritable.class,
+				SAMRecordWritable.class);
 
 		// Sets Mapper/Reducer output keys/values.
 		job.setMapOutputKeyClass(RegionSamRecordStartWritable.class);
