@@ -671,6 +671,29 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	}
 
 	/**
+	 * Test where the first round of recursion takes lower half and the round step takes the upper half.
+	 */
+	@Test
+	public void testWithMultipleRegionsEvenArrayUsesRecursionTakingHigherPartFollowedByLowerPart()
+	{
+		// Prepares/executes region with record matching.
+		inputRegions.add(new Region("1", 1, 20));
+		inputRegions.add(new Region("1", 21, 40));
+		inputRegions.add(new Region("1", 41, 60));
+		inputRegions.add(new Region("1", 61, 80));
+		inputRegions.add(new Region("1", 81, 120));
+		inputRegions.add(new Region("1", 121, 160));
+		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
+
+		// Sublist of input should be returned.
+		expectedOutputGroups = inputRegions.subList(4, 6);
+
+		// Executes and runs comparison.
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
+	}
+
+	/**
 	 * Generates a new {@link SAMRecord} that can be used for testing.
 	 * 
 	 * @param recordContig

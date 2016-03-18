@@ -92,7 +92,7 @@ public class SamRecordGroupsRetriever
 	 */
 	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(SAMRecord record, List<Region> list)
 	{
-		return retrieveFirstGroupWithEndHigherThanRecordStart(record.getStart(), list, 0, list.size());
+		return retrieveFirstGroupWithEndHigherThanRecordStart(record.getStart(), list, 0, list.size() - 1);
 	}
 
 	/**
@@ -114,15 +114,14 @@ public class SamRecordGroupsRetriever
 			int low, int high)
 	{
 		// Retrieves basic information for further usage.
-		int middle = (low + high) / 2; // Middle index, middle right if length is even.
-		int size = high - low; // Size of remaining list area to be looked at.
+		int middle = (int) Math.ceil((low + high) / 2.0); // Middle index, middle right if length is even.
 
 		// Retrieves end value of the group present in the middle of the list.
 		int middleGroupEnd = list.get(middle).getEnd();
 
-		// If middle is lower than 1, the remaining List only contains 1 remaining Region. Ignores comparisons using
-		// multiple list elements.
-		if (size < 2)
+		// If the low position is the same as the high position, the remaining List only contains 1 remaining Region.
+		// Ignores comparisons using multiple list elements.
+		if (low == high)
 		{
 			// If the only remaining Region has a higher end value than the record start, returns it's position.
 			if (middleGroupEnd >= recordStart)
@@ -154,7 +153,7 @@ public class SamRecordGroupsRetriever
 			// Should be equal to: MiddleMinusOneGroupEnd >= recordStart
 			else
 			{
-				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, low, middle);
+				return retrieveFirstGroupWithEndHigherThanRecordStart(recordStart, list, low, middle - 1);
 			}
 		}
 		// Returns null if the last remaining Region does not have an end value higher than the sam record start
