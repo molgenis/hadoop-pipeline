@@ -13,7 +13,6 @@ import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
 import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
-import org.molgenis.hadoop.pipeline.application.writables.SamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
@@ -152,41 +151,112 @@ public class HadoopPipelineTester extends Tester
 	List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> generateExpectedMapperOutput(List<SAMRecord> bwaOutput,
 			List<Region> regions)
 	{
+		// Stores the created expected output.
 		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
 
-		for (int i = 0; i < bwaOutput.size(); i += 2)
+		// Stores records of a single read and starts with the first record.
+		ArrayList<SAMRecord> regionRecords = new ArrayList<>();
+		regionRecords.add(bwaOutput.get(0));
+
+		// Iterates through the other records.
+		for (int i = 1; i < bwaOutput.size(); i++)
 		{
-			SAMRecord record1 = bwaOutput.get(i);
-			SAMRecord record2 = bwaOutput.get(i + 1);
+			SAMRecord currentRecord = bwaOutput.get(i);
 
-			List<Region> outputRegions = new ArrayList<>();
-
-			for (Region region : regions)
+			// If the record is from the same read, adds it to regionRecords.
+			if (currentRecord.getReadName().equals(regionRecords.get(0).getReadName()))
 			{
-				// At least 1 of the read pair should match the contig name.
-				if (record1.getContig().equals(region.getContig()) || record2.getContig().equals(region.getContig()))
-				{
-					// If record1 or record2 is in range of the region, the region is added to the outputRegions.
-					if (!checkIfRecordIsInRegionRange(outputRegions, record1, region))
-					{
-						checkIfRecordIsInRegionRange(outputRegions, record2, region);
-					}
-				}
+				regionRecords.add(currentRecord);
 			}
 
-			for (Region region : outputRegions)
+			// Otherwise, generate expected output from the currently stored records and start an empty regionRecords
+			// starting with the current record.
+			else
 			{
-				addRecordToExpectedMapperOutput(expectedMapperOutput, record1, region);
-				addRecordToExpectedMapperOutput(expectedMapperOutput, record2, region);
+				addRecordRegionsToExpectedMapperOutput(expectedMapperOutput, regions, regionRecords);
+				regionRecords.clear();
+				regionRecords.add(currentRecord);
 			}
+		}
+
+		// If after the last iteration the regionRecords is not empty, creates expected output from it.
+		if (!regionRecords.isEmpty())
+		{
+			addRecordRegionsToExpectedMapperOutput(expectedMapperOutput, regions, regionRecords);
 		}
 
 		return expectedMapperOutput;
 	}
 
 	/**
-	 * Checks whether the given {@code record} is in range of the {@code region}. If so, the {@code region} is added to
-	 * the {@code outputRegions}.
+	 * Processes the given {@code regionRecords} using the {@code regions} and adds expected output to
+	 * {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>} To which the expected output should be added to.
+	 * @param regions
+	 *            {@link List}{@code <}{@link Region}{@code >} Used for generating the expected output. Defines part of
+	 *            the key for each output key-value pair.
+	 * @param regionRecords
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >} The aligned records (from a single read pair) which
+	 *            should be used together with the {@link Region}{@code s} for generating the expected output. Defines
+	 *            the value value of a key-value pair and also a part of the key.
+	 */
+	private void addRecordRegionsToExpectedMapperOutput(
+			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, List<Region> regions,
+			ArrayList<SAMRecord> regionRecords)
+	{
+		// Stores the two primary records from the algined reads from a read pair.
+		SAMRecord firstPrimaryRecord = null;
+		SAMRecord secondPrimaryRecord = null;
+
+		// Iterates through the records to look for the two primary records.
+		for (SAMRecord regionRecord : regionRecords)
+		{
+			if (!regionRecord.isSecondaryOrSupplementary())
+			{
+				if (regionRecord.getFirstOfPairFlag()) firstPrimaryRecord = regionRecord;
+				else secondPrimaryRecord = regionRecord;
+			}
+		}
+
+		// If either primary record is unmapped, generates expected output with an unmapped region.
+		if (firstPrimaryRecord.getReadUnmappedFlag() || secondPrimaryRecord.getReadUnmappedFlag())
+		{
+			addRecordsListToExpectedMapperOutput(expectedMapperOutput, regionRecords, Region.unmapped());
+		}
+
+		// If either record is mapped, retrieve all regions any of the records map to and generate expected output.
+		if (!firstPrimaryRecord.getReadUnmappedFlag() || !secondPrimaryRecord.getReadUnmappedFlag())
+		{
+			List<Region> outputRegions = new ArrayList<>();
+
+			// Look for regions any of the records match with.
+			for (Region region : regions)
+			{
+				for (SAMRecord regionRecord : regionRecords)
+				{
+					// If a single record matches, adds it to the outputRegions and continue to the next Region.
+					if (checkIfRecordIsInRegionRange(regionRecord, region))
+					{
+						outputRegions.add(region);
+						break;
+					}
+				}
+			}
+
+			// Add the records with the regions to the expected output.
+			for (Region outputRegion : outputRegions)
+			{
+				addRecordsListToExpectedMapperOutput(expectedMapperOutput, regionRecords, outputRegion);
+			}
+
+		}
+	}
+
+	/**
+	 * Checks whether the given {@code record} is in range of the {@code region}.
 	 * 
 	 * @param outputRegions
 	 *            {@link List}{@code <}{@link Region}{@code >}
@@ -196,15 +266,35 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link Region}
 	 * @return {@code boolean} - True if a {@code record} was added to {@code outputRegions}, otherwise false.
 	 */
-	private boolean checkIfRecordIsInRegionRange(List<Region> outputRegions, SAMRecord record, Region region)
+	private boolean checkIfRecordIsInRegionRange(SAMRecord record, Region region)
 	{
 		if ((record.getStart() >= region.getStart() && record.getStart() <= region.getEnd())
 				|| (record.getEnd() >= region.getStart() && record.getEnd() <= region.getEnd()))
 		{
-			outputRegions.add(region);
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Adds all {@code records} to the {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>}
+	 * @param records
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >}
+	 * @param region
+	 *            {@link Region}
+	 */
+	private void addRecordsListToExpectedMapperOutput(
+			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, List<SAMRecord> records,
+			Region region)
+	{
+		for (SAMRecord record : records)
+		{
+			addRecordToExpectedMapperOutput(expectedMapperOutput, record, region);
+		}
 	}
 
 	/**
@@ -222,8 +312,10 @@ public class HadoopPipelineTester extends Tester
 			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
 			Region region)
 	{
+		SAMRecordWritable writable = new SAMRecordWritable();
+		writable.set(record);
 		expectedMapperOutput.add(new Pair<RegionSamRecordStartWritable, SAMRecordWritable>(
-				new RegionSamRecordStartWritable(region, record), new SamRecordWritable(record)));
+				new RegionSamRecordStartWritable(region, record), writable));
 	}
 
 	/**
@@ -252,7 +344,9 @@ public class HadoopPipelineTester extends Tester
 					&& recordRegion.getStart() == regionToKeep.getStart()
 					&& recordRegion.getEnd() == regionToKeep.getEnd())
 			{
-				recordsToKeep.add(new SamRecordWritable(record));
+				SAMRecordWritable writable = new SAMRecordWritable();
+				writable.set(record);
+				recordsToKeep.add(writable);
 			}
 		}
 

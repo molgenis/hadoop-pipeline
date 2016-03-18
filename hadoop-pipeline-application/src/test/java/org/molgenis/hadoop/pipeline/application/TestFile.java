@@ -5,11 +5,14 @@ public enum TestFile
 	/**
 	 * Mini version of the L1 fastq testing data.
 	 */
-	FASTQ_DATA_MINI_L1("input_fastq_mini/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz", TestFileType.FASTQ_GZIP),
+	FASTQ_DATA_CUSTOM("input_fastq/custom/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz", TestFileType.FASTQ_GZIP),
+
 	/**
 	 * The L1 fastq test data.
 	 */
-	FASTQ_DATA_L1("input_fastq/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz", TestFileType.FASTQ_GZIP),
+	FASTQ_DATA_L1("input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz",
+			TestFileType.FASTQ_GZIP),
+
 	/**
 	 * The SAM results when the L1 mini fastq data is aligned using: /path/to/bwa mem -p -M -R
 	 * "@RG\tID:1\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L1\tSM:sample1"
@@ -17,7 +20,8 @@ public enum TestFile
 	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
 	 * > hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1_mini.sam
 	 */
-	ALIGNED_READS_MINI_L1("expected_bwa_outputs/output_L1_mini.sam", TestFileType.SAM),
+	ALIGNED_READS_CUSTOM("expected_bwa_outputs/output_custom.sam", TestFileType.SAM),
+
 	/**
 	 * The SAM results when the L1 fastq data is aligned using: /path/to/bwa mem -p -M -R
 	 * "@RG\tID:1\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L1\tSM:sample1"
@@ -26,6 +30,7 @@ public enum TestFile
 	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
 	 */
 	ALIGNED_READS_L1("expected_bwa_outputs/output_L1.sam", TestFileType.SAM),
+
 	/**
 	 * A grouping dataset for grouping aligned reads depending on the region they aligned to.
 	 */

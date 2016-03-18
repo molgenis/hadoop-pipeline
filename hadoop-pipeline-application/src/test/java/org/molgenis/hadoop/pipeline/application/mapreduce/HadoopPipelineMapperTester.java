@@ -3,10 +3,12 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 import org.apache.hadoop.mrunit.types.Pair;
@@ -14,6 +16,7 @@ import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
+import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPairType;
 import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
@@ -38,7 +41,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	/**
 	 * Mini test input dataset.
 	 */
-	private BytesWritable fastqDataMiniL1;
+	private BytesWritable fastqDataCustom;
 
 	/**
 	 * Test input dataset.
@@ -68,9 +71,9 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		fastqDataMiniL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_MINI_L1));
+		fastqDataCustom = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_CUSTOM));
 		fastqDataL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_L1));
-		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
+		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_CUSTOM);
 		alignedReadsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
 		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
 	}
@@ -98,25 +101,41 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * @throws IOException
 	 */
 	@Test
-	public void testValidMapperRunWithMiniInputData() throws IOException
+	public void testMapperRunWithCustomInputData() throws IOException
 	{
 		// Generate expected output.
 		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
 				alignedReadsMiniL1, regions);
 
 		// Run mapper.
-		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataMiniL1);
+		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataCustom);
 		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
-
-		// Sorts data for correct comparison (as actual mapper output key "order" is defined by a Set).
-		Collections.sort(output);
-		Collections.sort(expectedResults);
 
 		// Print results
 		printOutput(output);
 
 		// Validate output.
 		validateOutput(output, expectedResults);
+
+		// Validate enum counters.
+		Counters counters = mDriver.getCounters();
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_UNMAPPED).getValue(), 1);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MAPPED).getValue(), 8);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
+				0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MAPPED).getValue(), 1);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(
+				counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
+				0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_MAPPED_ONE_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(mDriver.getCounters()
+				.findCounter(AlignedReadPairType.ONE_MAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(), 0);
+		Assert.assertEquals(
+				counters.findCounter(AlignedReadPairType.ONE_MULTIMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
+				0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPairType.INVALID).getValue(), 0);
 	}
 
 	/**
@@ -125,7 +144,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * 
 	 * @throws IOException
 	 */
-	@Test(enabled = false)
+	@Test
 	public void testValidMapperRun() throws IOException
 	{
 		// Generate expected output.
@@ -135,10 +154,6 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		// Run mapper.
 		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataL1);
 		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
-
-		// Sorts data for correct comparison (as actual mapper output key "order" is defined by a Set).
-		Collections.sort(output);
-		Collections.sort(expectedResults);
 
 		// Validate output.
 		validateOutput(output, expectedResults);
@@ -207,8 +222,20 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		Assert.assertEquals(output.size(), expectedResults.size());
 
 		// Sorts data for correct comparison (as actual mapper output key "order" is defined by a Set).
-		Collections.sort(output);
-		Collections.sort(expectedResults);
+		Comparator<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> comparator = new Comparator<Pair<RegionSamRecordStartWritable, SAMRecordWritable>>()
+		{
+			@Override
+			public int compare(Pair<RegionSamRecordStartWritable, SAMRecordWritable> o1,
+					Pair<RegionSamRecordStartWritable, SAMRecordWritable> o2)
+			{
+				int c = o1.getFirst().compareTo(o2.getFirst());
+				if (c == 0) c = o1.getSecond().get().getReadName().compareTo(o2.getSecond().get().getReadName());
+				if (c == 0) c = o1.getSecond().get().getStart() - o2.getSecond().get().getStart();
+				return c;
+			}
+		};
+		Collections.sort(output, comparator);
+		Collections.sort(expectedResults, comparator);
 
 		// Compares the actual output data with the expected output data.
 		for (int i = 0; i < output.size(); i++)

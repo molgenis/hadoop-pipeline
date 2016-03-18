@@ -30,6 +30,8 @@ import htsjdk.samtools.SAMRecord;
  * Tests the whole MapReduce process as a whole. Includes the {@link HadoopPipelineMapper},
  * {@link HadoopPipelineReducer} and {@link RegionSamRecordGroupingComparator}. IMPORTANT: Tests in this class are
  * disabled until a fix is found for {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
+ * 
+ * @deprecated Fix needed in {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
  */
 public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 {
@@ -41,12 +43,12 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	/**
 	 * Mini test input dataset.
 	 */
-	private BytesWritable fastqDataMiniL1;
+	private BytesWritable fastqDataCustom;
 
 	/**
 	 * Aligned reads results belonging to the mini test input dataset.
 	 */
-	private List<SAMRecord> alignedReadsMiniL1;
+	private List<SAMRecord> alignedReadsCustom;
 
 	/**
 	 * A list containing grouping information.
@@ -61,8 +63,8 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		fastqDataMiniL1 = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_MINI_L1));
-		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
+		fastqDataCustom = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_CUSTOM));
+		alignedReadsCustom = TestFileReader.readSamFile(TestFile.ALIGNED_READS_CUSTOM);
 		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
 	}
 

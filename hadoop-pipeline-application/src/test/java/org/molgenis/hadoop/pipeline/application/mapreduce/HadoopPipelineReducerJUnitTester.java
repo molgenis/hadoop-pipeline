@@ -31,11 +31,13 @@ import htsjdk.samtools.SAMRecord;
 /**
  * Tester for the {@link HadoopPipelineReducer}. As {@link MultipleOutputs} requires {@code @RunWith(}
  * {@link PowerMockRunner}{@code .class}) and did not work (after some initial efforts) using TestNG (see
- * https://issues.apache.org/jira/browse/MRUNIT-213), JUnit was used for this test. Do note that
- * {@link #addCacheToDriver()} cannot be used (without some fixes first) as this causes a
- * {@link javax.security.auth.login.LoginException}{@code : Can't find user name}. As the current implementation of the
- * {@link HadoopPipelineReducer} does not use the {@link DistributedCacheHandler} (and the custom
+ * <a href="https://issues.apache.org/jira/browse/MRUNIT-213">https://issues.apache.org/jira/browse/MRUNIT-213</a>),
+ * JUnit was used for this test. Do note that {@link #addCacheToDriver()} cannot be used (without some fixes first) as
+ * this causes a {@link javax.security.auth.login.LoginException}{@code : Can't find user name}. As the current
+ * implementation of the {@link HadoopPipelineReducer} does not use the {@link DistributedCacheHandler} (and the custom
  * {@link FileCacheSymlinkReduceDriver} is therefore not needed), this does not cause any problems.
+ * 
+ * @deprecated Bugs in unit-testing packages. See also description.
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(HadoopPipelineReducer.class)
@@ -49,7 +51,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	/**
 	 * Aligned reads results belonging to the mini test input dataset.
 	 */
-	private static List<SAMRecord> alignedReadsMiniL1;
+	private static List<SAMRecord> alignedReadsCustom;
 
 	/**
 	 * A list containing grouping information.
@@ -59,7 +61,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	@BeforeClass
 	public static void beforeClass() throws IOException
 	{
-		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_MINI_L1);
+		alignedReadsCustom = TestFileReader.readSamFile(TestFile.ALIGNED_READS_CUSTOM);
 		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
 	}
 
@@ -102,7 +104,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 
 		// Generate input.
 		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
-				alignedReadsMiniL1, regions);
+				alignedReadsCustom, regions);
 		Collections.sort(mapperOutput);
 		RegionSamRecordStartWritable inputKey = generateRegionSamRecordStartWritable(new Region("1", 800001, 1000000),
 				812735);

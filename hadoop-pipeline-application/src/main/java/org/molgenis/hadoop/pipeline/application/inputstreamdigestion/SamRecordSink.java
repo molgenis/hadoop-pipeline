@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
@@ -34,29 +33,14 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 			SAMRecordIterator samIterator = samReader.iterator();
 			while (samIterator.hasNext())
 			{
-				digestStreamItems(samIterator.next(), samIterator.next());
+				digestStreamItem(samIterator.next());
 			}
+			finishStreamProcessing();
 		}
 		finally
 		{
 			IOUtils.closeQuietly(samReader);
 		}
-	}
-
-	/**
-	 * Method allowing for digesting {@link SAMRecord}{@code s} per pair when overridden. By default, this method simply
-	 * calls {@link #digestStreamItem(SAMRecord)} for both {@link SAMRecord}{@code s}.
-	 * 
-	 * @param first
-	 *            {@link SAMRecord}
-	 * @param second
-	 *            {@link SAMRecord}
-	 * @throws IOException
-	 */
-	protected void digestStreamItems(SAMRecord first, SAMRecord second) throws IOException
-	{
-		digestStreamItem(first);
-		digestStreamItem(second);
 	}
 
 	/**
@@ -70,23 +54,9 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	protected abstract void digestStreamItem(SAMRecord item) throws IOException;
 
 	/**
-	 * Quick validation whether two {@link SAMRecord}{@code s} are mates using (some) supplied {@code getters} from the
-	 * instances themself.
-	 * 
-	 * @param first
-	 *            {@link SAMRecord}
-	 * @param second
-	 *            {@link SAMRecord}
-	 * @return {@code boolean} - True if mates, false if not.
+	 * Allows for some final processes after the last {@link SAMRecord} is digested. Defaults to no behavior.
 	 */
-	protected boolean validateIfMates(SAMRecord first, SAMRecord second)
+	protected void finishStreamProcessing() throws IOException
 	{
-		// StringUtils also compares null (if both are null, they are equal).
-		return StringUtils.equals(first.getMateReferenceName(), second.getReferenceName())
-				&& StringUtils.equals(first.getReferenceName(), second.getMateReferenceName())
-				&& first.getMateAlignmentStart() == second.getStart()
-				&& first.getStart() == second.getMateAlignmentStart()
-				&& first.getMateNegativeStrandFlag() == second.getReadNegativeStrandFlag()
-				&& first.getReadNegativeStrandFlag() == second.getMateNegativeStrandFlag();
 	}
 }
