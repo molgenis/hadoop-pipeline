@@ -32,7 +32,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	/**
 	 * A test {@link SAMRecord}.
 	 */
-	SAMRecord source1;
+	SAMRecord record1;
 
 	/**
 	 * Another test {@link SAMRecord}.
@@ -61,7 +61,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		builder = new ContigRegionsMapBuilder();
 
 		// Sets a record on contig 1 with range 100-200 (inclusive start/end).
-		source1 = generateTestRecord("1", 100, "101M", new SAMSequenceRecord("1:1-301", 300));
+		record1 = generateTestRecord("1", 100, "101M", new SAMSequenceRecord("1:1-301", 300));
 
 		// Sets a record on contig 2 with range 100-200 (inclusive start/end).
 		record2 = generateTestRecord("2", 100, "101M", new SAMSequenceRecord("1:1-301", 300),
@@ -99,7 +99,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -117,7 +117,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -134,7 +134,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -152,7 +152,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -170,7 +170,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -188,7 +188,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -211,7 +211,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -235,7 +235,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions;
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -257,7 +257,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -280,7 +280,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -302,7 +302,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -325,7 +325,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -348,7 +348,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.addAll(inputRegions.subList(1, 4));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -372,7 +372,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.addAll(inputRegions.subList(1, 5));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -395,7 +395,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -419,7 +419,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(0));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -442,7 +442,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -466,7 +466,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups.add(inputRegions.get(inputRegions.size() - 1));
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -623,7 +623,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		// Expected output should be empty, so no additional adjustments are made to the expected output.
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -666,7 +666,7 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		expectedOutputGroups = inputRegions.subList(2, 5);
 
 		// Executes and runs comparison.
-		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(source1);
+		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
