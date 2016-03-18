@@ -31,7 +31,8 @@ import htsjdk.samtools.SAMRecord;
  * {@link HadoopPipelineReducer} and {@link RegionSamRecordGroupingComparator}. IMPORTANT: Tests in this class are
  * disabled until a fix is found for {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
  * 
- * @deprecated Fix needed in {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}.
+ * @deprecated Fix needed in {@link HadoopPipelineReducerJUnitTester#testValidReducerRun()}. It might be outdated as
+ *             well.
  */
 public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 {

@@ -37,7 +37,7 @@ import htsjdk.samtools.SAMRecord;
  * implementation of the {@link HadoopPipelineReducer} does not use the {@link DistributedCacheHandler} (and the custom
  * {@link FileCacheSymlinkReduceDriver} is therefore not needed), this does not cause any problems.
  * 
- * @deprecated Bugs in unit-testing packages. See also description.
+ * @deprecated Bugs in unit-testing packages. See also description. It might be outdated as well.
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(HadoopPipelineReducer.class)
