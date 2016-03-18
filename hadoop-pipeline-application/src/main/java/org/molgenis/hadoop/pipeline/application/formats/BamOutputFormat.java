@@ -26,7 +26,7 @@ public class BamOutputFormat<K> extends BAMOutputFormat<K>
 	@Override
 	public RecordWriter<K, SAMRecordWritable> getRecordWriter(TaskAttemptContext ctx) throws IOException
 	{
-		return new KeyIgnoringBAMRecordWriter<K>(getDefaultWorkFile(ctx, ""),
+		return new KeyIgnoringBAMRecordWriter<K>(getDefaultWorkFile(ctx, ".bam"),
 				SamFileHeaderGenerator.retrieveSamFileHeader(ctx), true, ctx);
 	}
 }

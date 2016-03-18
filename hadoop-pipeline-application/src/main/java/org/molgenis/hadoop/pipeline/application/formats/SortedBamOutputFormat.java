@@ -21,7 +21,7 @@ public class SortedBamOutputFormat<K> extends BamOutputFormat<K>
 	@Override
 	public RecordWriter<K, SAMRecordWritable> getRecordWriter(TaskAttemptContext ctx) throws IOException
 	{
-		return new KeyIgnoringBAMRecordWriter<K>(getDefaultWorkFile(ctx, ""),
+		return new KeyIgnoringBAMRecordWriter<K>(getDefaultWorkFile(ctx, ".bam"),
 				SamFileHeaderGenerator.retrieveSamFileHeader(ctx, SortOrder.coordinate), true, ctx);
 	}
 }
