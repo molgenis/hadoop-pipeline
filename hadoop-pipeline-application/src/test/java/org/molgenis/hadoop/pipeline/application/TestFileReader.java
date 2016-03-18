@@ -45,15 +45,17 @@ public abstract class TestFileReader
 	public static byte[] readFileAsByteArray(TestFile file) throws IOException
 	{
 		InputStream in = null;
+		ByteArrayOutputStream baos = null;
 		try
 		{
 			in = classLoader.getResource(file.getFilePath()).openStream();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			baos = new ByteArrayOutputStream();
 			IOUtils.copy(in, baos);
 			return baos.toByteArray();
 		}
 		finally
 		{
+			IOUtils.closeQuietly(baos);
 			IOUtils.closeQuietly(in);
 		}
 	}
