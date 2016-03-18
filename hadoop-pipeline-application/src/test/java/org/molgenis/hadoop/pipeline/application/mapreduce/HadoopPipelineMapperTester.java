@@ -20,6 +20,7 @@ import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPairType;
 import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -76,6 +77,23 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		alignedReadsMiniL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_CUSTOM);
 		alignedReadsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
 		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
+	}
+
+	/**
+	 * Sets large data variables to {@code null} and runs the garbage collector to reduce the amount of memory used
+	 * after these tests are done.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterClass
+	public void AfterClass() throws IOException
+	{
+		fastqDataCustom = null;
+		fastqDataL1 = null;
+		alignedReadsMiniL1 = null;
+		alignedReadsL1 = null;
+		regions = null;
+		System.gc();
 	}
 
 	/**

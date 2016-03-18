@@ -12,8 +12,10 @@ import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
+import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.Sink;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -51,6 +53,20 @@ public class PipeRunnerTester extends Tester
 	{
 		fastqDataL1 = TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_L1);
 		expectedBwaResultsL1 = TestFileReader.readSamFile(TestFile.ALIGNED_READS_L1);
+	}
+
+	/**
+	 * Sets large data variables to {@code null} and runs the garbage collector to reduce the amount of memory used
+	 * after these tests are done.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterClass
+	public void AfterClass() throws IOException
+	{
+		fastqDataL1 = null;
+		expectedBwaResultsL1 = null;
+		System.gc();
 	}
 
 	/**
