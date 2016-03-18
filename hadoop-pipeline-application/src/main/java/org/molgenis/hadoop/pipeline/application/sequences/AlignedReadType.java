@@ -66,6 +66,16 @@ public enum AlignedReadType
 		// If no primary record is found, returns invalid.
 		if (primaryRecord == null) return INVALID;
 
+		// If record belongs to a read pair read and includes records that are from the other read compared to the
+		// primary record, returns INVALID.
+		if (primaryRecord.getReadPairedFlag())
+		{
+			for (SAMRecord record : records)
+			{
+				if (record.getFirstOfPairFlag() != primaryRecord.getFirstOfPairFlag()) return INVALID;
+			}
+		}
+
 		// If there is only 1 record, it can either be mapped or unmapped.
 		if (records.size() == 1)
 		{
