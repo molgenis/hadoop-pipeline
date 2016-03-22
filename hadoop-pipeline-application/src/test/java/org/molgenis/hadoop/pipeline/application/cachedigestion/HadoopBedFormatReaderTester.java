@@ -45,13 +45,13 @@ public class HadoopBedFormatReaderTester extends Tester
 		expectedRegions.add(new Region("1", 400001, 600000));
 		expectedRegions.add(new Region("1", 600001, 800000));
 		expectedRegions.add(new Region("1", 800001, 1000000));
-		expectedRegionsMap = builder.addAndBuild(expectedRegions);
+		expectedRegionsMap = builder.addAll(expectedRegions).build();
 		builder.clear();
 
 		// Creates a different expected ArrayList when the 4th line does not contain an end value.
 		ArrayList<Region> expectedRegionsNoEndValueForFourthLine = new ArrayList<Region>(expectedRegions);
 		expectedRegionsNoEndValueForFourthLine.set(3, new Region("1", 600001, 600001));
-		expectedRegionsMapNoEndValueForFourthLine = builder.addAndBuild(expectedRegionsNoEndValueForFourthLine);
+		expectedRegionsMapNoEndValueForFourthLine = builder.addAll(expectedRegionsNoEndValueForFourthLine).build();
 	}
 
 	/**
