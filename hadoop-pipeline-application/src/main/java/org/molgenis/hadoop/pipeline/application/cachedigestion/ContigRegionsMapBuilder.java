@@ -19,44 +19,32 @@ public class ContigRegionsMapBuilder
 	private Map<String, ArrayList<Region>> contigRegions = new HashMap<>();
 
 	/**
-	 * Add multiple {@link Region}{@code s} and immediately generate a {@link ContigRegionsMap} from it. Note that
-	 * previously stored {@link Region}{@code s} are also added.
+	 * Add multiple {@link Region}{@code s} that should be stored. Returns itself for easy chaining.
 	 * 
 	 * @param regions
 	 *            {@link List}{@code <}{@link Region}{@code >}
-	 * @see {@link #addAll(List)}
-	 * @see {@link #build()}
-	 * @see {@link #clear()}
-	 */
-	public ContigRegionsMap addAndBuild(List<Region> regions)
-	{
-		addAll(regions);
-		ContigRegionsMap map = build();
-		return map;
-	}
-
-	/**
-	 * Add multiple {@link Region}{@code s} that should be stored.
-	 * 
-	 * @param regions
-	 *            {@link List}{@code <}{@link Region}{@code >}
+	 * @return {@link ContigRegionsMapBuilder}
 	 * @see {@link #add(Region)}
 	 */
-	public void addAll(List<Region> regions)
+	public ContigRegionsMapBuilder addAll(List<Region> regions)
 	{
 		for (Region region : regions)
 		{
 			add(region);
 		}
+
+		// Returns itself for easy chaining.
+		return this;
 	}
 
 	/**
-	 * Add a {@link Region} that should be stored.
+	 * Add a {@link Region} that should be stored. Returns itself for easy chaining.
 	 * 
 	 * @param region
 	 *            {@link Region}
+	 * @return {@link ContigRegionsMapBuilder}
 	 */
-	public void add(Region region)
+	public ContigRegionsMapBuilder add(Region region)
 	{
 		ArrayList<Region> regions = contigRegions.get(region.getContig());
 		if (regions == null)
@@ -69,6 +57,9 @@ public class ContigRegionsMapBuilder
 		{
 			regions.add(region);
 		}
+
+		// Returns itself for easy chaining.
+		return this;
 	}
 
 	/**

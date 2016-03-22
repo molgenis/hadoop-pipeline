@@ -7,6 +7,7 @@ import java.io.InputStream;
  * Abstract class for the digestion of an {@link InputStream}, one {@code <T>} at a time.
  * 
  * @param <T>
+ *            The type to be digested for each {@link InputStream} item (chunk from the {@link InputStream}).
  */
 public abstract class Sink<T>
 {
@@ -25,7 +26,7 @@ public abstract class Sink<T>
 	 * for each {@code <T>item} present in the {@link InputStream}.
 	 * 
 	 * @param item
-	 *            {@code <T>}
+	 *            {@link T}
 	 * @throws IOException
 	 */
 	protected abstract void digestStreamItem(T item) throws IOException;

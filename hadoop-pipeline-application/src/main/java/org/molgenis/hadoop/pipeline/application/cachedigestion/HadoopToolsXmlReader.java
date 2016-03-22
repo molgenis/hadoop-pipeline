@@ -28,12 +28,13 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<Map<String, SAMProgram
 	/**
 	 * Stores the attribute that stores the file name in each tool node within the XML file.
 	 */
-	static final String FILE_NAME = "fileName";
+	private static final String FILE_NAME = "fileName";
+	
 	/**
 	 * A {@link File} that stores the validation {@link Schema}. This file should be present within the created jar
 	 * after compiling.
 	 */
-	final URL schemaFile = getClass().getClassLoader().getResource("tools_archive_info.xsd");
+	private final URL schemaFile = getClass().getClassLoader().getResource("tools_archive_info.xsd");
 
 	/**
 	 * Reads and digests an XML-formatted {@link inputStream} that adheres to the format as defined in the

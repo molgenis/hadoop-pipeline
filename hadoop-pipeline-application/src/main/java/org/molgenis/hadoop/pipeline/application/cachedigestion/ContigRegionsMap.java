@@ -79,7 +79,7 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 	 * 
 	 * @param region
 	 *            {@link Region}
-	 * @return {@code boolean} - If present, returns {@code true}, otherwise returns {@code false}.
+	 * @return {@code boolean} If present, returns {@code true}, otherwise returns {@code false}.
 	 */
 	public boolean containsRegion(Region region)
 	{
@@ -139,12 +139,13 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 	 * @param key
 	 *            {@link Object}
 	 * @return {@link ImmutableList}{@code <}{@link Region}{@code >}
+	 * @see {@link Map#remove(Object)}
 	 */
 	@Override
 	public ImmutableList<Region> remove(Object key)
 	{
 		ImmutableList<Region> regions = contigRegions.remove(key);
-		nRegions -= regions.size();
+		if (regions != null) nRegions -= regions.size();
 		return regions;
 	}
 

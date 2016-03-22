@@ -12,6 +12,9 @@ import htsjdk.samtools.SAMFileHeader.SortOrder;
 import htsjdk.samtools.SAMProgramRecord;
 import htsjdk.samtools.SAMSequenceDictionary;
 
+/**
+ * Generates a {@link SAMFileHeader} using information from the distributed cache.
+ */
 public abstract class SamFileHeaderGenerator
 {
 	/**
@@ -55,6 +58,17 @@ public abstract class SamFileHeaderGenerator
 		return samFileHeader;
 	}
 
+	/**
+	 * Wrapper for {@link #retrieveSamFileHeader(TaskAttemptContext)} that also allows for setting a {@link SortOrder}.
+	 * 
+	 * @param context
+	 *            {@link TaskAttemptContext}
+	 * @param order
+	 *            {@link SortOrder}
+	 * @return {@link SAMFileHeader}
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
 	public static SAMFileHeader retrieveSamFileHeader(TaskAttemptContext context, SortOrder order)
 			throws IllegalArgumentException, IOException
 	{

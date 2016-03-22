@@ -64,8 +64,9 @@ public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 
 	/**
 	 * Generates a parsed XML {@link Document} which can be used for retrieving node data. Uses the given {@link Schema}
-	 * for validating the XML-formatted {@link InputStream}. The used {@link ErrorHandler} is a new instance of
-	 * {@link XmlReaderStrictErrorHandler}.
+	 * for validating the XML-formatted {@link InputStream}. Is the same as
+	 * {@link #generateParsedXmlDocument(InputStream, Schema, ErrorHandler)} with as {@link ErrorHandler} a new instance
+	 * of {@link XmlReaderStrictErrorHandler}.
 	 * 
 	 * @param inputStream
 	 *            {@link InputStream}
@@ -75,6 +76,7 @@ public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
 	 * @throws IOException
+	 * @see {@link #generateParsedXmlDocument(InputStream, Schema, ErrorHandler)}
 	 */
 	Document generateParsedXmlDocument(InputStream inputStream, Schema schema)
 			throws ParserConfigurationException, SAXException, IOException
@@ -84,7 +86,9 @@ public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 
 	/**
 	 * Generates a parsed XML {@link Document} which can be used for retrieving node data. Uses no {@link Schema} for
-	 * validation and as {@link ErrorHandler} it uses the default behavior from {@link DocumentBuilder}.
+	 * validation and as {@link ErrorHandler} it uses the default behavior from {@link DocumentBuilder}. Is the same as
+	 * {@link #generateParsedXmlDocument(InputStream, Schema, ErrorHandler)} with as {@link Schema} and
+	 * {@link ErrorHandler} both {@code null}.
 	 * 
 	 * @param inputStream
 	 *            {@link InputStream}
@@ -92,6 +96,7 @@ public abstract class HadoopXmlReader<T> extends HadoopFileReader<T>
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
 	 * @throws IOException
+	 * @see {@link #generateParsedXmlDocument(InputStream, Schema, ErrorHandler)}
 	 */
 	Document generateParsedXmlDocument(InputStream inputStream)
 			throws ParserConfigurationException, SAXException, IOException

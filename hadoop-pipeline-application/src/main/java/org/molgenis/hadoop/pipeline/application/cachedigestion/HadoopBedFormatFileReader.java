@@ -39,7 +39,7 @@ public class HadoopBedFormatFileReader extends HadoopFileReader<ContigRegionsMap
 		StringSink sink = new StringSink()
 		{
 			@Override
-			public void digestStreamItem(String item) throws IOException
+			protected void digestStreamItem(String item) throws IOException
 			{
 				BEDFeature bedFeature = codec.decode(item.trim());
 

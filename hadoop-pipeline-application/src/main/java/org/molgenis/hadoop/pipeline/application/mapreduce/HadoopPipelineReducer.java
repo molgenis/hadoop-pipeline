@@ -62,11 +62,11 @@ public class HadoopPipelineReducer
 	/**
 	 * Generates a {@link String} containing the start of the file name prefix to where the output should be written to
 	 * (inside the output directory). The actual output file name might slightly differ however (for example by having
-	 * something like {@code -r-<reducer number>} appended after the given name).
+	 * something like {@code -r-<reducer number>} appended behind the given name).
 	 * 
 	 * @param region
-	 *            {@link Region} used to define the file name.
-	 * @return {@link String} file name to be used.
+	 *            {@link Region} Used to define the file name.
+	 * @return {@link String} File name to be used.
 	 */
 	private String generateOutputFileName(Region region)
 	{

@@ -12,7 +12,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
-import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
@@ -43,13 +42,15 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 	private String bwaTool;
 
 	/**
-	 * Alignment reference fasta file location (with index file having the same prefix and being in the same directory.
+	 * Alignment reference fasta file location (with the other required files for alignment by bwa having the same
+	 * prefix and being in the same directory).
 	 */
 	private String alignmentReferenceFastaFile;
 
 	/**
-	 * Allows retrieval of the groups to which a specific {@link SAMRecord} belongs to (based upon the area the
-	 * {@link SAMRecord} was aligned to on the reference data compared to a BED file stored start/end regions).
+	 * Allows retrieval of the {@link Region}{@code s} to which a specific {@link SAMRecord} belongs to (based upon the
+	 * area the {@link SAMRecord} was aligned to on the reference data compared to a BED file stored contig/start/end
+	 * data).
 	 */
 	private SamRecordGroupsRetriever groupsRetriever;
 
@@ -295,8 +296,8 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 	/**
 	 * Digests the cache files that are needed into the required formats.
 	 * 
-	 * IMPORTANT: Be sure the exact same array order is used as defined in {@link HadoopPipelineApplication}!
-	 * 
+	 * @param context
+	 *            {@link Context}
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
@@ -322,10 +323,10 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 	 * 
 	 * @param inputSplitPath
 	 *            {@link String}
-	 * @return {@code true} if input split is a file with a name that starts with "halvade_" and ends with ".fq.gz",
-	 *         false if it has a file extension different to ".fq.gz".
+	 * @return {@code boolean} If input split is a file with a name that starts with "halvade_" and ends with ".fq.gz"
+	 *         returns {@code true}. If the file extension is different to ".fq.gz" returns {@code false}.
 	 * @throws IOException
-	 *             if the given input split is a ".fq.gz" file but does not start with "halvade_", throws an
+	 *             If the given input split is a ".fq.gz" file but does not start with "halvade_", throws an
 	 *             {@link Exception) as safety measure as the to-be-digested could be invalid due to being wrongly
 	 *             uploaded (or some other reason that should result in the file not being processed).
 	 */
@@ -334,16 +335,16 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 		// Retrieves the file name.
 		String fileName = FilenameUtils.getName(inputSplitPath);
 
-		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
-		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_"))
-		{
-			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
-		}
-
 		// Non-".fq.gz" files return false.
 		if (!fileName.endsWith(".fq.gz"))
 		{
 			return false;
+		}
+
+		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
+		if (!fileName.startsWith("halvade_"))
+		{
+			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
 		}
 
 		//  Otherwise returns true.
@@ -352,14 +353,13 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 
 	/**
 	 * Returns the first found {@link Sample} that matches to the current input split (only one match should be present
-	 * in {@code this.samples}).
+	 * in {@link #samples}).
 	 * 
 	 * @param inputSplitPath
 	 *            {@link String}
-	 * @return {@link Sample} the {@link Sample} that matches with the {@code inputSplitPath}.
+	 * @return {@link Sample} The {@link Sample} that matches with the {@code inputSplitPath}.
 	 * @throws IOException
-	 *             if no {@link Sample} could be found within {@code this.samples} that matches the
-	 *             {@code inputSplitPath}.
+	 *             If no {@link Sample} could be found within {@link #samples} that matches the {@code inputSplitPath}.
 	 */
 	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
 	{

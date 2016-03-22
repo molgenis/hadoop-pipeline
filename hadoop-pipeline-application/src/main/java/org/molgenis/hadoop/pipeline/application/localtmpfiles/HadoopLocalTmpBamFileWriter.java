@@ -26,7 +26,7 @@ public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFil
 	/**
 	 * Header of the bam file.
 	 */
-	SAMFileHeader header;
+	private SAMFileHeader header;
 
 	@Override
 	public SAMFileHeader getFileHeader()
@@ -48,7 +48,7 @@ public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFil
 		super(fileName);
 		header = SamFileHeaderGenerator.retrieveSamFileHeader(context);
 		SAMFileWriterFactory factory = new SAMFileWriterFactory();
-		writer = factory.makeBAMWriter(header, false, file);
+		setWriter(factory.makeBAMWriter(header, false, getFile()));
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFil
 	@Override
 	public void add(SAMRecord item)
 	{
-		writer.addAlignment(item);
+		getWriter().addAlignment(item);
 	}
 
 	/**
@@ -94,13 +94,13 @@ public class HadoopLocalTmpBamFileWriter extends HadoopLocalTmpFileWriter<SAMFil
 	@Override
 	public void setProgressLogger(ProgressLoggerInterface progress)
 	{
-		writer.setProgressLogger(progress);
+		getWriter().setProgressLogger(progress);
 	}
 
 	@Override
 	public void close()
 	{
 		// Overrides close() of HadoopLocalTmpFileWriter as SAMFileWriter requires no exceptions to be thrown.
-		writer.close();
+		getWriter().close();
 	}
 }

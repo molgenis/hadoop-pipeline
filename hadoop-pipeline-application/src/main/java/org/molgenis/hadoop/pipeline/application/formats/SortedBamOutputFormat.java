@@ -15,6 +15,7 @@ import htsjdk.samtools.SAMFileHeader.SortOrder;
  * sorted based on {@link SortOrder#coordinate}.
  * 
  * @param <K>
+ * @see {@link BamOutputFormat}
  */
 public class SortedBamOutputFormat<K> extends BamOutputFormat<K>
 {

@@ -25,18 +25,28 @@ public abstract class HadoopLocalTmpFileWriter<T1 extends Closeable, T2> impleme
 	/**
 	 * The created temporary file.
 	 */
-	File file;
+	private File file;
 
 	/**
 	 * The writer used to write to the file.
 	 * 
 	 * @see {@link T1}
 	 */
-	T1 writer;
+	private T1 writer;
 
 	File getFile()
 	{
 		return file;
+	}
+
+	T1 getWriter()
+	{
+		return writer;
+	}
+
+	void setWriter(T1 writer)
+	{
+		this.writer = writer;
 	}
 
 	/**
@@ -68,7 +78,7 @@ public abstract class HadoopLocalTmpFileWriter<T1 extends Closeable, T2> impleme
 	 *            {@link String}
 	 * @throws IOException
 	 */
-	HadoopLocalTmpFileWriter(String fileName) throws IOException
+	public HadoopLocalTmpFileWriter(String fileName) throws IOException
 	{
 		file = FileUtil.createLocalTempFile(null, fileName, true);
 	}

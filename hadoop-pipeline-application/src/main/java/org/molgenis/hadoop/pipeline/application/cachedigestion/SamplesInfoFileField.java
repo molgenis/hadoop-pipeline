@@ -1,5 +1,8 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
+/**
+ * Represents a required field of a {@link Sample}.
+ */
 public enum SamplesInfoFileField
 {
 	EXTERNALSAMPLEID
@@ -52,15 +55,15 @@ public enum SamplesInfoFileField
 	}
 
 	/**
-	 * Compares the name of this {@link Enum} (excluding the {@link Enum} type name) to a {@link String}. Ignores
+	 * Compares the name of this {@link Enum} (excluding the {@link Enum} class name) to a {@link String}. Ignores
 	 * capitalization during the comparison!
 	 * 
 	 * @param fieldName
 	 *            {@link String}
-	 * @return {@code true} if the {@link String} equals the name of the {@link Enum} (ignoring the {@link Enum} type
+	 * @return {@code true} if the {@link String} equals the name of the {@link Enum} (ignoring the {@link Enum} class
 	 *         name), otherwise false.
 	 */
-	boolean nameEquals(String fieldName)
+	public boolean nameEquals(String fieldName)
 	{
 		return this.toString().equals(fieldName.toUpperCase());
 	}

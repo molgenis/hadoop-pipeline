@@ -43,7 +43,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 * Default main class that calls {@link ToolRunner} to execute Hadoop MapReduce.
 	 * 
 	 * @param args
-	 *            {@link String}{@code []} user input.
+	 *            {@link String}{@code []} User input.
 	 */
 	public static void main(String[] args)
 	{
@@ -73,11 +73,10 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	}
 
 	/**
-	 * Configures and executes Hadoop MapReduce job. IMPORTANT: Be sure that when retrieving items from the cache arrays
-	 * in the mapper/reducer, to use the positions as defined within this function!
+	 * Configures and executes Hadoop MapReduce job.
 	 * 
 	 * @param args
-	 *            {@link String}{@code []} (part of the) user input.
+	 *            {@link String}{@code []} User input excluding what is digested by {@link GenericOptionsParser}.
 	 * @throws IOException
 	 * @throws ParseException
 	 * @throws InterruptedException
@@ -129,8 +128,10 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		job.setInputFormatClass(WholeFileInputFormat.class);
 
 		// Defines default output format as lazy so only files are generated when actually writing to context.
+		// Do not use NullOutputFormat (causes the MultipleOutputs to stay in a tmp dir as Job "did not create final
+		// output" due to the NullOutputFormat)!!!
 		job.setOutputFormatClass(LazyOutputFormat.class);
-		LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class); // Not used so set to basic format.
+		LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
 
 		// Sets a multiple outputs writer for writing different files from a single reducer.
 		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", SortedBamOutputFormat.class, NullWritable.class,

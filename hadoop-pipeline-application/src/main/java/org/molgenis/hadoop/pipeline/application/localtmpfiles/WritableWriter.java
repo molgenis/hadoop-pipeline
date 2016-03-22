@@ -9,7 +9,7 @@ import org.apache.hadoop.io.Writable;
  * {@link Writable} implementations of the data the {@code writer} can write.
  * 
  * @param <T>
- *            - The {@link Writable} instances that the {@code writer} should be able to add.
+ *            The {@link Writable} instances that the {@code writer} should be able to add.
  */
 interface WritableWriter<T extends Writable>
 {

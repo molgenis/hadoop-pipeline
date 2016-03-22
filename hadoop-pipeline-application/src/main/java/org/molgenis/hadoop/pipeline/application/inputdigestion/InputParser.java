@@ -8,7 +8,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 /**
- * Abstract parser for storing/validating information needed elsewhere in the application.
+ * Abstract parser for storing/validating user input.
  */
 public abstract class InputParser
 {
@@ -262,7 +262,7 @@ public abstract class InputParser
 	 * Checks whether all required input parameters are valid. For each invalid parameter, an error message is written
 	 * (unless otherwise specified by in-line code comments).
 	 * 
-	 * @return {@code true} if all parameters are correct, otherwise {@code false}.
+	 * @return {@code boolean} If all parameters are correct returns {@code true}, otherwise {@code false}.
 	 * @throws IOException
 	 */
 	protected boolean checkValidityArguments() throws IOException

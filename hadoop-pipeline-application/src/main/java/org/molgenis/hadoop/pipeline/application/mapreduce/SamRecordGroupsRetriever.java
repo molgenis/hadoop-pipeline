@@ -25,7 +25,7 @@ public class SamRecordGroupsRetriever
 	private static final Logger logger = Logger.getLogger(SamRecordGroupsRetriever.class);
 
 	/**
-	 * Stores the groups to which a {@link SAMRecord} can match to.
+	 * Stores the {@link Region}{@code s} to which a {@link SAMRecord} can match with.
 	 */
 	private ContigRegionsMap contigRegionsMap;
 
@@ -34,7 +34,7 @@ public class SamRecordGroupsRetriever
 	 * {@code s} a specific {@link SAMRecord} belongs to.
 	 * 
 	 * @param contigRegionsMap
-	 *            {@link ContigRegionsMap} - Storing the {@link Region}{@code s} to be used for matching with a
+	 *            {@link ContigRegionsMap} Storing the {@link Region}{@code s} to be used for matching with a
 	 *            {@link SAMRecord}.
 	 */
 	public SamRecordGroupsRetriever(ContigRegionsMap contigRegionsMap)
@@ -47,8 +47,8 @@ public class SamRecordGroupsRetriever
 	 * These also include {@link Region}{@code s} which partially match with the given {@link SAMRecord}.
 	 * 
 	 * @param record
-	 *            {@link SAMRecord} - To be used to find the {@link Region}{@code s} that are within range of it.
-	 * @return {@link List}{@code <}{@link Region}{@code >} - The {@link Region}{@code s} within range of the given
+	 *            {@link SAMRecord} To be used to find the {@link Region}{@code s} that are within range of it.
+	 * @return {@link List}{@code <}{@link Region}{@code >} The {@link Region}{@code s} within range of the given
 	 *         {@link SAMRecord}. If no matches were found, returns an empty {@link List}.
 	 */
 	public List<Region> retrieveGroupsWithinRange(SAMRecord record)
@@ -88,12 +88,13 @@ public class SamRecordGroupsRetriever
 	}
 
 	/**
-	 * Wrapper for {@link #retrieveFirstGroupWithEndHigherThanRecordStart(Integer, List, int, int)}.
+	 * Wrapper for first call to {@link #retrieveFirstGroupWithEndHigherThanRecordStart(Integer, List, int, int)}.
 	 * 
 	 * @param record
-	 *            {@link SAMRecord} to retrieve {@code startPosition} from.
+	 *            {@link SAMRecord} The {@link SAMRecord} to retrieve {@code startPosition} from.
 	 * @param list
-	 *            used for position comparison with the given {@code recordStart}.
+	 *            {@link List}{@code <}{@link Region}{@code >} Used for position comparison with the given
+	 *            {@code recordStart}.
 	 * @return {@code int} value if position was found, otherwise {@code null}.
 	 */
 	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(SAMRecord record, List<Region> list)
@@ -103,20 +104,21 @@ public class SamRecordGroupsRetriever
 
 	/**
 	 * Recursive function that returns the {@code index} as {@link Integer} of the first {@link Region} that has a
-	 * {@link Region#getEnd()} that is higher than the {@link SAMRecord#getStart()}.
+	 * {@link Region#getEnd()} that is equal/higher than the {@link SAMRecord#getStart()}. If none are found, returns
+	 * {@code null} instead.
 	 * 
 	 * @param recordStart
-	 *            {@code final} {@link Integer} value stored in {@link SAMRecord#getStart()}.
+	 *            {@code final} {@code int} Value stored in {@link SAMRecord#getStart()}.
 	 * @param list
-	 *            {@link List}{@code <}{@link Region}{@code >} used for position comparison with the given
+	 *            {@code final} {@link List}{@code <}{@link Region}{@code >} Used for position comparison with the given
 	 *            {@code recordStart}.
 	 * @param low
-	 *            {@code int} bottom position to be used for {@code list}.
+	 *            {@code int} Bottom position to be used for {@code list}.
 	 * @param high
-	 *            {@code int} upper position to be used for {@code list}.
-	 * @return {@code int} value if position was found, otherwise {@code null}.
+	 *            {@code int} Upper position to be used for {@code list}.
+	 * @return {@code int} Value if position was found, otherwise {@code null}.
 	 */
-	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(final Integer recordStart, List<Region> list,
+	private Integer retrieveFirstGroupWithEndHigherThanRecordStart(final int recordStart, final List<Region> list,
 			int low, int high)
 	{
 		// Retrieves basic information for further usage.

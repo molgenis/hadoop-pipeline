@@ -16,8 +16,8 @@ import htsjdk.samtools.SAMFileHeader;
 /**
  * Custom implementation replacing {@link KeyIgnoringBAMOutputFormat} where the {@link SAMFileHeader} is generated using
  * the {@link TaskAttemptContext} from {@link #getRecordWriter(TaskAttemptContext)}. This means the
- * {@link SAMFileHeader} is generated at the moment a {@link RecordWriter} is retrieved from the {@link OutputFormat},
- * though this allows the distributed cache to be used for generating the {@link SAMFileHeader}.
+ * {@link SAMFileHeader} is generated at the moment a {@link RecordWriter} is retrieved from the {@link OutputFormat}.
+ * This allows the distributed cache to be used for generating the {@link SAMFileHeader}.
  * 
  * @param <K>
  */
