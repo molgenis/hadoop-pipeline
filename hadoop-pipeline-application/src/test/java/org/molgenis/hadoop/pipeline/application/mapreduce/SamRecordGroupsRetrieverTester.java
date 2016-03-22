@@ -1,9 +1,14 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.WriterAppender;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMapBuilder;
@@ -24,6 +29,11 @@ import htsjdk.samtools.SAMSequenceRecord;
  */
 public class SamRecordGroupsRetrieverTester extends Tester
 {
+	/**
+	 * Writer to catch logger output with.
+	 */
+	private StringWriter stringWriter;
+
 	/**
 	 * Grouper to be tested.
 	 */
@@ -71,14 +81,22 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		// Generate clean logger writer.
+		stringWriter = new StringWriter();
+		Logger.getRootLogger().addAppender(new WriterAppender(new SimpleLayout(), stringWriter));
+
 		// Creates a new List to be filled with Region that can be used to compare with the SAMRecord.
 		inputRegions = new ArrayList<>();
 		expectedOutputGroups = new ArrayList<Region>();
 	}
 
 	@AfterMethod
-	public void afterMethod()
+	public void afterMethod(Method method)
 	{
+		// Write logger data to stdout.
+		System.out.println(method.getName().toString());
+		System.out.println(stringWriter.toString());
+
 		// Clears the grouper.
 		grouper = null;
 
@@ -663,11 +681,20 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 201, 240));
 		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
+		// Generate expected recursion positions. Each position represents a round of recursion.
+		int[] expectedLows =
+		{ 0, 0, 1 };
+		int[] expectedMiddles =
+		{ 3, 1, 2 };
+		int[] expectedHighs =
+		{ 5, 2, 2 };
+
 		// Sublist of input should be returned.
 		expectedOutputGroups = inputRegions.subList(2, 5);
 
-		// Executes and runs comparison.
+		// Executes and runs comparisons.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		compareRecursionPositions(stringWriter.toString(), expectedLows, expectedMiddles, expectedHighs);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -689,11 +716,20 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 161, 200));
 		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
+		// Generate expected recursion positions. Each position represents a round of recursion.
+		int[] expectedLows =
+		{ 0, 4, 4 };
+		int[] expectedMiddles =
+		{ 4, 6, 5 };
+		int[] expectedHighs =
+		{ 7, 7, 5 };
+
 		// Sublist of input should be returned.
 		expectedOutputGroups = inputRegions.subList(5, 8);
 
-		// Executes and runs comparison.
+		// Executes and runs comparisons.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		compareRecursionPositions(stringWriter.toString(), expectedLows, expectedMiddles, expectedHighs);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -714,11 +750,20 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 241, 280));
 		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
+		// Generate expected recursion positions. Each position represents a round of recursion.
+		int[] expectedLows =
+		{ 0, 0, 1 };
+		int[] expectedMiddles =
+		{ 3, 1, 2 };
+		int[] expectedHighs =
+		{ 6, 2, 2 };
+
 		// Sublist of input should be returned.
 		expectedOutputGroups = inputRegions.subList(2, 5);
 
-		// Executes and runs comparison.
+		// Executes and runs comparisons.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		compareRecursionPositions(stringWriter.toString(), expectedLows, expectedMiddles, expectedHighs);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -739,11 +784,20 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		inputRegions.add(new Region("1", 161, 200));
 		grouper = new SamRecordGroupsRetriever(builder.addAndBuild(inputRegions));
 
+		// Generate expected recursion positions. Each position represents a round of recursion.
+		int[] expectedLows =
+		{ 0, 3, 3 };
+		int[] expectedMiddles =
+		{ 3, 5, 4 };
+		int[] expectedHighs =
+		{ 6, 6, 4 };
+
 		// Sublist of input should be returned.
 		expectedOutputGroups = inputRegions.subList(4, 7);
 
-		// Executes and runs comparison.
+		// Executes and runs comparisons.
 		List<Region> actualOutputGroups = grouper.retrieveGroupsWithinRange(record1);
+		compareRecursionPositions(stringWriter.toString(), expectedLows, expectedMiddles, expectedHighs);
 		Assert.assertEquals(actualOutputGroups, expectedOutputGroups);
 	}
 
@@ -782,5 +836,39 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		if (recordCigar != null) record.setCigarString(recordCigar);
 
 		return record;
+	}
+
+	/**
+	 * Compares the debug message containing the recursion positions to what is expected. Assumes debug messages about
+	 * recursion positions start with "DEBUG - Entered recursion." and consist of a single line. Furthermore, it is
+	 * assumed that these recursion position messages are in chronological order. Lines that start with something
+	 * different are ignored.
+	 * 
+	 * @param debugOutput
+	 *            {@link String}
+	 * @param expectedLow
+	 *            {@code int[]}
+	 * @param expectedMiddle
+	 *            {@code int[]}
+	 * @param expectedHigh
+	 *            {@code int[]}
+	 */
+	private void compareRecursionPositions(String debugOutput, int[] expectedLow, int[] expectedMiddle,
+			int[] expectedHigh)
+	{
+		// Recursion counter.
+		int counter = 0;
+
+		// Goes through each logger line and if it starts with "DEBUG - Entered recursion.", compares it to the expected
+		// message at that recursion leve.
+		for (String line : debugOutput.split(System.lineSeparator()))
+		{
+			if (line.startsWith("DEBUG - Entered recursion."))
+			{
+				Assert.assertEquals(line, "DEBUG - Entered recursion. Low=" + expectedLow[counter] + ", middle="
+						+ expectedMiddle[counter] + ", high=" + expectedHigh[counter]);
+				counter++;
+			}
+		}
 	}
 }

@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 
@@ -19,9 +20,14 @@ import htsjdk.samtools.SAMRecord;
 public class SamRecordGroupsRetriever
 {
 	/**
+	 * Logger to write information to.
+	 */
+	private static final Logger logger = Logger.getLogger(SamRecordGroupsRetriever.class);
+
+	/**
 	 * Stores the groups to which a {@link SAMRecord} can match to.
 	 */
-	ContigRegionsMap contigRegionsMap;
+	private ContigRegionsMap contigRegionsMap;
 
 	/**
 	 * Create a new instance using a set of {@link Region}{@code s} which can be used for retrieving the {@link Region}
@@ -31,7 +37,7 @@ public class SamRecordGroupsRetriever
 	 *            {@link ContigRegionsMap} - Storing the {@link Region}{@code s} to be used for matching with a
 	 *            {@link SAMRecord}.
 	 */
-	SamRecordGroupsRetriever(ContigRegionsMap contigRegionsMap)
+	public SamRecordGroupsRetriever(ContigRegionsMap contigRegionsMap)
 	{
 		this.contigRegionsMap = requireNonNull(contigRegionsMap);
 	}
@@ -45,7 +51,7 @@ public class SamRecordGroupsRetriever
 	 * @return {@link List}{@code <}{@link Region}{@code >} - The {@link Region}{@code s} within range of the given
 	 *         {@link SAMRecord}. If no matches were found, returns an empty {@link List}.
 	 */
-	List<Region> retrieveGroupsWithinRange(SAMRecord record)
+	public List<Region> retrieveGroupsWithinRange(SAMRecord record)
 	{
 		// Stores the regions that match the SAMRecord.
 		List<Region> matchingRegions = new ArrayList<>();
@@ -115,6 +121,9 @@ public class SamRecordGroupsRetriever
 	{
 		// Retrieves basic information for further usage.
 		int middle = (int) Math.ceil((low + high) / 2.0); // Middle index, middle right if length is even.
+
+		// Debug info recursion positions.
+		logger.debug("Entered recursion. Low=" + low + ", middle=" + middle + ", high=" + high);
 
 		// Retrieves end value of the group present in the middle of the list.
 		int middleGroupEnd = list.get(middle).getEnd();
