@@ -7,24 +7,25 @@ import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWr
 /**
  * Custom grouping comparator for the {@link RegionSamRecordStartWritable}, where only
  * {@link RegionSamRecordStartWritable#getRegionWritable()} is used within the grouping comparator (so the natural key
- * part from the composite key).
+ * part from the composite key). This comparator controls which keys are grouped together into a single call to the
+ * reduce() method.
  */
 public class RegionSamRecordGroupingComparator extends WritableComparator
 {
-	public RegionSamRecordGroupingComparator()
+	protected RegionSamRecordGroupingComparator()
 	{
+		// Gives WritableComparable class and the creation of instances for the keys is set to true.
 		super(RegionSamRecordStartWritable.class, true);
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	/**
-	 * This comparator controls which keys are grouped together into a single call to the reduce() method.
-	 */
 	public int compare(WritableComparable first, WritableComparable second)
 	{
 		RegionSamRecordStartWritable castedFirst = (RegionSamRecordStartWritable) first;
 		RegionSamRecordStartWritable castedSecond = (RegionSamRecordStartWritable) second;
+
+		// Comparison is done only on the RegionWritable (natural key).
 		return castedFirst.getRegionWritable().compareTo(castedSecond.getRegionWritable());
 	}
 }

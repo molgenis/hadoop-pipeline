@@ -10,6 +10,9 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 
+/**
+ * {@link Writable} for storing a {@link Region}.
+ */
 public class RegionWritable implements WritableComparable<RegionWritable>
 {
 	/**

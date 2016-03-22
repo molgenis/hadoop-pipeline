@@ -12,6 +12,10 @@ import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 
 import htsjdk.samtools.SAMRecord;
 
+/**
+ * {@link WritableComparable} storing a {@link Region} (natural key) together with the {@code int} from
+ * {@link SAMRecord#getStart()} that together can be used as composite key for a secondary sort.
+ */
 public class RegionSamRecordStartWritable implements WritableComparable<RegionSamRecordStartWritable>
 {
 	/**
