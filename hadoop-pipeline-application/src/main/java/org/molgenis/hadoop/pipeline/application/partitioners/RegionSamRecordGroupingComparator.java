@@ -12,7 +12,7 @@ import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWr
  */
 public class RegionSamRecordGroupingComparator extends WritableComparator
 {
-	protected RegionSamRecordGroupingComparator()
+	public RegionSamRecordGroupingComparator()
 	{
 		// Gives WritableComparable class and the creation of instances for the keys is set to true.
 		super(RegionSamRecordStartWritable.class, true);
