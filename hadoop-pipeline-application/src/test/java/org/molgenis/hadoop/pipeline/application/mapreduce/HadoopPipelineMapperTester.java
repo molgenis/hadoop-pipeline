@@ -17,7 +17,7 @@ import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPairType;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -37,7 +37,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapDriver allowing the mapper to be tested.
 	 */
-	private MapDriver<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable> mDriver;
+	private MapDriver<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable> mDriver;
 
 	/**
 	 * Mini test input dataset.
@@ -104,8 +104,8 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		Mapper<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
-		mDriver = new FileCacheSymlinkMapDriver<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable>(
+		Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
+		mDriver = new FileCacheSymlinkMapDriver<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable>(
 				mapper);
 		setDriver(mDriver);
 
@@ -122,12 +122,12 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	public void testMapperRunWithCustomInputData() throws IOException
 	{
 		// Generate expected output.
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
 				alignedReadsMiniL1, regions);
 
 		// Run mapper.
 		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataCustom);
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> output = mDriver.run();
 
 		// Print results
 		printOutput(output);
@@ -166,12 +166,12 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	public void testValidMapperRun() throws IOException
 	{
 		// Generate expected output.
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedResults = generateExpectedMapperOutput(
 				alignedReadsL1, regions);
 
 		// Run mapper.
 		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz"), fastqDataL1);
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> output = mDriver.run();
 
 		// Validate output.
 		validateOutput(output, expectedResults);
@@ -213,7 +213,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	{
 		mDriver.withInput(new Text("hdfs/path/to/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.csv"), fastqDataL1);
 
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output = mDriver.run();
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> output = mDriver.run();
 
 		// As the input file "represents" a csv file, it should not be digested and the output should stay empty, but it
 		// should not cause an exception either (for when multiple lanes are given as input using a single main
@@ -228,23 +228,23 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	 * Compares the output from the driver with the expected output.
 	 * 
 	 * @param output
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param expectedResults
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 */
-	private void validateOutput(List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> output,
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedResults)
+	private void validateOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> output,
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedResults)
 	{
 		Assert.assertEquals(output.size(), expectedResults.size());
 
 		// Sorts data for correct comparison (as actual mapper output key "order" is defined by a Set).
-		Comparator<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> comparator = new Comparator<Pair<RegionSamRecordStartWritable, SAMRecordWritable>>()
+		Comparator<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> comparator = new Comparator<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>>()
 		{
 			@Override
-			public int compare(Pair<RegionSamRecordStartWritable, SAMRecordWritable> o1,
-					Pair<RegionSamRecordStartWritable, SAMRecordWritable> o2)
+			public int compare(Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable> o1,
+					Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable> o2)
 			{
 				int c = o1.getFirst().compareTo(o2.getFirst());
 				if (c == 0) c = o1.getSecond().get().getReadName().compareTo(o2.getSecond().get().getReadName());

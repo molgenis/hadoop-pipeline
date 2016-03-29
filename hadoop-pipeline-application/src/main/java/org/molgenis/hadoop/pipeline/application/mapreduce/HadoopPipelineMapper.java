@@ -21,7 +21,7 @@ import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSi
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
 import org.molgenis.hadoop.pipeline.application.sequences.AlignedRead;
 import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPair;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
@@ -29,7 +29,7 @@ import htsjdk.samtools.SAMRecord;
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable>
+public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -232,7 +232,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 
 	/**
 	 * Write all {@link SAMRecord}{@code s} from an {@link AlignedReadPair} to the {@link Context} using the
-	 * {@link Region} as part of the {@link RegionSamRecordStartWritable} to be used as {@link Mapper} output key.
+	 * {@link Region} as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
 	 * 
 	 * @param context
 	 *            {@link Context}
@@ -252,7 +252,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 
 	/**
 	 * Write all {@link SAMRecord}{@code s} from an {@link AlignedRead} to the {@link Context} using the {@link Region}
-	 * as part of the {@link RegionSamRecordStartWritable} to be used as {@link Mapper} output key.
+	 * as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
 	 * 
 	 * @param context
 	 *            {@link Context}
@@ -274,7 +274,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 
 	/**
 	 * Write a single {@link SAMRecord} to the {@link Context} using the {@link Region} as part of the
-	 * {@link RegionSamRecordStartWritable} to be used as {@link Mapper} output key.
+	 * {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
 	 * 
 	 * @param context
 	 *            {@link Context}
@@ -290,7 +290,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionSamR
 	{
 		SAMRecordWritable firstWritable = new SAMRecordWritable();
 		firstWritable.set(record);
-		context.write(new RegionSamRecordStartWritable(region, record), firstWritable);
+		context.write(new RegionWithSortableSamRecordWritable(region, record), firstWritable);
 	}
 
 	/**

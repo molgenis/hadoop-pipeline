@@ -12,7 +12,7 @@ import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
@@ -101,10 +101,10 @@ public class HadoopPipelineTester extends Tester
 	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 */
-	void printOutput(List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> pairsList)
+	void printOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> pairsList)
 	{
 		printOutput(pairsList, pairsList.size());
 	}
@@ -113,12 +113,12 @@ public class HadoopPipelineTester extends Tester
 	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
 	 * 
 	 * @param pairsList
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param limit
 	 *            {@code int} - The number of pairs to write to stdout.
 	 */
-	void printOutput(List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> pairsList, int limit)
+	void printOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> pairsList, int limit)
 	{
 		// If the limit is higher than the actual list size, resets the limit.
 		if (limit > pairsList.size()) limit = pairsList.size();
@@ -145,14 +145,14 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link List}{@code <}{@link SAMRecord}{@code >} - The bwa output used to base expected output on.
 	 * @param groups
 	 *            {@link List}{@code <}{@link Region}{@code >} - The groups used for defining keys.
-	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *         {@link SAMRecordWritable} {@code >>}
 	 */
-	List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> generateExpectedMapperOutput(List<SAMRecord> bwaOutput,
+	List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> generateExpectedMapperOutput(List<SAMRecord> bwaOutput,
 			List<Region> regions)
 	{
 		// Stores the created expected output.
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
 
 		// Stores records of a single read and starts with the first record.
 		ArrayList<SAMRecord> regionRecords = new ArrayList<>();
@@ -193,7 +193,7 @@ public class HadoopPipelineTester extends Tester
 	 * {@code expectedMapperOutput}.
 	 * 
 	 * @param expectedMapperOutput
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable} {@code >>} To which the expected output should be added to.
 	 * @param regions
 	 *            {@link List}{@code <}{@link Region}{@code >} Used for generating the expected output. Defines part of
@@ -204,7 +204,7 @@ public class HadoopPipelineTester extends Tester
 	 *            the value value of a key-value pair and also a part of the key.
 	 */
 	private void addRecordRegionsToExpectedMapperOutput(
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, List<Region> regions,
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, List<Region> regions,
 			ArrayList<SAMRecord> regionRecords)
 	{
 		// Stores the two primary records from the algined reads from a read pair.
@@ -280,7 +280,7 @@ public class HadoopPipelineTester extends Tester
 	 * Adds all {@code records} to the {@code expectedMapperOutput}.
 	 * 
 	 * @param expectedMapperOutput
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable} {@code >>}
 	 * @param records
 	 *            {@link List}{@code <}{@link SAMRecord}{@code >}
@@ -288,7 +288,7 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link Region}
 	 */
 	private void addRecordsListToExpectedMapperOutput(
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, List<SAMRecord> records,
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, List<SAMRecord> records,
 			Region region)
 	{
 		for (SAMRecord record : records)
@@ -301,7 +301,7 @@ public class HadoopPipelineTester extends Tester
 	 * Adds the {code record} to the {@code expectedMapperOutput}.
 	 * 
 	 * @param expectedMapperOutput
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable} {@code >>}
 	 * @param record
 	 *            {@link SAMRecord}
@@ -309,13 +309,13 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link Region}
 	 */
 	private void addRecordToExpectedMapperOutput(
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
 			Region region)
 	{
 		SAMRecordWritable writable = new SAMRecordWritable();
 		writable.set(record);
-		expectedMapperOutput.add(new Pair<RegionSamRecordStartWritable, SAMRecordWritable>(
-				new RegionSamRecordStartWritable(region, record), writable));
+		expectedMapperOutput.add(new Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>(
+				new RegionWithSortableSamRecordWritable(region, record), writable));
 	}
 
 	/**
@@ -323,20 +323,20 @@ public class HadoopPipelineTester extends Tester
 	 * {@code regionToKeepWritable}.
 	 * 
 	 * @param mapperOutput
-	 *            {@link List}{@code <}{@link RegionSamRecordStartWritable}{@code , }{@link SAMRecordWritable}
+	 *            {@link List}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }{@link SAMRecordWritable}
 	 *            {@code >>}
 	 * @param regionToKeep
-	 *            {@link RegionSamRecordStartWritable}
+	 *            {@link RegionWithSortableSamRecordWritable}
 	 * @return {@link List}{@code <}{@link SAMRecordWritable}{@code >}
 	 */
 	public List<SAMRecordWritable> filterMapperOutput(
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> mapperOutput,
-			RegionSamRecordStartWritable regionToKeepWritable)
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> mapperOutput,
+			RegionWithSortableSamRecordWritable regionToKeepWritable)
 	{
 		ArrayList<SAMRecordWritable> recordsToKeep = new ArrayList<>();
 		Region regionToKeep = regionToKeepWritable.get();
 
-		for (Pair<RegionSamRecordStartWritable, SAMRecordWritable> outputItem : mapperOutput)
+		for (Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable> outputItem : mapperOutput)
 		{
 			Region recordRegion = outputItem.getFirst().get();
 			SAMRecord record = outputItem.getSecond().get();
@@ -354,17 +354,17 @@ public class HadoopPipelineTester extends Tester
 	}
 
 	/**
-	 * Generates a {@link RegionSamRecordStartWritable}.
+	 * Generates a {@link RegionWithSortableSamRecordWritable}.
 	 * 
 	 * @param region
 	 *            {@link Region}
 	 * @param recordStart
 	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
-	 * @return {@link RegionSamRecordStartWritable}
+	 * @return {@link RegionWithSortableSamRecordWritable}
 	 */
-	RegionSamRecordStartWritable generateRegionSamRecordStartWritable(Region region, int recordStart)
+	RegionWithSortableSamRecordWritable generateRegionSamRecordStartWritable(Region region, int recordStart)
 	{
-		return new RegionSamRecordStartWritable(region, generateSamRecordWithStart(recordStart));
+		return new RegionWithSortableSamRecordWritable(region, generateSamRecordWithStart(recordStart));
 	}
 
 	/**

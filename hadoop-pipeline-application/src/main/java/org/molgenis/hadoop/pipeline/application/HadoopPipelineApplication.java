@@ -24,7 +24,7 @@ import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
 import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordGroupingComparator;
 import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordPartitioner;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -138,7 +138,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 				SAMRecordWritable.class);
 
 		// Sets Mapper/Reducer output keys/values.
-		job.setMapOutputKeyClass(RegionSamRecordStartWritable.class);
+		job.setMapOutputKeyClass(RegionWithSortableSamRecordWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);

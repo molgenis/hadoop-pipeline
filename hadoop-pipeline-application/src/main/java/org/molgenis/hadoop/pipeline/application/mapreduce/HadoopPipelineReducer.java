@@ -7,14 +7,14 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 /**
  * Hadoop MapReduce Job reducer.
  */
 public class HadoopPipelineReducer
-		extends Reducer<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
+		extends Reducer<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
 {
 	/**
 	 * Collector for reducer output.
@@ -35,7 +35,7 @@ public class HadoopPipelineReducer
 	 * Function run on a key with an {@link Iterable} containing the values belonging to that key.
 	 */
 	@Override
-	protected void reduce(RegionSamRecordStartWritable key, Iterable<SAMRecordWritable> values, Context context)
+	protected void reduce(RegionWithSortableSamRecordWritable key, Iterable<SAMRecordWritable> values, Context context)
 			throws IOException, InterruptedException
 	{
 		// Retrieve the Region from the Writable.

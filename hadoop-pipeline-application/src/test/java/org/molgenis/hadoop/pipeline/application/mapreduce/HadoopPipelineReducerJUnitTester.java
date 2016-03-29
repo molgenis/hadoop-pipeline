@@ -20,7 +20,7 @@ import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkReduceDriver;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
@@ -46,7 +46,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapReduceDriver allowing the mapper to be tested.
 	 */
-	private ReduceDriver<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> rDriver;
+	private ReduceDriver<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> rDriver;
 
 	/**
 	 * Aligned reads results belonging to the mini test input dataset.
@@ -73,8 +73,8 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	 */
 	public void beforeMethod() throws URISyntaxException
 	{
-		Reducer<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
-		rDriver = new ReduceDriver<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
+		Reducer<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
+		rDriver = new ReduceDriver<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
 				reducer);
 		setDriver(rDriver);
 	}
@@ -103,10 +103,10 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 		beforeMethod();
 
 		// Generate input.
-		List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
 				alignedReadsCustom, regions);
 		Collections.sort(mapperOutput);
-		RegionSamRecordStartWritable inputKey = generateRegionSamRecordStartWritable(new Region("1", 800001, 1000000),
+		RegionWithSortableSamRecordWritable inputKey = generateRegionSamRecordStartWritable(new Region("1", 800001, 1000000),
 				812735);
 		List<SAMRecordWritable> inputValues = filterMapperOutput(mapperOutput, inputKey);
 

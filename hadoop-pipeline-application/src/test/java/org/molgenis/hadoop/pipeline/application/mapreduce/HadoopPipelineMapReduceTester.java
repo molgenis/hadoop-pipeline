@@ -17,7 +17,7 @@ import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapReduceDriver;
 import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordGroupingComparator;
-import org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -39,7 +39,7 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	/**
 	 * A mrunit MapReduceDriver allowing the mapper to be tested.
 	 */
-	private MapReduceDriver<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> mrDriver;
+	private MapReduceDriver<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> mrDriver;
 
 	/**
 	 * Mini test input dataset.
@@ -78,9 +78,9 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	@BeforeMethod
 	public void beforeMethod() throws URISyntaxException
 	{
-		Mapper<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
-		Reducer<RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
-		mrDriver = new FileCacheSymlinkMapReduceDriver<Text, BytesWritable, RegionSamRecordStartWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
+		Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable> mapper = new HadoopPipelineMapper();
+		Reducer<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> reducer = new HadoopPipelineReducer();
+		mrDriver = new FileCacheSymlinkMapReduceDriver<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>(
 				mapper, reducer);
 
 		mrDriver.setKeyGroupingComparator(new RegionSamRecordGroupingComparator());
@@ -111,11 +111,11 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	 *            {@link List}{@code <}{@link Pair}{@code <}{@link NullWritable}{@code , } {@link SAMRecordWritable}
 	 *            {@code >>}
 	 * @param expectedResults
-	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionSamRecordStartWritable}{@code , }
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable} {@code >>}
 	 */
 	private void validateOutput(List<Pair<NullWritable, SAMRecordWritable>> output,
-			List<Pair<RegionSamRecordStartWritable, SAMRecordWritable>> expectedResults)
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedResults)
 	{
 		Assert.assertEquals(output.size(), expectedResults.size());
 
