@@ -174,7 +174,15 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> output = mDriver.run();
 
 		// Validate output.
-		validateOutput(output, expectedResults);
+		try
+		{
+			validateOutput(output, expectedResults);
+		}
+		// Clears the generated output, even if an exception is thrown.
+		finally
+		{
+			output.clear();
+		}
 	}
 
 	/**

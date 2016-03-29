@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.hadoop.mrunit.mapreduce.ReduceDriver;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -66,6 +67,20 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	}
 
 	/**
+	 * Sets large data variables to {@code null} and runs the garbage collector to reduce the amount of memory used
+	 * after these tests are done.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterClass
+	public static void afterClass() throws IOException
+	{
+		alignedReadsCustom = null;
+		regions = null;
+		System.gc();
+	}
+
+	/**
 	 * Method that should be called first at every JUnit test. Uses exact same naming convention as TestNG tests to stay
 	 * coherent (even though this class is not automatically run in the JUnit tests).
 	 * 
@@ -106,8 +121,8 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
 				alignedReadsCustom, regions);
 		Collections.sort(mapperOutput);
-		RegionWithSortableSamRecordWritable inputKey = generateRegionSamRecordStartWritable(new Region("1", 800001, 1000000),
-				812735);
+		RegionWithSortableSamRecordWritable inputKey = generateRegionSamRecordStartWritable(
+				new Region("1", 800001, 1000000), 812735);
 		List<SAMRecordWritable> inputValues = filterMapperOutput(mapperOutput, inputKey);
 
 		// Generate expected output.

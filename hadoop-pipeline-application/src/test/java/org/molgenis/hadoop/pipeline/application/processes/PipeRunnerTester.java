@@ -208,6 +208,14 @@ public class PipeRunnerTester extends Tester
 								.start());
 
 		// Tests whether the actual output is the same as the expected output.
-		Assert.assertEquals(actualSamRecords, expectedBwaResultsL1);
+		try
+		{
+			Assert.assertEquals(actualSamRecords, expectedBwaResultsL1);
+		}
+		// Clears the generated output, even if an exception is thrown.
+		finally
+		{
+			actualSamRecords.clear();
+		}
 	}
 }

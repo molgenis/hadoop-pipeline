@@ -20,6 +20,7 @@ import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordGrou
 import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -67,6 +68,21 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 		fastqDataCustom = new BytesWritable(TestFileReader.readFileAsByteArray(TestFile.FASTQ_DATA_CUSTOM));
 		alignedReadsCustom = TestFileReader.readSamFile(TestFile.ALIGNED_READS_CUSTOM);
 		regions = TestFileReader.readBedFile(TestFile.GROUPS_SET1);
+	}
+
+	/**
+	 * Sets large data variables to {@code null} and runs the garbage collector to reduce the amount of memory used
+	 * after these tests are done.
+	 * 
+	 * @throws IOException
+	 */
+	@AfterClass
+	public void afterClass()
+	{
+		fastqDataCustom = null;
+		alignedReadsCustom = null;
+		regions = null;
+		System.gc();
 	}
 
 	/**
