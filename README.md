@@ -170,7 +170,7 @@ As the job jar is written to assume input uploaded using the `HalvadeUploaderWit
 ---
 
 __Problem:__
-The `-D` argument suggested below does not work.
+The `-D` argument suggested does not work.
 
 __Solution:__
 Be sure to place the `-D` argument right behind the `myapplication.jar` argument on the command line:
@@ -221,3 +221,52 @@ I get an error similar to that shown below.
 
 __Solution:__
 Try increasing the time before Hadoop ends a mapper/reducer if it has not contacted the context yet. This can be done by increasing the `mapreduce.task.timeout` value (either in the cluster config files or by using `-D`).
+
+---
+
+__Problem:__
+
+The reducer phase is really slow.
+
+__Solution:__
+
+By default, the reducing phase uses only a single reducer. This can be changed using `-d mapreduce.job.reduces=<number>`. The optimal number of reducers can differ depending on the actual data. In general, if there are few regions each having many aligned reads, an amount of reducers just below the amount of regions is adviced (the number of reducers doesn't have to be exactly equal to the number of regions as depending on the data some regions might not have records aligned to them and therefore the number of actually needed reducers is lower than the number of defined regions). On the other side, if there are many regions but each having only a few records aligned to them, a single reducer can easily process multiple regions (reducing some overhead for creating new reducers).
+
+Do note that if the data is very skewed (one region having a lot more aligned records than another region), this might strongly influence the overall time needed for the whole process to finish.
+
+---
+
+__Problem:__
+
+The generated BAM files cause the following error when validating with Picard:
+
+	ERROR: Record <number>, Read name <name>, Mate alignment does not match alignment start of mate
+	ERROR: Record <number>, Read name <name>, Mate negative strand flag does not match read negative strand flag of mate
+
+__Solution:__
+
+Among the different input sets (lanes), there are 1 or more read pairs that have the same QNAME field (see the [SAM format specification](https://samtools.github.io/hts-specs/SAMv1.pdf)). Please make sure that among all used input sets, each read pair has a inique name.
+
+---
+
+__Problem:__
+
+The generated BAM files cause the following error when validating with Picard:
+
+	WARNING: Read name <output file>, Older BAM file -- does not have terminator block
+
+__Solution:__
+
+This is expected behavior. See also [this issue](https://github.com/HadoopGenomics/Hadoop-BAM/issues/12) on the Hadoop-BAM GitHub page.
+
+---
+
+__Problem:__
+
+Reducer syslogs contain the following error:
+
+	java.lang.OutOfMemoryError: unable to create new native thread
+
+__Solution:__
+
+A single reducer processes too many regions. Try increasing the number of reducers to decrease the load of each individual reducer (and with that the number of files each reducer creates and writes output to).
