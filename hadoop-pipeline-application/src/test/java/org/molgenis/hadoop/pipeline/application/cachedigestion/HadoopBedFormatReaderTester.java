@@ -24,7 +24,7 @@ public class HadoopBedFormatReaderTester extends Tester
 	private ContigRegionsMap expectedRegionsMap;
 
 	/**
-	 * egions that are expected as output when the 4th line of the bed file does not have an end value.
+	 * Regions that are expected as output when the 4th line of the bed file does not have an end value.
 	 */
 	private ContigRegionsMap expectedRegionsMapNoEndValueForFourthLine;
 
@@ -55,7 +55,7 @@ public class HadoopBedFormatReaderTester extends Tester
 	}
 
 	/**
-	 * Tests whether a BED-formatted file is loaded correctly (identical to input file).
+	 * Test when a BED-formatted file is loaded correctly (identical to input file).
 	 * 
 	 * @throws IOException
 	 */

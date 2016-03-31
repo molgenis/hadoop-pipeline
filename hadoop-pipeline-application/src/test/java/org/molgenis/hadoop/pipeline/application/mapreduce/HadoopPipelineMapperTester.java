@@ -29,18 +29,18 @@ import htsjdk.samtools.SAMRecord;
 
 /**
  * Tester for {@link HadoopPipelineMapper}. Note that it only tests the key:value outputs of the mapper, so any custom
- * grouping comparators that are used within the whole process are not tested. For tests that include these as well,
- * please refer to the {@link HadoopPipelineMapReduceTester}.
+ * grouping comparators or alike that are used within the whole process are not tested. For tests that include these as
+ * well, please refer to the {@link HadoopPipelineMapReduceTester}.
  */
 public class HadoopPipelineMapperTester extends HadoopPipelineTester
 {
 	/**
-	 * A mrunit MapDriver allowing the mapper to be tested.
+	 * An mrunit MapDriver allowing the mapper to be tested.
 	 */
 	private MapDriver<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable> mDriver;
 
 	/**
-	 * Mini test input dataset.
+	 * Custom test input dataset.
 	 */
 	private BytesWritable fastqDataCustom;
 
@@ -50,7 +50,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	private BytesWritable fastqDataL1;
 
 	/**
-	 * Aligned reads results belonging to the mini test input dataset.
+	 * Aligned reads results belonging to the custom test input dataset.
 	 */
 	private List<SAMRecord> alignedReadsMiniL1;
 
@@ -114,7 +114,7 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 
 	/**
 	 * Tests the {@link HadoopPipelineMapper} with a few reads to allow for faster bug-fixing if something would go
-	 * wrong with the full dataset.
+	 * wrong with the full dataset. Also validates whether the counters behave as expected.
 	 * 
 	 * @throws IOException
 	 */
@@ -157,8 +157,8 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 	}
 
 	/**
-	 * Tests the {@link HadoopPipelineMapper} when a single sample is given. Currently skipped due to taking quite some
-	 * time to finish and mini set should be enough for validation.
+	 * Tests the {@link HadoopPipelineMapper} when a small file containing fastq reads is given, simulating the data
+	 * from a single lane.
 	 * 
 	 * @throws IOException
 	 */

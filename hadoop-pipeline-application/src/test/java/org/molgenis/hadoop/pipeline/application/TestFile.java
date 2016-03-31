@@ -3,7 +3,7 @@ package org.molgenis.hadoop.pipeline.application;
 public enum TestFile
 {
 	/**
-	 * Mini version of the L1 fastq testing data.
+	 * Custom version of the L1 fastq testing data.
 	 */
 	FASTQ_DATA_CUSTOM("input_fastq/custom/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz", TestFileType.FASTQ_GZIP),
 
@@ -14,11 +14,11 @@ public enum TestFile
 			TestFileType.FASTQ_GZIP),
 
 	/**
-	 * The SAM results when the L1 mini fastq data is aligned using: /path/to/bwa mem -p -M -R
+	 * The SAM results when the L1 custom fastq data is aligned using: /path/to/bwa mem -p -M -R
 	 * "@RG\tID:1\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L1\tSM:sample1"
 	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
-	 * > hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1_mini.sam
+	 * hadoop-pipeline-application/src/test/resources/input_fastq/custom/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.
+	 * gz > hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_custom.sam
 	 */
 	ALIGNED_READS_CUSTOM("expected_bwa_outputs/output_custom.sam", TestFileType.SAM),
 
@@ -26,8 +26,8 @@ public enum TestFile
 	 * The SAM results when the L1 fastq data is aligned using: /path/to/bwa mem -p -M -R
 	 * "@RG\tID:1\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L1\tSM:sample1"
 	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/three_samples/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
+	 * hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L1/
+	 * halvade_0_0.fq.gz > hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
 	 */
 	ALIGNED_READS_L1("expected_bwa_outputs/output_L1.sam", TestFileType.SAM),
 
@@ -65,7 +65,7 @@ public enum TestFile
 	/**
 	 * The type of the {@link TestFile}.
 	 */
-	public enum TestFileType
+	enum TestFileType
 	{
 		/**
 		 * A test gzipped fastq file.

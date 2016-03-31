@@ -24,7 +24,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ true };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.UNMAPPED);
 	}
@@ -43,7 +43,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.MAPPED);
 	}
@@ -62,7 +62,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false, false, false, false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.MULTIMAPPED);
 	}
@@ -81,7 +81,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false, false, true, false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.MULTIMAPPED_SUPPLEMENTARY_ONLY);
 	}
@@ -100,7 +100,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{};
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.INVALID);
 	}
@@ -119,7 +119,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.INVALID);
 	}
@@ -138,7 +138,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false, false, false, false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.INVALID);
 	}
@@ -157,7 +157,7 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false, false, false, false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.INVALID);
 	}
@@ -176,21 +176,17 @@ public class AlignedReadTypeTester
 		boolean[] isUnmapped =
 		{ false, false, false, false };
 		AlignedReadType actualType = AlignedReadType
-				.determineType(generateSamRecordList(true, isFirst, isSupplementary, isUnmapped));
+				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
 		Assert.assertEquals(actualType, AlignedReadType.INVALID);
 	}
 
 	/**
 	 * Generates a {@link List} with {@link SAMRecord} using the parameter data.
-	 * 
-	 * @param isPaired
-	 *            {@code boolean} Whether the generated {@link List} should represent {@link SAMRecord}{@code s} from
-	 *            paired reads. If {@code false}, {@link isFirst} will be not be used.
+	 *
 	 * @param isFirst
 	 *            {@code boolean[]} Each position n determines whether each {@link SAMRecord} on position n in the
-	 *            {@link List} represent an aligned record from the first read of a read pair. Is not used when
-	 *            {@code isPaired == false}.
+	 *            {@link List} represent an aligned record from the first read of a read pair.
 	 * @param isSupplementary
 	 *            {@code boolean[]} Each position n determines whether each {@link SAMRecord} on position n in the
 	 *            {@link List} represents a supplementary {@link SAMRecord}.
@@ -199,21 +195,18 @@ public class AlignedReadTypeTester
 	 *            {@link List} represents an unmapped {@link SAMRecord}.
 	 * @return {@link List}{@code <}{@link SAMRecord}{@code >}
 	 */
-	private List<SAMRecord> generateSamRecordList(boolean isPaired, boolean[] isFirst, boolean[] isSupplementary,
+	private List<SAMRecord> generatePairedSamRecordList(boolean[] isFirst, boolean[] isSupplementary,
 			boolean[] isUnmapped)
 	{
 		// Validates input.
-		if (isPaired)
-		{
-			if (isFirst.length != isSupplementary.length) return null;
-		}
+		if (isFirst.length != isSupplementary.length) return null;
 		if (isSupplementary.length != isUnmapped.length) return null;
 
 		// Generates SAMRecord list.
 		List<SAMRecord> records = new ArrayList<>();
 		for (int i = 0; i < isFirst.length; i++)
 		{
-			records.add(generateSamRecord(isPaired, isFirst[i], isSupplementary[i], isUnmapped[i]));
+			records.add(generateSamRecord(true, isFirst[i], isSupplementary[i], isUnmapped[i]));
 		}
 
 		return records;
@@ -224,10 +217,10 @@ public class AlignedReadTypeTester
 	 * 
 	 * @param isPaired
 	 *            {@code boolean} Whether the generated {@link SAMRecord} should represent a {@link SAMRecord} from
-	 *            paired reads. If {@code false}, {@link isFirst} will be not be used.
+	 *            paired reads. If {@code false}, {@link isFirst} will be not be used and can be of any (allowed) value.
 	 * @param isFirst
 	 *            {@code boolean} Whether the generated {@link SAMRecord} should represent an aligned record from the
-	 *            first read of a read pair. Is not used when {@code isPaired == false}.
+	 *            first read of a read pair. Is not used if {@code isPaired == false}.
 	 * @param isSupplementary
 	 *            {@code boolean} Whether the generated {@link SAMRecord} should represent a supplementary
 	 *            {@link SAMRecord}.

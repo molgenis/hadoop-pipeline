@@ -16,7 +16,8 @@ import org.molgenis.hadoop.pipeline.application.exceptions.SymlinkAlreadyExistsE
  * with that name was already created using the {@link WorkDirSymlinkManager}. This class is needed when testing a
  * custom subclass of {@link org.apache.hadoop.mapreduce.Mapper} or {@link org.apache.hadoop.mapreduce.Reducer} that
  * retrieves the distributed cache using {@link org.apache.hadoop.mapreduce.JobContext#getCacheArchives()} and/or
- * {@link org.apache.hadoop.mapreduce.JobContext#getCacheFiles()}.
+ * {@link org.apache.hadoop.mapreduce.JobContext#getCacheFiles()}. Do note that if a test is manually aborted, the
+ * {@link WorkDirSymlinkManager} might not have been able to clean up the created symlinks.
  */
 public abstract class WorkDirSymlinkManager
 {
@@ -72,11 +73,11 @@ public abstract class WorkDirSymlinkManager
 	 * 
 	 * @param targetFile
 	 *            {@link Path}
-	 * @return {@code boolean}
+	 * @return {@code boolean} Returns {@code true} if a symlink with that name already exists, otherwise returns
+	 *         {@code false}.
 	 */
 	private static boolean checkIfSymlinkNameAlreadyCreated(Path targetFile)
 	{
-		// Returns true if a symlink with that name has already been created, othw
 		for (File symlink : symlinksCreated)
 		{
 			if (symlink.getName().equals(targetFile.getName()))

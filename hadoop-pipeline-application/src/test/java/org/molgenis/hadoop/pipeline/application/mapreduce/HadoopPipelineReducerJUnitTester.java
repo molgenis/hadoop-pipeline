@@ -2,7 +2,6 @@ package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.io.NullWritable;
@@ -50,7 +49,7 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	private ReduceDriver<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable> rDriver;
 
 	/**
-	 * Aligned reads results belonging to the mini test input dataset.
+	 * Aligned reads results belonging to the custom test input dataset.
 	 */
 	private static List<SAMRecord> alignedReadsCustom;
 
@@ -108,6 +107,8 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 	 * dictionary} is returned. Comparison of mismatching output would therefore also not be possible with the current
 	 * implementation.
 	 * 
+	 * IMPORTANT: Removed outdated code and replaced it with TODO's.
+	 * 
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
@@ -120,16 +121,12 @@ public class HadoopPipelineReducerJUnitTester extends HadoopPipelineTester
 		// Generate input.
 		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> mapperOutput = generateExpectedMapperOutput(
 				alignedReadsCustom, regions);
-		Collections.sort(mapperOutput);
-		RegionWithSortableSamRecordWritable inputKey = generateRegionSamRecordStartWritable(
-				new Region("1", 800001, 1000000), 812735);
-		List<SAMRecordWritable> inputValues = filterMapperOutput(mapperOutput, inputKey);
 
-		// Generate expected output.
-		List<Pair<NullWritable, SAMRecordWritable>> expectedReducerOutput = generateExpectedReducerOutput(inputValues);
+		// TODO: Convert mapper output to reducer input format.
+		// TODO: Generate expected reducer output based on reducer input.
 
-		// Run test.
-		rDriver.withInput(inputKey, inputValues).withMultiOutput("recordsPerRegion", expectedReducerOutput.get(0))
-				.withMultiOutput("recordsPerRegion", expectedReducerOutput.get(1)).runTest();
+		// TODO: Update "Run test" code.
+		// rDriver.withInput(inputKey, inputValues).withMultiOutput("recordsPerRegion", expectedReducerOutput.get(0))
+		// .withMultiOutput("recordsPerRegion", expectedReducerOutput.get(1)).runTest();
 	}
 }

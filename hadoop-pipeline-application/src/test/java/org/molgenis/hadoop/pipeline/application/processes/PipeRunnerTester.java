@@ -12,7 +12,6 @@ import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.Tester;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
-import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.Sink;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.StringSink;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -178,9 +177,6 @@ public class PipeRunnerTester extends Tester
 	 * tests belonging to those tools should be part of those tools and not here. So this test is purely for an extra
 	 * layer of confidence that the code works as it should. Testing whether the alignment locations of the SAMRecords
 	 * are correct is not the core idea behind this test.
-	 * 
-	 * IMPORTANT: Do note that a {@link org.molgenis.hadoop.pipeline.application.exceptions.UncheckedIOException} is
-	 * thrown when an {@link Assert} fails due to the assertions being done within a {@link Sink}.
 	 *
 	 * @throws Exception
 	 */

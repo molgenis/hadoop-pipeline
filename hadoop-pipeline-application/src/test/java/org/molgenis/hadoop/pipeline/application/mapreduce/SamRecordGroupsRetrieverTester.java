@@ -37,33 +37,38 @@ public class SamRecordGroupsRetrieverTester extends Tester
 	/**
 	 * Grouper to be tested.
 	 */
-	SamRecordGroupsRetriever grouper;
+	private SamRecordGroupsRetriever grouper;
 
 	/**
 	 * A test {@link SAMRecord}.
 	 */
-	SAMRecord record1;
+	private SAMRecord record1;
 
 	/**
 	 * Another test {@link SAMRecord}.
 	 */
-	SAMRecord record2;
+	private SAMRecord record2;
 
 	/**
 	 * {@link List} with {@link Region}{@code s} used as input for the {@link SamRecordGroupsRetriever}.
 	 */
-	List<Region> inputRegions;
+	private List<Region> inputRegions;
 
 	/**
 	 * Builder used to create the {@link ContigRegionsMap}.
 	 */
-	ContigRegionsMapBuilder builder;
+	private ContigRegionsMapBuilder builder;
 
 	/**
 	 * Stores the expected output.
 	 */
-	List<Region> expectedOutputGroups;
+	private List<Region> expectedOutputGroups;
 
+	/**
+	 * Loads/generates general data needed for testing.
+	 * 
+	 * @throws IOException
+	 */
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
@@ -78,6 +83,9 @@ public class SamRecordGroupsRetrieverTester extends Tester
 				new SAMSequenceRecord("2:1-301", 300));
 	}
 
+	/**
+	 * Prepares for running a test.
+	 */
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -85,11 +93,14 @@ public class SamRecordGroupsRetrieverTester extends Tester
 		stringWriter = new StringWriter();
 		Logger.getRootLogger().addAppender(new WriterAppender(new SimpleLayout(), stringWriter));
 
-		// Creates a new List to be filled with Region that can be used to compare with the SAMRecord.
+		// Creates new Lists to be filled with Regions to serve as grouper input and for generating the expected output.
 		inputRegions = new ArrayList<>();
 		expectedOutputGroups = new ArrayList<Region>();
 	}
 
+	/**
+	 * Cleans up after a test and writes data to stdout for manual reviewing.
+	 */
 	@AfterMethod
 	public void afterMethod(Method method)
 	{

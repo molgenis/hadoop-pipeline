@@ -22,9 +22,9 @@ import htsjdk.samtools.ValidationStringency;
 
 /**
  * Reads in test files for usage within unit testing. Do note that depending on the {@link TestFileType} of a
- * {@link TestFile}, some methods are not usable. As this class is reader for all possible test file formats, individual
- * methods check whether the given {@link TestFile} is of the correct {@link TestFileType) and throws an
- * {@link IOException} if it has an invalid {@link TestFileType}.
+ * {@link TestFile}, some methods are not usable. As this class is a reader for all possible test file formats,
+ * individual methods check whether the given {@link TestFile} is of the correct {@link TestFileType) and throws an
+ * {@link IllegalArgumentException} if it has an invalid {@link TestFileType}.
  */
 public abstract class TestFileReader
 {
@@ -69,11 +69,14 @@ public abstract class TestFileReader
 	 *            {@link TestFile}
 	 * @return {@link ArrayList}{@code <}{@link SAMRecord}{@code >}
 	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 *             If the {@link TestFile} is not of the type {@link TestFileType#SAM}.
 	 */
-	public static ArrayList<SAMRecord> readSamFile(TestFile file) throws IOException
+	public static ArrayList<SAMRecord> readSamFile(TestFile file) throws IOException, IllegalArgumentException
 	{
 		// Validates whether given test file is of correct format.
-		if (file.getFileType() != TestFileType.SAM) throw new IOException();
+		if (file.getFileType() != TestFileType.SAM)
+			throw new IllegalArgumentException("The given TestFile is not of the required type: TestFileType.SAM");
 
 		// Digests file.
 		ArrayList<SAMRecord> records = new ArrayList<SAMRecord>();
@@ -90,12 +93,13 @@ public abstract class TestFileReader
 			{
 				records.add(samIterator.next());
 			}
-			return records;
 		}
 		finally
 		{
 			IOUtils.closeQuietly(samReader);
 		}
+
+		return records;
 	}
 
 	/**
@@ -112,11 +116,14 @@ public abstract class TestFileReader
 	 * @throws IOException
 	 * 
 	 * @see {@link HadoopBedFormatFileReader#read(java.io.File)}
+	 * @throws IllegalArgumentException
+	 *             If the {@link TestFile} is not of the type {@link TestFileType#BED}.
 	 */
 	public static List<Region> readBedFile(TestFile file) throws IOException
 	{
 		// Validates whether given test file is of correct format.
-		if (file.getFileType() != TestFileType.BED) throw new IOException();
+		if (file.getFileType() != TestFileType.BED)
+			throw new IllegalArgumentException("The given TestFile is not of the required type: TestFileType.BED");
 
 		// Digests file.
 		ArrayList<Region> regions = new ArrayList<>();

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mrunit.TestDriver;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
@@ -41,6 +40,8 @@ public class HadoopPipelineTester extends Tester
 	 */
 	static
 	{
+		// Generates a basic SAMFileHeader used for comparing SAMRecords (as the mapper output SAMRecords do not contain
+		// any header information this needs to be manually added afterwards).
 		samFileHeader = new SAMFileHeader();
 		samFileHeader
 				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
@@ -116,7 +117,7 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *            {@link SAMRecordWritable}{@code >>}
 	 * @param limit
-	 *            {@code int} - The number of pairs to write to stdout.
+	 *            {@code int} The number of pairs to write to stdout.
 	 */
 	void printOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> pairsList, int limit)
 	{
@@ -142,14 +143,14 @@ public class HadoopPipelineTester extends Tester
 	 * Generates the expected {@link HadoopPipelineMapper} output.
 	 * 
 	 * @param bwaOutput
-	 *            {@link List}{@code <}{@link SAMRecord}{@code >} - The bwa output used to base expected output on.
-	 * @param groups
-	 *            {@link List}{@code <}{@link Region}{@code >} - The groups used for defining keys.
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >} The bwa output used to base expected output on.
+	 * @param regions
+	 *            {@link List}{@code <}{@link Region}{@code >} The groups used for defining keys.
 	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
 	 *         {@link SAMRecordWritable} {@code >>}
 	 */
-	List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> generateExpectedMapperOutput(List<SAMRecord> bwaOutput,
-			List<Region> regions)
+	List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> generateExpectedMapperOutput(
+			List<SAMRecord> bwaOutput, List<Region> regions)
 	{
 		// Stores the created expected output.
 		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
@@ -204,14 +205,15 @@ public class HadoopPipelineTester extends Tester
 	 *            the value value of a key-value pair and also a part of the key.
 	 */
 	private void addRecordRegionsToExpectedMapperOutput(
-			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, List<Region> regions,
-			ArrayList<SAMRecord> regionRecords)
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput,
+			List<Region> regions, ArrayList<SAMRecord> regionRecords)
 	{
 		// Stores the two primary records from the algined reads from a read pair.
 		SAMRecord firstPrimaryRecord = null;
 		SAMRecord secondPrimaryRecord = null;
 
-		// Iterates through the records to look for the two primary records.
+		// Iterates through the records to look for the two primary records. Expected mapper output is assumed to be
+		// valid so should only contain 1 primary record for both reads of the read pair.
 		for (SAMRecord regionRecord : regionRecords)
 		{
 			if (!regionRecord.isSecondaryOrSupplementary())
@@ -264,10 +266,19 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link SAMRecord}
 	 * @param region
 	 *            {@link Region}
-	 * @return {@code boolean} - True if a {@code record} was added to {@code outputRegions}, otherwise false.
+	 * @return {@code boolean} If a {@code record} is in range of the {@code region} returns {@code true}. Returns
+	 *         {@code false} if a {@code record} is unmapped, mapped to a different contig or mapped on the same contig
+	 *         but not within range.
 	 */
 	private boolean checkIfRecordIsInRegionRange(SAMRecord record, Region region)
 	{
+		// If comparison is done with a record from a read pair that is not mapped, returns false.
+		if (record.getContig() == null) return false;
+
+		// If region is from a different contig, they do not match.
+		if (!record.getContig().equals(region.getContig())) return false;
+
+		// Checks positions If within range range returns true, otherwise returns false.
 		if ((record.getStart() >= region.getStart() && record.getStart() <= region.getEnd())
 				|| (record.getEnd() >= region.getStart() && record.getEnd() <= region.getEnd()))
 		{
@@ -288,8 +299,8 @@ public class HadoopPipelineTester extends Tester
 	 *            {@link Region}
 	 */
 	private void addRecordsListToExpectedMapperOutput(
-			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, List<SAMRecord> records,
-			Region region)
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput,
+			List<SAMRecord> records, Region region)
 	{
 		for (SAMRecord record : records)
 		{
@@ -316,87 +327,5 @@ public class HadoopPipelineTester extends Tester
 		writable.set(record);
 		expectedMapperOutput.add(new Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>(
 				new RegionWithSortableSamRecordWritable(region, record), writable));
-	}
-
-	/**
-	 * Filter out all key:value pairs from (expected) mapper output that do not match to the given
-	 * {@code regionToKeepWritable}.
-	 * 
-	 * @param mapperOutput
-	 *            {@link List}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }{@link SAMRecordWritable}
-	 *            {@code >>}
-	 * @param regionToKeep
-	 *            {@link RegionWithSortableSamRecordWritable}
-	 * @return {@link List}{@code <}{@link SAMRecordWritable}{@code >}
-	 */
-	public List<SAMRecordWritable> filterMapperOutput(
-			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> mapperOutput,
-			RegionWithSortableSamRecordWritable regionToKeepWritable)
-	{
-		ArrayList<SAMRecordWritable> recordsToKeep = new ArrayList<>();
-		Region regionToKeep = regionToKeepWritable.get();
-
-		for (Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable> outputItem : mapperOutput)
-		{
-			Region recordRegion = outputItem.getFirst().get();
-			SAMRecord record = outputItem.getSecond().get();
-			if (recordRegion.getContig().equals(regionToKeep.getContig())
-					&& recordRegion.getStart() == regionToKeep.getStart()
-					&& recordRegion.getEnd() == regionToKeep.getEnd())
-			{
-				SAMRecordWritable writable = new SAMRecordWritable();
-				writable.set(record);
-				recordsToKeep.add(writable);
-			}
-		}
-
-		return recordsToKeep;
-	}
-
-	/**
-	 * Generates a {@link RegionWithSortableSamRecordWritable}.
-	 * 
-	 * @param region
-	 *            {@link Region}
-	 * @param recordStart
-	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
-	 * @return {@link RegionWithSortableSamRecordWritable}
-	 */
-	RegionWithSortableSamRecordWritable generateRegionSamRecordStartWritable(Region region, int recordStart)
-	{
-		return new RegionWithSortableSamRecordWritable(region, generateSamRecordWithStart(recordStart));
-	}
-
-	/**
-	 * Generate a {@link SAMRecord} with only a value for {@link SAMRecord#getStart()}.
-	 * 
-	 * @param recordStart
-	 *            {@code int} - Represents the start value from a {@link SAMRecord}.
-	 * @return {@link SAMRecord}
-	 */
-	private SAMRecord generateSamRecordWithStart(int recordStart)
-	{
-		SAMRecord record = new SAMRecord(null);
-		record.setAlignmentStart(recordStart);
-		return record;
-	}
-
-	/**
-	 * Generates the expected {@link HadoopPipelineReducer} output.
-	 * 
-	 * @param records
-	 *            {@link List}{@code <}{@link SAMRecordWritable}{@code >}
-	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link NullWritable}{@code , }{@link SAMRecordWritable}
-	 *         {@code >>}
-	 */
-	List<Pair<NullWritable, SAMRecordWritable>> generateExpectedReducerOutput(List<SAMRecordWritable> records)
-	{
-		List<Pair<NullWritable, SAMRecordWritable>> expectedReducerOutput = new ArrayList<Pair<NullWritable, SAMRecordWritable>>();
-		for (SAMRecordWritable record : records)
-		{
-			expectedReducerOutput.add(new Pair<NullWritable, SAMRecordWritable>(NullWritable.get(), record));
-		}
-
-		return expectedReducerOutput;
 	}
 }

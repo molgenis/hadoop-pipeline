@@ -48,7 +48,7 @@ public class HadoopPipelineMapReduceTester extends HadoopPipelineTester
 	private BytesWritable fastqDataCustom;
 
 	/**
-	 * Aligned reads results belonging to the mini test input dataset.
+	 * Aligned reads results belonging to the custom test input dataset.
 	 */
 	private List<SAMRecord> alignedReadsCustom;
 
