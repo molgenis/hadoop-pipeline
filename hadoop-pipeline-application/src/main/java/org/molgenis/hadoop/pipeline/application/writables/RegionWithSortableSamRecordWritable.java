@@ -17,8 +17,7 @@ import htsjdk.samtools.SAMRecord;
  * {@link WritableComparable} storing a {@link Region} (natural key) together with the {@code int} from
  * {@link SAMRecord#getStart()} that together can be used as composite key for a secondary sort.
  */
-public class RegionWithSortableSamRecordWritable
-		implements WritableComparable<RegionWithSortableSamRecordWritable>
+public class RegionWithSortableSamRecordWritable implements WritableComparable<RegionWithSortableSamRecordWritable>
 {
 	/**
 	 * Stores the the natural key, which also functions as a part from the composite key.
@@ -61,8 +60,8 @@ public class RegionWithSortableSamRecordWritable
 	}
 
 	/**
-	 * Create an empty {@link RegionWithSortableSamRecordWritable} instance. Otherwise a Hadoop job will throw
-	 * the following {@link Exception}:
+	 * Create an empty {@link RegionWithSortableSamRecordWritable} instance. Otherwise a Hadoop job will throw the
+	 * following {@link Exception}:
 	 * 
 	 * <pre>
 	 * java.lang.NoSuchMethodException: org.molgenis.hadoop.pipeline.application.writables.RegionSamRecordStartWritable.&lt;init&gt;()
@@ -131,8 +130,8 @@ public class RegionWithSortableSamRecordWritable
 	public int compareTo(RegionWithSortableSamRecordWritable o)
 	{
 		int c = regionWritable.compareTo(o.regionWritable);
-		// null-safe comparison. Null is assumed lowest value.
-		if (c == 0) c = ObjectUtils.compare(samRecordContig, o.samRecordContig);
+		// null-safe comparison. A null contig name is assumed the highest value.
+		if (c == 0) c = ObjectUtils.compare(samRecordContig, o.samRecordContig, true);
 		if (c == 0) c = samRecordStart - o.samRecordStart;
 
 		return c;
