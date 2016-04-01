@@ -56,7 +56,9 @@ a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/multipl
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/no_tools_present.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_tool_missing_attribute.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_tool_missing_child.xml
+a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_tool_missing_subchild.xml
 a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_valid_tool.xml
+a hadoop-pipeline-application/src/test/resources/tools_archive_xml_files/single_valid_tool_with_optional_info.xml
 a hadoop-pipeline-halvade-testing/data/150616_SN163_0648_AHKYLMADXX_L1_1.fq.gz
 a hadoop-pipeline-halvade-testing/data/150616_SN163_0648_AHKYLMADXX_L1_2.fq.gz
 a hadoop-pipeline-halvade-testing/data/150616_SN163_0648_AHKYLMADXX_L2_1.fq.gz
