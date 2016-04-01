@@ -26,11 +26,6 @@ import htsjdk.samtools.SAMProgramRecord;
 public class HadoopToolsXmlReader extends HadoopXmlReader<Map<String, SAMProgramRecord>>
 {
 	/**
-	 * Stores the attribute that stores the file name in each tool node within the XML file.
-	 */
-	private static final String FILE_NAME = "fileName";
-	
-	/**
 	 * A {@link File} that stores the validation {@link Schema}. This file should be present within the created jar
 	 * after compiling.
 	 */
@@ -59,7 +54,8 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<Map<String, SAMProgram
 
 	/**
 	 * Digestion of the XML-formatted {@link Document} that adheres to the {@link Scheme} defined in
-	 * {@code src/main/resources/tools_archive_info.xsd}.
+	 * {@code src/main/resources/tools_archive_info.xsd}. IMPORTANT: If XML-formatted {@link Document} does not adhere
+	 * to the scheme, this might cause unexpected behavior!
 	 * 
 	 * @param dom
 	 *            {@link Document}
@@ -77,45 +73,20 @@ public class HadoopToolsXmlReader extends HadoopXmlReader<Map<String, SAMProgram
 		// Goes through all tool nodes.
 		for (int i = 0; i < toolNodes.getLength(); i++)
 		{
+			// Retrieves the tool node.
 			Node toolNode = toolNodes.item(i);
 
-			// Resets the needed node data for each tool.
-			String fileName = toolNode.getAttributes().getNamedItem(FILE_NAME).getNodeValue();
-			String toolId = null;
-			String toolName = null;
-			String toolVersion = null;
-
-			// Retrieves info nodes of a single tool node.
-			NodeList toolInfoNodes = toolNode.getChildNodes();
-
-			//  Goes through all tool node info nodes.
-			for (int j = 0; j < toolInfoNodes.getLength(); j++)
-			{
-				Node toolInfoNode = toolInfoNodes.item(j);
-
-				// Only digests child nodes that are actual elements (skip "#text" nodes).
-				if (toolInfoNode.getNodeType() == Node.ELEMENT_NODE)
-				{
-					// Retrieves the tool child nodes. ToolField.getEnum(fieldString) should not be able to return null
-					// if the xml file adheres to the given scheme.
-					switch (ToolChildNode.getEnum(toolInfoNode.getNodeName()))
-					{
-						case ID:
-							toolId = toolInfoNode.getTextContent();
-							break;
-						case NAME:
-							toolName = toolInfoNode.getTextContent();
-							break;
-						case VERSION:
-							toolVersion = toolInfoNode.getTextContent();
-					}
-				}
-			}
+			// Retrieves information about the tool.
+			String fileName = toolNode.getAttributes().getNamedItem("fileName").getNodeValue();
+			Element toolElement = (Element) toolNode;
+			String id = toolElement.getElementsByTagName("id").item(0).getTextContent();
+			String name = toolElement.getElementsByTagName("name").item(0).getTextContent();
+			String version = toolElement.getElementsByTagName("version").item(0).getTextContent();
 
 			// Creates a new tool instance and adds it to the ArrayList for storing.
-			SAMProgramRecord program = new SAMProgramRecord(toolId);
-			program.setProgramName(toolName);
-			program.setProgramVersion(toolVersion);
+			SAMProgramRecord program = new SAMProgramRecord(id);
+			program.setProgramName(name);
+			program.setProgramVersion(version);
 			tools.put(fileName, program);
 		}
 
