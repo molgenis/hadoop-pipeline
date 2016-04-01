@@ -1,4 +1,4 @@
-# VERSION: 2016-03-10
+# VERSION: 2016-04-01
 a hadoop-pipeline-application/src/test/resources/bed_files
 a hadoop-pipeline-application/src/test/resources/bed_files/chr1_20000000-21000000.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig-start-end-name_normal-end.bed
@@ -10,22 +10,27 @@ a hadoop-pipeline-application/src/test/resources/bed_files/line_contig_normal-en
 a hadoop-pipeline-application/src/test/resources/bed_files/line_contig_tab-end.bed
 a hadoop-pipeline-application/src/test/resources/bed_files/unsorted_contig-start-end.bed
 a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs
+a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_custom.sam
+a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_custom_no_pair_matching_read.sam
 a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1.sam
-a hadoop-pipeline-application/src/test/resources/expected_bwa_outputs/output_L1_mini.sam
 a hadoop-pipeline-application/src/test/resources/extra_dict_files
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_length_field.dict
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_name_field.dict
 a hadoop-pipeline-application/src/test/resources/extra_dict_files/no_sq_tag.dict
 a hadoop-pipeline-application/src/test/resources/input_fastq
-a hadoop-pipeline-application/src/test/resources/input_fastq/150616_SN163_0648_AHKYLMADXX_L1
-a hadoop-pipeline-application/src/test/resources/input_fastq/150616_SN163_0648_AHKYLMADXX_L2
-a hadoop-pipeline-application/src/test/resources/input_fastq/150702_SN163_0649_BHJYNKADXX_L5
-a hadoop-pipeline-application/src/test/resources/input_fastq/150702_SN163_0649_BHJYNKADXX_L5/halvade_0_0.fq.gz
-a hadoop-pipeline-application/src/test/resources/input_fastq/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz
-a hadoop-pipeline-application/src/test/resources/input_fastq/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
-a hadoop-pipeline-application/src/test/resources/input_fastq_mini
-a hadoop-pipeline-application/src/test/resources/input_fastq_mini/150616_SN163_0648_AHKYLMADXX_L1
-a hadoop-pipeline-application/src/test/resources/input_fastq_mini/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom_no_pair_matching_read
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L1
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L2
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150702_SN163_0649_BHJYNKADXX_L5
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150702_SN163_0649_BHJYNKADXX_L5/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L2/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/input_fastq/three_samples/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom_no_pair_matching_read/150616_SN163_0648_AHKYLMADXX_L1
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom_no_pair_matching_read/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom/150616_SN163_0648_AHKYLMADXX_L1
+a hadoop-pipeline-application/src/test/resources/input_fastq/custom/150616_SN163_0648_AHKYLMADXX_L1/halvade_0_0.fq.gz
 a hadoop-pipeline-application/src/test/resources/reference_data
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.dict
 a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa
@@ -38,6 +43,7 @@ a hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21
 a hadoop-pipeline-application/src/test/resources/samplesheets
 a hadoop-pipeline-application/src/test/resources/samplesheets/header_empty_line.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/header_missing_run_column.csv
+a hadoop-pipeline-application/src/test/resources/samplesheets/missing_header_line.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_last_field_comma-ended.csv
 a hadoop-pipeline-application/src/test/resources/samplesheets/sample_missing_run.csv
