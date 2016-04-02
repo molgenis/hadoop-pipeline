@@ -29,7 +29,8 @@ import htsjdk.samtools.SAMRecord;
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable>
+public class HadoopPipelineMapper
+		extends Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -232,7 +233,8 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionWith
 
 	/**
 	 * Write all {@link SAMRecord}{@code s} from an {@link AlignedReadPair} to the {@link Context} using the
-	 * {@link Region} as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
+	 * {@link Region} as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output
+	 * key.
 	 * 
 	 * @param context
 	 *            {@link Context}
@@ -288,9 +290,9 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, RegionWith
 	private void writeRecordToContext(Context context, Region region, SAMRecord record)
 			throws IOException, InterruptedException
 	{
-		SAMRecordWritable firstWritable = new SAMRecordWritable();
-		firstWritable.set(record);
-		context.write(new RegionWithSortableSamRecordWritable(region, record), firstWritable);
+		SAMRecordWritable recordWritable = new SAMRecordWritable();
+		recordWritable.set(record);
+		context.write(new RegionWithSortableSamRecordWritable(region, record), recordWritable);
 	}
 
 	/**
