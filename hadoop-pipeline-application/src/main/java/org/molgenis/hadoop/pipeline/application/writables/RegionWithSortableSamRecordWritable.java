@@ -6,7 +6,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
@@ -25,12 +24,12 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 	private RegionWritable regionWritable;
 
 	/**
-	 * Stores the second composite key part, which is the contig name of the given {@link SAMRecord}.
+	 * Stores a part of the composite key; the index of the reference sequence the record is mapped to.
 	 */
-	private String samRecordContig;
+	private int samRecordReferenceIndex;
 
 	/**
-	 * Stores the third composite key part, which is the start value of the given {@link SAMRecord}.
+	 * Stores a part of the composite key; the left-most mapping position on the reference sequence.
 	 */
 	private int samRecordStart;
 
@@ -49,9 +48,9 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 		return regionWritable;
 	}
 
-	public String getSamRecordContig()
+	public int getSamRecordReferenceIndex()
 	{
-		return samRecordContig;
+		return samRecordReferenceIndex;
 	}
 
 	public int getSamRecordStart()
@@ -85,31 +84,26 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 	 */
 	public RegionWithSortableSamRecordWritable(Region region, SAMRecord record) throws IllegalArgumentException
 	{
-		// record.getContig() is allowed to be null.
 		requireNonNull(region);
+		requireNonNull(record.getReferenceIndex());
 		requireNonNull(record.getStart());
 		this.regionWritable = new RegionWritable(region);
-		this.samRecordContig = record.getContig();
+		this.samRecordReferenceIndex = record.getReferenceIndex();
 		this.samRecordStart = record.getStart();
 	}
 
 	@Override
 	public String toString()
 	{
-		return "RegionSamRecordStartWritable [regionWritable=" + regionWritable + ", samRecordContig=" + samRecordContig
-				+ ", samRecordStart=" + samRecordStart + "]";
+		return "RegionSamRecordStartWritable [regionWritable=" + regionWritable + ", samRecordReferenceIndex="
+				+ samRecordReferenceIndex + ", samRecordStart=" + samRecordStart + "]";
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException
 	{
 		regionWritable.write(out);
-
-		// Writes a boolean whether contig != null, and if so, writes the actual contig name.
-		boolean hasContig = (samRecordContig != null);
-		out.writeBoolean(hasContig);
-		if (hasContig) out.writeUTF(samRecordContig);
-
+		out.writeInt(samRecordReferenceIndex);
 		out.writeInt(samRecordStart);
 	}
 
@@ -118,11 +112,7 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 	{
 		regionWritable = new RegionWritable();
 		regionWritable.readFields(in);
-
-		// Reads in whether contig name != null, and if so, reads in the actual contig name.
-		boolean hasContig = in.readBoolean();
-		if (hasContig) samRecordContig = in.readUTF();
-
+		samRecordReferenceIndex = in.readInt();
 		samRecordStart = in.readInt();
 	}
 
@@ -130,8 +120,13 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 	public int compareTo(RegionWithSortableSamRecordWritable o)
 	{
 		int c = regionWritable.compareTo(o.regionWritable);
-		// null-safe comparison. A null contig name is assumed the highest value.
-		if (c == 0) c = ObjectUtils.compare(samRecordContig, o.samRecordContig, true);
+		if (c == 0)
+		{
+			// Compares reference index where -1 is regarded as highest value.
+			if (samRecordReferenceIndex == -1 || o.samRecordReferenceIndex == -1)
+				c = o.samRecordReferenceIndex - samRecordReferenceIndex;
+			else c = samRecordReferenceIndex - o.samRecordReferenceIndex;
+		}
 		if (c == 0) c = samRecordStart - o.samRecordStart;
 
 		return c;
@@ -143,7 +138,7 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((regionWritable == null) ? 0 : regionWritable.hashCode());
-		result = prime * result + ((samRecordContig == null) ? 0 : samRecordContig.hashCode());
+		result = prime * result + samRecordReferenceIndex;
 		result = prime * result + samRecordStart;
 		return result;
 	}
@@ -160,13 +155,8 @@ public class RegionWithSortableSamRecordWritable implements WritableComparable<R
 			if (other.regionWritable != null) return false;
 		}
 		else if (!regionWritable.equals(other.regionWritable)) return false;
-		if (samRecordContig == null)
-		{
-			if (other.samRecordContig != null) return false;
-		}
-		else if (!samRecordContig.equals(other.samRecordContig)) return false;
+		if (samRecordReferenceIndex != other.samRecordReferenceIndex) return false;
 		if (samRecordStart != other.samRecordStart) return false;
 		return true;
 	}
-
 }
