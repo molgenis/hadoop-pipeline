@@ -1,5 +1,5 @@
 # hadoop-pipeline
-Implementation of a hadoop (map-reduce) Next-Generation Sequencing pipeline for fast single sample genetic diagnostics.
+Implementation of a hadoop (map-reduce) Next-Generation Sequencing pipeline for fast single sample genetic diagnostics. The current implementation runs a parallel BWA alignment and generates valid BAM files according to Picard v2.1.1.
 
 ## Preperations
 Before using the tool, be sure that the following has been done:
@@ -21,12 +21,12 @@ Before using the tool, be sure that the following has been done:
 	* `<bwa_reference_file_prefix>.fasta.sa`
 	* `<bwa_reference_file_prefix>.dict`
 
-* A `.bed` file containing the grouping regions for the SAM records after BWA alignment. If a record fits into multiple groups, an individual record will be added to all the groups it has a (partial) overlap in. For more information about the bed-format, see [this](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) page.
+* A `.bed` file containing the grouping regions for the SAM records after BWA alignment. For each record from a read pair, the group regions are retrieved it matches with. This means that if a single record aligns over multiple grouping regions, it is marked to match all of these. Then, every record from the read pair is written to the grouping regions any of the records from the read pair matches with. For more information about the bed-format, see [this](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) page.
 
 	* Be sure that the given contig name, start position and end position are valid compared to the reference sequence data.
 	* The bed file should be UTF-8 compliant.
 
-* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file by the job (this to reduce application running time). While this file can contain all sorts of information, it should at least contain columns with the following headers:
+* A samplesheet csv file is present with information about the input data. Note that this file will be used for comparison with the last directory of each input file, so be sure that all input folders that will be digested are mentioned in this csv file. Be sure that all used samples are mentioned in the samplesheet csv file (and only these)! If the samplesheet contains information about more samples than used within the job, the other samples will still be added using an @RG tag to each created output file (this to reduce application runtime). While this file can contain all sorts of information, it should at least contain columns with the following headers (with each row containing correct values for these fields):
 	
 	* externalSampleID
 	* sequencer
@@ -53,9 +53,9 @@ The needed file can be found at: `target/HadoopPipelineApplicationWithDependenci
 Note: While this is enough to create an executable jar, for more advanced usage (such as requirements for the TestNG tests and updating), please refer to its own [README](./hadoop-pipeline-application/README.md).
 
 ### Creating a tools.tar.gz
-On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux (tested on a Hadoop cluster running CentOS 6.7) and OS X (tested on v10.10.5). If these tool archives do not work or the download link does not, please use the steps below to create a new one.
+On the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) a `.tar.gz` can be found containing several testing files and an already prepared tools archive for archive for Linux (tested on a Hadoop cluster running CentOS 6.7) and OS X (tested on v10.10.5). If these tool archives do not work or the download link does not, please use the steps below to create a new one. Creating static libraries might include different/additional steps.
 
-IMPORTANT: When creating binaries, be sure to compile them on the same operating system as the Hadoop cluster uses. Furthermore, these created binaries need to be static!
+IMPORTANT: When creating binaries, be sure to compile them on the same operating system as the Hadoop cluster uses. It is advisable to create a statically-linked binaries (in contrary to the current versions available on the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/), which are dynamically-linked).
 
 1. Create a `tools` directory. to store the tools in.
 2. Add the following tools to the created directory:
@@ -73,7 +73,7 @@ The final hierachy of the created tools `.tar.gz` should look as follows:
 			|- bwa
 			|- info.xml
 
-IMPORTANT: Be sure to use the exact naming as shown above! Only the archive name itself does not matter.
+IMPORTANT: Be sure to use the naming as shown above! It is of vital importance that the path to the `info.xml` is exactly as shown here!
 
 The `info.xml` file contains information of all tools present in the archive and should adhere to [this](./hadoop-pipeline-application/src/main/resources/tools_archive_info.xsd) Schema. An example of a correct `info.xml` file can be found within the tools archives present in the `.tar.gz` which can be downloaded from the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/).
 
@@ -94,13 +94,15 @@ The `info.xml` file contains information of all tools present in the archive and
 			yarn jar HalvadeUploaderWithLibs.jar -1 local/path/to/150616_SN163_0648_AHKYLMADXX_L2/reads1.fastq.gz -2 local/path/to/150616_SN163_0648_AHKYLMADXX_L2/reads2.fastq.gz -O /path/to/hdfs/output/folder/150616_SN163_0648_AHKYLMADXX_L2 -size 124
 			yarn jar HalvadeUploaderWithLibs.jar -1 local/path/to/150702_SN163_0649_BHJYNKADXX_L5/reads1.fastq.gz -2 local/path/to/150702_SN163_0649_BHJYNKADXX_L5/reads2.fastq.gz -O /path/to/hdfs/output/folder/150702_SN163_0649_BHJYNKADXX_L5 -size 124
 	
-	In this case, the 3 different samples represent sequenced data from 3 different lanes. to view a samplesheet.csv that would adhere to the above files, please review the file `hadoop-pipeline/hadoop-pipeline-application/src/test/resources/samplesheets/valid_minimal.csv` which can be found in the [externally downloadable files archive](https://molgenis26.target.rug.nl/downloads/hadoop/). Do note that the used samplesheet should only contain the lines for the actual used samples within the job. While this might seem cumbersome, this this removes the necessity to go through all reads to look which samples are present before actually writing the results back to HDFS.
+	In this case, the 3 different samples represent sequenced data from 3 different lanes. To view a samplesheet.csv that would adhere to the above files, please review the file `hadoop-pipeline/hadoop-pipeline-application/src/test/resources/samplesheets/valid_minimal.csv` which can be found in the full archive on the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/). Do note that the used samplesheet should only contain the lines for the actual used samples within the job. While this might seem cumbersome, this removes the necessity to go through all reads to look which samples are present before actually writing the results back to HDFS.
 	
 	* To make proper use of data locality, be sure that a single created file is smaller than the HDFS block size. You can check the set HDFS block size of a given file using `hdfs dfs -stat %o /hdfs/path/to/file`.
+	
 	* See [https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing](https://github.com/ddcap/halvade/wiki/Halvade-Preprocessing) for more information about the halvade upload tool.
+
 2. Run the HadoopPipelineApplication:
 	
-		yarn jar HadoopPipelineApplicationWithDependencies.jar -t /hdfs/path/to/tools.tar.gz -i /hdfs/path/to/input/folder/ -o /hdfs/path/to/output/folder/ -r /hdfs/path/to/bwa/reference/data/file.fa(sta) -s /hdfs/path/to/samples/info/file.csv -b /hdfs/path/to/groups/file.bed
+		yarn jar HadoopPipelineApplicationWithDependencies.jar [-D <hadoop-config-key>=<hadoop-config-value>]... -t /hdfs/path/to/tools.tar.gz -i /hdfs/path/to/input/folder/ -o /hdfs/path/to/output/folder/ -r /hdfs/path/to/bwa/reference/data/file.fa(sta) -s /hdfs/path/to/samples/info/file.csv -b /hdfs/path/to/groups/file.bed
 	
 	* When using multiple samples, a `-i /hdfs/path/to/input/folder` can be given for each input folder (sample). Alternatively, `-D mapreduce.input.fileinputformat.input.dir.recursive=true` can be given to use all input files in the given input folder and the subfolders. Do note that when using recursiveness input, the given input folder should have a structure similar to:
 	
@@ -121,7 +123,7 @@ The `info.xml` file contains information of all tools present in the archive and
 					|- halvade_1_0.fq.gz
 					|- etc.
 	
-	While the samplesheet belonging to this data can be stored in the main `/hdfs/input/folder/`, it is suggested to store it elsewhere as initially it will be treated as an input file and only during the Mapper phase itself it will be ignored. When using a separate `-i` argument for each input path, this does not matter at all as the shared parent directory isn't processed itself. An added bonus to using separate `-i` arguments is that each input sample can have a completely different path. The only thing that matters is that the final directory which stores the actual files uploaded using the halvade upload tool is coherent to the expected format so it can be used to retrieve which sample is stored in that directory (together with a samplesheet csv file).
+	While the samplesheet belonging to this data can be stored in the main `/hdfs/input/folder/`, it is suggested to store it elsewhere as initially it will be treated as an input file and only after a mapper retrieved it as an input file it will be ignored. When using a separate `-i` argument for each input path, this does not matter at all as the shared parent directory isn't processed itself. An added bonus to using separate `-i` arguments is that each input sample can have a completely different path. The only thing that matters is that the final directory which stores the actual files uploaded using the halvade upload tool is coherent to the expected naming format so it can be used to retrieve which sample is stored in that directory (together with a samplesheet csv file).
 	
 3. Download the results:
 	
@@ -132,6 +134,16 @@ The `info.xml` file contains information of all tools present in the archive and
 A class UML design was generated using the [Eclipse](https://eclipse.org/) plugin from [ObjectAid](http://www.objectaid.com/). This design can be found on the [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/). Do note that the image was software-generated, so no guarantee is given about the correctness of the image. Nevertheless, it should allow for a good initial overview of how the created Hadoop application tool functions.
 
 ## Troubleshooting
+
+__Problem:__
+
+The binaries from the tools archive that can be downloaded from [molgenis downloads page](https://molgenis26.target.rug.nl/downloads/hadoop/) cause issues.
+
+__Solution:__
+
+First of all, check if the correct OS archive is used. If this is the case, it is suggested to generate a new binary for the exact OS version the Hadoop cluster is running. Furthermore, do keep in mind that the currently available binaries are dynamically-linked, so this might also be the reason it might not work. So if the newly created binaries do not work either, try creating statically-linked binaries instead.
+
+---
 
 __Problem:__
 
@@ -173,9 +185,9 @@ __Problem:__
 The `-D` argument suggested does not work.
 
 __Solution:__
-Be sure to place the `-D` argument right behind the `myapplication.jar` argument on the command line:
+Be sure to place the `-D` argument right behind the `HalvadeUploaderWithLibs.jar` argument on the command line but before any application-specific arguments:
 
-	yarn jar myapplication.jar -D <key>=<value> <application-specific arguments here>
+	yarn jar HalvadeUploaderWithLibs.jar -D <key>=<value> <application-specific arguments here>
 
 As many `-D <key>=<value>` arguments can be placed as needed. Just be sure that each `<key>=<value>` pair is defined by a new `-D` argument.
  
@@ -185,7 +197,7 @@ __Problem:__
 When uploading my files to halvade, the block size on HDFS is smaller than a single `.fq.gz` file.
 
 __Solution:__
-Either use lower `-size` with the `HalvadeUploaderWithLibs.jar` or increase the HDFS block size. Increasing the HDFS block size can be done either in the cluster config files or by using `-D dfs.block.size=<size in bytes>` when running the `HalvadeUploaderWithLibs.jar`. Be sure to use a value that is a multiple of 512 when setting the HDFS block size. Furthermore, be sure to use a value for `-size` of the `HalvadeUploaderWithLibs.jar` that is slightly lower than the `dfs.block.size` (as otherwise a single uploaded file might still be slightly bigger).
+Either use lower `-size` with the `HalvadeUploaderWithLibs.jar` or increase the HDFS block size. Increasing the HDFS block size can be done either in the cluster config files or by using `-D dfs.block.size=<size in bytes>` when running the `HalvadeUploaderWithLibs.jar`. Be sure to use a value that is a multiple of 512 when setting the HDFS block size. Furthermore, be sure to use a value for `-size` of the `HalvadeUploaderWithLibs.jar` that is slightly lower than the `dfs.block.size` (as otherwise a single uploaded file might still be slightly bigger due to rounding per read pair).
 
 ---
 
