@@ -15,7 +15,7 @@ public class Sample
 	 * The platform used to generate the samples. Currently hardcoded as illumina sequence outputs are expected in
 	 * current pipeline.
 	 */
-	private static final String platform = "illumina";
+	private static final String PLATFORM = "illumina";
 
 	/**
 	 * The sample external sample ID.
@@ -120,7 +120,7 @@ public class Sample
 	public SAMReadGroupRecord getAsReadGroupRecord()
 	{
 		SAMReadGroupRecord record = new SAMReadGroupRecord(Integer.toString(lane));
-		record.setPlatform(platform);
+		record.setPlatform(PLATFORM);
 		record.setLibrary(
 				String.format("%1$s_%2$s_%3$s_%4$s_L%5$s", sequencingStartDate, sequencer, run, flowcell, lane));
 		record.setSample(externalSampleId);
