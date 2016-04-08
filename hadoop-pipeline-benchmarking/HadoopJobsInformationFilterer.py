@@ -299,9 +299,9 @@ def retrieveFromTree(tree, path):
 		nValues = len(values)
 		
 		if nValues == 0:
-			return 'n.a.'
+			return 'NA'
 		elif nValues > 1:
-			return 'invalid json object. "' + path + '" returns multiple values.'
+			raise Exception('Invalid json file. The following path returns multiple values:' + os.linesep + path)
 		else:
 			return values[0]
 	
@@ -315,7 +315,7 @@ def retrieveFromTree(tree, path):
 	
 	# If type is something else, process as 'unknown' but do not exit application.
 	else:
-		return 'field of unknown type: ' + str(type(values))
+		raise Exception('Invalid json file. The following path returns a value of unexpected type "' + str(type(values)) + '":' + os.linesep + path)
 
 def storeJobData(storedData, dataToStore):
 	"""
