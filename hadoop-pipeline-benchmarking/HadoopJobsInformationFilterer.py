@@ -384,7 +384,7 @@ def readFileAsJson(fileName):
 		fileName - String: Path to file that should be read.
 	"""
 	
-	with open(fileName) as dataFile:    
+	with open(fileName) as dataFile:
 		return json.load(dataFile)
 
 def generateTree(dirPath, fileName):
