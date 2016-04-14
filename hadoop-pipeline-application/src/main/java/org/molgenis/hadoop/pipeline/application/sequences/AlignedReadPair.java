@@ -56,9 +56,9 @@ public class AlignedReadPair
 	}
 
 	/**
-	 * Orders and evaluates whether the stored {@link SAMRecord}{@code s} are correct. Use this method if after
-	 * initialization the {@link AlignedRead}{@code s} have been adjusted. If a {@link AlignedRead#setRecords(List)} was
-	 * used, {@link #updateType()} can be used instead.
+	 * Updates both {@link AlignedRead}{@code s} and retrieves the {@link AlignedReadPair.Type} of this
+	 * {@link AlignedReadPair}. Use this method if after initialization the {@link AlignedRead}{@code s} have been
+	 * adjusted. If an {@link AlignedRead#setRecords(List)} was used, {@link #updateType()} can be used instead.
 	 */
 	public void update()
 	{
@@ -68,7 +68,7 @@ public class AlignedReadPair
 	}
 
 	/**
-	 * Evaluates whether the stored {@link SAMRecord}{@code s} are correct. This method does not call the
+	 * Retrieves the {@link AlignedReadPair.Type} of this {@link AlignedReadPair}. This method does not call the
 	 * {@link AlignedRead#update()} method for the stored {@link AlignedRead}{@code s}. This method can for example be
 	 * used if {@link AlignedRead#setRecords(List)} is called from one of the stored {@link AlignedRead}{@code s}, as
 	 * these already call their own {@link AlignedRead#update()} already. If the actual stored {@link List}{@code <}

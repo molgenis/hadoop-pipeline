@@ -104,9 +104,10 @@ public class AlignedRead
 	}
 
 	/**
-	 * Orders and evaluates whether the stored {@link SAMRecord}{@code s} are correct. Note that if the stored
-	 * {@link List} or the {@link SAMRecord}{@code s} in it are manipulated outside of this class, this method NEEDS TO
-	 * BE CALLED BEFORE DOING ANYTHING ELSE!
+	 * Orders the stored {@link SAMRecord}{@code s} using {@link #orderRecords()} and retrieves the
+	 * {@link AlignedRead.Type} of this {@link AlignedRead}. Call this method if the stored {@link List}{@code <}
+	 * {@link SAMRecord}{@code >} has been adjusted (outside of {@link AlignedRead#setRecords(List)}) after
+	 * initialization of the class instance.
 	 */
 	public void update()
 	{
