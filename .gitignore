@@ -10,13 +10,6 @@
 !/external_files.txt
 !/*/
 
-# External files archive info files that were added by extracting the archive over the project folder
-#archive_files.txt
-#archive_files_info.md
-
-# External file archives (if any were generated)
-#hadoop-pipeline_*.tar.gz
-
 # Tools directory (is a separate download)
 /hadoop-pipeline-tools/
 

@@ -22,11 +22,6 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 	 */
 	private Map<String, ImmutableList<Region>> contigRegions = new HashMap<>();
 
-	/**
-	 * Number of {@link Region}{@code s} stored.
-	 */
-	private int nRegions = 0;
-
 	@Override
 	public int size()
 	{
@@ -40,15 +35,7 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 	 */
 	public int numberOfRegions()
 	{
-		return nRegions;
-	}
-
-	/**
-	 * Calculates the number of {@link Region}{@code s} stored over all contigs.
-	 */
-	private int calculateNumberOfRegions()
-	{
-		nRegions = 0;
+		int nRegions = 0;
 		for (List<Region> regions : contigRegions.values())
 		{
 			nRegions += regions.size();
@@ -122,15 +109,8 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 		// Validates the input. Throws IllegalArgumentException if it fails.
 		validateInputKeyValuePair(key, value);
 
-		// Adds the key-value pair.
-		ImmutableList<Region> oldRegions = contigRegions.put(key, value);
-
-		// Calculates new size.
-		nRegions += value.size();
-		if (oldRegions != null) nRegions -= oldRegions.size();
-
-		// Returns old list or null.
-		return oldRegions;
+		// Adds the key-value pair and returns the old list (which can be null).
+		return contigRegions.put(key, value);
 	}
 
 	/**
@@ -144,9 +124,7 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 	@Override
 	public ImmutableList<Region> remove(Object key)
 	{
-		ImmutableList<Region> regions = contigRegions.remove(key);
-		if (regions != null) nRegions -= regions.size();
-		return regions;
+		return contigRegions.remove(key);
 	}
 
 	/**
@@ -167,14 +145,12 @@ public class ContigRegionsMap implements Map<String, ImmutableList<Region>>
 		}
 
 		contigRegions.putAll(m);
-		calculateNumberOfRegions();
 	}
 
 	@Override
 	public void clear()
 	{
 		contigRegions.clear();
-		nRegions = 0;
 	}
 
 	@Override

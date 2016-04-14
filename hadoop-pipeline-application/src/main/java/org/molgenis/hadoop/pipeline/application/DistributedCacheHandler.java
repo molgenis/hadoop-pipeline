@@ -16,6 +16,19 @@ import org.molgenis.hadoop.pipeline.application.inputdigestion.InputParser;
  */
 public class DistributedCacheHandler
 {
+	// Static instance variables for storing the archive positions stored in the distributed cache using
+	// addCacheToJob() from this class. Be sure the position numbers stored here reflect the order that
+	// the archives are added to the distributed cache in addCacheToJob().
+	private static final int TOOLS_ARCHIVE = 0;
+
+	// Static instance variables for storing the file positions stored in the distributed cache using
+	// addCacheToJob() from this class. Be sure the position numbers stored here reflect the order that
+	// the files are added to the distributed cache in addCacheToJob().
+	private static final int REFERENCE_FASTA_FILE = 0;
+	private static final int REFERENCE_DICT_FILE = 7;
+	private static final int BED_FILE = 8;
+	private static final int SAMPLES_INFO__FILE = 9;
+
 	/**
 	 * The object storing the files added to the distributed cache.
 	 */
@@ -76,9 +89,11 @@ public class DistributedCacheHandler
 		Job job = (Job) context;
 
 		// IMPORTANT: input order defines position in array for retrieval!!!
+		// Make sure the correct position number is stored in the static instance variables!
 		job.addCacheArchive(parser.getToolsArchiveLocation().toUri()); // [0]
 
 		// IMPORTANT: input order defines position in array for retrieval!!!
+		// Make sure the correct position number is stored in the static instance variables!
 		job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri()); // [0]
 		job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri()); // [1]
 		job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri()); // [2]
@@ -99,7 +114,7 @@ public class DistributedCacheHandler
 	 */
 	public String getToolsArchive() throws IOException
 	{
-		return getArchiveFromCache(0);
+		return getArchiveFromCache(TOOLS_ARCHIVE);
 	}
 
 	/**
@@ -134,7 +149,7 @@ public class DistributedCacheHandler
 	 */
 	public String getReferenceFastaFile() throws IOException
 	{
-		return getFileFromCache(0);
+		return getFileFromCache(REFERENCE_FASTA_FILE);
 	}
 
 	/**
@@ -145,7 +160,7 @@ public class DistributedCacheHandler
 	 */
 	public String getReferenceDictFile() throws IOException
 	{
-		return getFileFromCache(7);
+		return getFileFromCache(REFERENCE_DICT_FILE);
 	}
 
 	/**
@@ -156,7 +171,7 @@ public class DistributedCacheHandler
 	 */
 	public String getBedFile() throws IOException
 	{
-		return getFileFromCache(8);
+		return getFileFromCache(BED_FILE);
 	}
 
 	/**
@@ -167,7 +182,7 @@ public class DistributedCacheHandler
 	 */
 	public String getSamplesInfoFile() throws IOException
 	{
-		return getFileFromCache(9);
+		return getFileFromCache(SAMPLES_INFO__FILE);
 	}
 
 	/**

@@ -16,7 +16,7 @@ import org.molgenis.hadoop.pipeline.application.TestFile;
 import org.molgenis.hadoop.pipeline.application.TestFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
-import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPairType;
+import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPair;
 import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import org.testng.Assert;
@@ -137,23 +137,22 @@ public class HadoopPipelineMapperTester extends HadoopPipelineTester
 
 		// Validate enum counters.
 		Counters counters = mDriver.getCounters();
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_UNMAPPED).getValue(), 1);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MAPPED).getValue(), 8);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MULTIMAPPED).getValue(), 0);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.BOTH_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.BOTH_UNMAPPED).getValue(), 1);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.BOTH_MAPPED).getValue(), 8);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.BOTH_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.BOTH_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
 				0);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MAPPED).getValue(), 1);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.ONE_UNMAPPED_ONE_MAPPED).getValue(), 1);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.ONE_UNMAPPED_ONE_MULTIMAPPED).getValue(), 0);
 		Assert.assertEquals(
-				counters.findCounter(AlignedReadPairType.ONE_UNMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
+				counters.findCounter(AlignedReadPair.Type.ONE_UNMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
 				0);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.ONE_MAPPED_ONE_MULTIMAPPED).getValue(), 0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.ONE_MAPPED_ONE_MULTIMAPPED).getValue(), 0);
 		Assert.assertEquals(mDriver.getCounters()
-				.findCounter(AlignedReadPairType.ONE_MAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(), 0);
-		Assert.assertEquals(
-				counters.findCounter(AlignedReadPairType.ONE_MULTIMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(),
-				0);
-		Assert.assertEquals(counters.findCounter(AlignedReadPairType.INVALID).getValue(), 0);
+				.findCounter(AlignedReadPair.Type.ONE_MAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(), 0);
+		Assert.assertEquals(counters
+				.findCounter(AlignedReadPair.Type.ONE_MULTIMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY).getValue(), 0);
+		Assert.assertEquals(counters.findCounter(AlignedReadPair.Type.INVALID).getValue(), 0);
 	}
 
 	/**

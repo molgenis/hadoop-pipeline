@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
 import htsjdk.samtools.SAMRecord;
 
 /**
@@ -19,7 +21,7 @@ public class AlignedRead
 	/**
 	 * The alignment type of the read.
 	 */
-	private AlignedReadType type;
+	private Type type;
 
 	/**
 	 * Returns whether the {@code type} is {@link AlignedReadType#INVALID}. If so, returns {@code false}. If any other
@@ -29,7 +31,7 @@ public class AlignedRead
 	 */
 	public boolean isValid()
 	{
-		return type != AlignedReadType.INVALID;
+		return type != Type.INVALID;
 	}
 
 	/**
@@ -84,7 +86,7 @@ public class AlignedRead
 	 * 
 	 * @return {@link AlignedReadType}.
 	 */
-	public AlignedReadType getType()
+	public Type getType()
 	{
 		return type;
 	}
@@ -109,7 +111,7 @@ public class AlignedRead
 	public void update()
 	{
 		orderRecords();
-		type = AlignedReadType.determineType(records);
+		type = Type.determineType(records);
 	}
 
 	/**
@@ -127,4 +129,95 @@ public class AlignedRead
 			}
 		}
 	}
+
+	/**
+	 * The type of an {@link AlignedRead}.
+	 */
+	public enum Type
+	{
+		/**
+		 * The read did not map.
+		 */
+		UNMAPPED,
+
+		/**
+		 * The read mapped once.
+		 */
+		MAPPED,
+
+		/**
+		 * The read mapped and secondary/supplementary read(s) as well.
+		 */
+		MULTIMAPPED,
+
+		/**
+		 * Only a secondary/supplementary read(s) aligned, but not the primary read.
+		 */
+		MULTIMAPPED_SUPPLEMENTARY_ONLY,
+
+		/**
+		 * The data is deemed invalid.
+		 */
+		INVALID;
+
+		/**
+		 * Determines the {@link AlignedRead.Type} of a {@link List}{@code <}{@link SAMRecord}{@code >}. If the
+		 * {@link List}{@code <}{@link SAMRecord}{@code >} does not adhere to the requirements, returns
+		 * {@link AlignedRead.Type#INVALID}. Otherwise, returns one of the other possible types. Assumes the given
+		 * {@link List}{@code <}{@link SAMRecord}{@code >} is ordered using {@link AlignedRead#orderRecords()}.
+		 * 
+		 * @param records
+		 *            {@link List}{@code <}{@link SAMRecord}{@code >}
+		 * @return {@link AlignedRead.Type}
+		 */
+		private static Type determineType(List<SAMRecord> records)
+		{
+			// When list is empty, type is INVALID.
+			if (records.size() == 0) return INVALID;
+
+			// Retrieves first record and validates whether it is a primary record.
+			// As the input parameter 'records' is sorted using AlignedRead's orderRecords(),
+			// it can be assumed the primary record(s) are it the first position(s).
+			SAMRecord firstRecord = records.get(0);
+			if (firstRecord.isSecondaryOrSupplementary()) return INVALID;
+
+			// If there is only 1 record, it can either be mapped or unmapped.
+			if (records.size() == 1)
+			{
+				return firstRecord.getReadUnmappedFlag() ? UNMAPPED : MAPPED;
+			}
+			else // If there are multiple records:
+			{
+				// Validates that the second record is not a primary record.
+				if (!records.get(1).isSecondaryOrSupplementary()) return INVALID;
+
+				// If the records belong to a read pair read and includes records that are from the other read compared
+				// to the first record, returns INVALID.
+				if (firstRecord.getReadPairedFlag())
+				{
+					for (SAMRecord record : records)
+					{
+						if (record.getFirstOfPairFlag() != firstRecord.getFirstOfPairFlag()) return INVALID;
+					}
+				}
+
+				// Primary and supplementary reads can be mapped or only the latter.
+				return firstRecord.getReadUnmappedFlag() ? MULTIMAPPED_SUPPLEMENTARY_ONLY : MULTIMAPPED;
+			}
+		}
+
+		/**
+		 * Add +1 to the {@link TaskAttemptContext} counter of this {@link AlignedRead.Type} and returns itself as well.
+		 * 
+		 * @param context
+		 *            {@link TaskAttemptContext}
+		 * @return {@link AlignedRead.Type} Of this instance.
+		 */
+		public Type increment(TaskAttemptContext context)
+		{
+			context.getCounter(this).increment(1);
+			return this;
+		}
+	}
+
 }

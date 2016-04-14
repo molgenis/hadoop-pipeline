@@ -23,10 +23,9 @@ public class AlignedReadTypeTester
 		{ false };
 		boolean[] isUnmapped =
 		{ true };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.UNMAPPED);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.UNMAPPED);
 	}
 
 	/**
@@ -42,10 +41,9 @@ public class AlignedReadTypeTester
 		{ false };
 		boolean[] isUnmapped =
 		{ false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.MAPPED);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.MAPPED);
 	}
 
 	/**
@@ -61,10 +59,9 @@ public class AlignedReadTypeTester
 		{ true, false, true, true };
 		boolean[] isUnmapped =
 		{ false, false, false, false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.MULTIMAPPED);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.MULTIMAPPED);
 	}
 
 	/**
@@ -80,10 +77,9 @@ public class AlignedReadTypeTester
 		{ true, true, false, true };
 		boolean[] isUnmapped =
 		{ false, false, true, false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.MULTIMAPPED_SUPPLEMENTARY_ONLY);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.MULTIMAPPED_SUPPLEMENTARY_ONLY);
 	}
 
 	/**
@@ -99,10 +95,9 @@ public class AlignedReadTypeTester
 		{};
 		boolean[] isUnmapped =
 		{};
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.INVALID);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.INVALID);
 	}
 
 	/**
@@ -118,10 +113,9 @@ public class AlignedReadTypeTester
 		{ true };
 		boolean[] isUnmapped =
 		{ false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.INVALID);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.INVALID);
 	}
 
 	/**
@@ -137,10 +131,9 @@ public class AlignedReadTypeTester
 		{ true, true, true, true };
 		boolean[] isUnmapped =
 		{ false, false, false, false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.INVALID);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.INVALID);
 	}
 
 	/**
@@ -156,10 +149,9 @@ public class AlignedReadTypeTester
 		{ false, true, false, true };
 		boolean[] isUnmapped =
 		{ false, false, false, false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.INVALID);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.INVALID);
 	}
 
 	/**
@@ -175,10 +167,9 @@ public class AlignedReadTypeTester
 		{ false, true, true, true };
 		boolean[] isUnmapped =
 		{ false, false, false, false };
-		AlignedReadType actualType = AlignedReadType
-				.determineType(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
+		AlignedRead actualRead = new AlignedRead(generatePairedSamRecordList(isFirst, isSupplementary, isUnmapped));
 
-		Assert.assertEquals(actualType, AlignedReadType.INVALID);
+		Assert.assertEquals(actualRead.getType(), AlignedRead.Type.INVALID);
 	}
 
 	/**

@@ -5,32 +5,22 @@ package org.molgenis.hadoop.pipeline.application.cachedigestion;
  */
 public enum SamplesInfoFileField
 {
-	EXTERNALSAMPLEID
-	{
-		@Override
-		public String getName()
-		{
-			return "externalSampleID";
-		}
-	},
-	SEQUENCER, SEQUENCINGSTARTDATE
-	{
-		@Override
-		public String getName()
-		{
-			return "sequencingStartDate";
-		}
-	},
-	RUN, FLOWCELL, LANE;
+	EXTERNALSAMPLEID("externalSampleID"), SEQUENCER("sequencer"), SEQUENCINGSTARTDATE("sequencingStartDate"), RUN(
+			"run"), FLOWCELL("flowcell"), LANE("lane");
 
 	/**
-	 * Returns the name of the enum using the capitalization as expected to be used in the sample sheet files.
-	 * 
-	 * @return {@link String}
+	 * The name of a samples info field using capitalization.
 	 */
+	private String name;
+
 	public String getName()
 	{
-		return this.toString().toLowerCase();
+		return name;
+	}
+
+	private SamplesInfoFileField(String name)
+	{
+		this.name = name;
 	}
 
 	/**
