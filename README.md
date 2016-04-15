@@ -282,3 +282,28 @@ Reducer syslogs contain the following error:
 __Solution:__
 
 A single reducer processes too many regions. Try increasing the number of reducers to decrease the load of each individual reducer (and with that the number of files each reducer creates and writes output to).
+
+---
+
+__Problem:__
+
+When running the application locally on a pseudo-cluster, the following error occurs:
+
+	Exit code: 127
+	Stack trace: ExitCodeException exitCode=127:
+		at org.apache.hadoop.util.Shell.runCommand(Shell.java:545)
+		at org.apache.hadoop.util.Shell.run(Shell.java:456)
+		at org.apache.hadoop.util.Shell$ShellCommandExecutor.execute(Shell.java:722)
+		at org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor.launchContainer(DefaultContainerExecutor.java:212)
+		at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:302)
+		at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:82)
+		at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+		at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+		at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+		at java.lang.Thread.run(Thread.java:745)
+
+__Solution:__
+
+Try viewing the log files from the application attempt. If the message `/bin/bash: /bin/java: No such file or directory` is shown, please try [the following fix](http://stackoverflow.com/questions/33968422/bin-bash-bin-java-no-such-file-or-directory/34499058#34499058):
+
+	sudo ln -s /usr/bin/java /bin/java
