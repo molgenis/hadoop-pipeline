@@ -1,7 +1,11 @@
 package org.molgenis.hadoop.pipeline.application.sequences;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -186,14 +190,24 @@ public class AlignedReadPair
 		 */
 		private AlignedRead.Type secondAlignedReadType;
 
-		private AlignedRead.Type getFirstAlignedReadType()
-		{
-			return firstAlignedReadType;
-		}
+		/**
+		 * {@link Map} containing the available {@link AlignedReadPair.Type}{@code s} as values with as key their two
+		 * {@link AlignedRead.Type} as a {@link Set}.
+		 */
+		private static Map<Set<AlignedRead.Type>, AlignedReadPair.Type> typeMap = new HashMap<>();
 
-		private AlignedRead.Type getSecondAlignedReadType()
+		/**
+		 * Fills the {@code typeMap} with all available {@link AlignedReadPair.Type}{@code s}.
+		 */
+		static
 		{
-			return secondAlignedReadType;
+			for (Type alignedReadPairType : Type.values())
+			{
+				Set<AlignedRead.Type> key = new HashSet<>();
+				key.add(alignedReadPairType.firstAlignedReadType);
+				key.add(alignedReadPairType.secondAlignedReadType);
+				typeMap.put(key, alignedReadPairType);
+			}
 		}
 
 		/**
@@ -221,24 +235,22 @@ public class AlignedReadPair
 		 *            {@link AlignedRead.Type}
 		 * @param second
 		 *            {@link AlignedRead.Type}
-		 * @return {@link AlignedReadPairType}
+		 * @return {@link AlignedReadPair.Type}
 		 */
 		private static Type determineType(AlignedRead.Type first, AlignedRead.Type second)
 		{
-			// Goes through all possible options (excluding if one is invalid while another is not).
-			for (Type alignedReadPairType : Type.values())
-			{
-				// As only the combination of the two AlignedReadTypes matter, checks both possibilities.
-				if (alignedReadPairType.getFirstAlignedReadType().equals(first)
-						&& alignedReadPairType.getSecondAlignedReadType().equals(second))
-					return alignedReadPairType;
-				else if (alignedReadPairType.getFirstAlignedReadType().equals(second)
-						&& alignedReadPairType.getSecondAlignedReadType().equals(first))
-					return alignedReadPairType;
-			}
+			// Generates a Set from the two AlignedRead.Types.
+			Set<AlignedRead.Type> readTypes = new HashSet<>();
+			readTypes.add(first);
+			readTypes.add(second);
 
-			// If any of the tried possibilities did not match, returns invalid (including when only one is invalid).
-			return INVALID;
+			// Tries to retrieve the AlignedReadPair.Type belonging to the two AlignedRead.Types.
+			Type match = typeMap.get(readTypes);
+			// If a match was found, returns match.
+			if (match != null) return match;
+			// If no matching type was found (including of only 1 AlignedRead.Type was INVALID and not both), returns
+			// INVALID.
+			else return INVALID;
 		}
 
 		/**
