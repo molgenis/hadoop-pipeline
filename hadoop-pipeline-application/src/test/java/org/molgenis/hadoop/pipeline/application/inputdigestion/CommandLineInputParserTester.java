@@ -19,38 +19,37 @@ import org.testng.annotations.Test;
  */
 public class CommandLineInputParserTester extends Tester
 {
-	FileSystem fileSys;
+	private FileSystem fileSys;
 
-	String tools;
-	String inputDir;
-	String outputDir;
-	String bwaRefFasta;
-	String bwaRefFastaAmb;
-	String bwaRefFastaAnn;
-	String bwaRefFastaBwt;
-	String bwaRefFastaFai;
-	String bwaRefFastaPac;
-	String bwaRefFastaSa;
-	String bwaRefDict;
-	String bedFile;
-	String samplesInfoFile;;
+	private String tools;
+	private String inputDir;
+	private String outputDir;
+	private String bwaRefFasta;
+	private String bwaRefFastaAmb;
+	private String bwaRefFastaAnn;
+	private String bwaRefFastaBwt;
+	private String bwaRefFastaFai;
+	private String bwaRefFastaPac;
+	private String bwaRefFastaSa;
+	private String bwaRefDict;
+	private String bedFile;
+	private String samplesInfoFile;;
 
-	Path toolsAsPath;
-	ArrayList<Path> inputDirsAsPath;
-	Path outputDirAsPath;
-	Path bwaRefFastaAsPath;
-	Path bwaRefFastaAmbAsPath;
-	Path bwaRefFastaAnnAsPath;
-	Path bwaRefFastaBwtAsPath;
-	Path bwaRefFastaFaiAsPath;
-	Path bwaRefFastaPacAsPath;
-	Path bwaRefFastaSaAsPath;
-	Path bwaRefDictAsPath;
-	Path bedFileAsPath;
-	Path samplesInfoFileAsPath;
+	private Path toolsAsPath;
+	private ArrayList<Path> inputDirsAsPath;
+	private Path outputDirAsPath;
+	private Path bwaRefFastaAsPath;
+	private Path bwaRefFastaAmbAsPath;
+	private Path bwaRefFastaAnnAsPath;
+	private Path bwaRefFastaBwtAsPath;
+	private Path bwaRefFastaFaiAsPath;
+	private Path bwaRefFastaPacAsPath;
+	private Path bwaRefFastaSaAsPath;
+	private Path bwaRefDictAsPath;
+	private Path bedFileAsPath;
+	private Path samplesInfoFileAsPath;
 
-	String[] args;
-	String[] argsWithReadGroupLine;
+	private String[] args;
 
 	/**
 	 * Executes basic code needed for the tests.

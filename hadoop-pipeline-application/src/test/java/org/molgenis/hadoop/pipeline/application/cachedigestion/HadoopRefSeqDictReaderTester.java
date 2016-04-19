@@ -72,7 +72,8 @@ public class HadoopRefSeqDictReaderTester extends Tester
 	}
 
 	/**
-	 * Tests a .dict file that misses a a sequence tag ("@SQ") at the start of the line.
+	 * Tests a .dict file that misses a sequence tag ("@SQ") at the start of the line. Lines containing sequence
+	 * information but are missing the tag, are ignored.
 	 * 
 	 * @throws IOException
 	 */

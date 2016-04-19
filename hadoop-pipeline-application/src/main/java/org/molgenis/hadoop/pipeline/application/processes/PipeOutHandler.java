@@ -10,6 +10,9 @@ import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.Sink;
 
 /**
  * Digests a {@link InputStream} using a {@link Sink}{@code <T>}.
+ * 
+ * @param <T>
+ *            The output type that should be processed by a {@link Sink}.
  */
 public class PipeOutHandler<T> implements Runnable
 {
@@ -17,8 +20,9 @@ public class PipeOutHandler<T> implements Runnable
 	 * The stream that needs to be digested.
 	 */
 	private final InputStream inputStream;
+
 	/**
-	 * The {@code sink<T>} that will digest the {@code inputStream}.
+	 * The {@link Sink}{@code <}{@link T}{@code >} that will digest the {@code inputStream}.
 	 */
 	private final Sink<T> sink;
 
@@ -37,7 +41,7 @@ public class PipeOutHandler<T> implements Runnable
 	}
 
 	/**
-	 * Digest the {@link InputStream} using a {@link Sink}{@code <T>}.
+	 * Digest the {@link InputStream} using a {@link Sink}{@code <}{@link T}{@code >}.
 	 */
 	@Override
 	public void run()

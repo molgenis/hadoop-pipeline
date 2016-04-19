@@ -11,15 +11,20 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
-import org.molgenis.hadoop.pipeline.application.formats.BamOutputFormat;
+import org.molgenis.hadoop.pipeline.application.formats.SortedBamOutputFormat;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineMapper;
 import org.molgenis.hadoop.pipeline.application.mapreduce.HadoopPipelineReducer;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordGroupingComparator;
+import org.molgenis.hadoop.pipeline.application.partitioners.RegionSamRecordPartitioner;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import mr.wholeFile.WholeFileInputFormat;
@@ -38,7 +43,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	 * Default main class that calls {@link ToolRunner} to execute Hadoop MapReduce.
 	 * 
 	 * @param args
-	 *            {@link String}{@code []} user input.
+	 *            {@link String}{@code []} User input.
 	 */
 	public static void main(String[] args)
 	{
@@ -68,11 +73,10 @@ public class HadoopPipelineApplication extends Configured implements Tool
 	}
 
 	/**
-	 * Configures and executes Hadoop MapReduce job. IMPORTANT: Be sure that when retrieving items from the cache arrays
-	 * in the mapper/reducer, to use the positions as defined within this function!
+	 * Configures and executes Hadoop MapReduce job.
 	 * 
 	 * @param args
-	 *            {@link String}{@code []} (part of the) user input.
+	 *            {@link String}{@code []} User input excluding what is digested by {@link GenericOptionsParser}.
 	 * @throws IOException
 	 * @throws ParseException
 	 * @throws InterruptedException
@@ -89,6 +93,7 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		logger.debug("mapreduce.input.fileinputformat.input.dir.recursive: "
 				+ getConf().get("mapreduce.input.fileinputformat.input.dir.recursive"));
 
+		// Retrieves file system.
 		FileSystem fileSys = FileSystem.get(getConf());
 
 		// Digests application-specific command line arguments. Throws an Exception if the input arguments are invalid.
@@ -110,16 +115,30 @@ public class HadoopPipelineApplication extends Configured implements Tool
 		}
 		FileOutputFormat.setOutputPath(job, parser.getOutputDir());
 
+		// Sets custom partitioner & grouping comparator so it only uses the natural key.
+		// Sort comparator uses default behavior, so uses compareTo of Writable (composite key).
+		job.setPartitionerClass(RegionSamRecordPartitioner.class);
+		job.setGroupingComparatorClass(RegionSamRecordGroupingComparator.class);
+
 		// Sets Mapper/Reducer.
 		job.setMapperClass(HadoopPipelineMapper.class);
 		job.setReducerClass(HadoopPipelineReducer.class);
 
-		// Sets input/output formats.
+		// Sets input format.
 		job.setInputFormatClass(WholeFileInputFormat.class);
-		job.setOutputFormatClass(BamOutputFormat.class);
 
-		// Sets Mapper/Reducer output key/value.
-		job.setMapOutputKeyClass(BedFeatureWritable.class);
+		// Defines default output format as lazy so only files are generated when actually writing to context.
+		// Do not use NullOutputFormat (causes the MultipleOutputs to stay in a tmp dir as Job "did not create final
+		// output" due to the NullOutputFormat)!!!
+		job.setOutputFormatClass(LazyOutputFormat.class);
+		LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
+
+		// Sets a multiple outputs writer for writing different files from a single reducer.
+		MultipleOutputs.addNamedOutput(job, "recordsPerRegion", SortedBamOutputFormat.class, NullWritable.class,
+				SAMRecordWritable.class);
+
+		// Sets Mapper/Reducer output keys/values.
+		job.setMapOutputKeyClass(RegionWithSortableSamRecordWritable.class);
 		job.setMapOutputValueClass(SAMRecordWritable.class);
 		job.setOutputKeyClass(NullWritable.class);
 		job.setOutputValueClass(SAMRecordWritable.class);

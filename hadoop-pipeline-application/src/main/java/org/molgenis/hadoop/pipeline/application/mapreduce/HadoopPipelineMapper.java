@@ -1,7 +1,10 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.io.BytesWritable;
@@ -9,22 +12,25 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
-import org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.ContigRegionsMap;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopBedFormatFileReader;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.HadoopSamplesInfoFileReader;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
 import org.molgenis.hadoop.pipeline.application.cachedigestion.Sample;
 import org.molgenis.hadoop.pipeline.application.inputstreamdigestion.SamRecordSink;
 import org.molgenis.hadoop.pipeline.application.processes.PipeRunner;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.sequences.AlignedRead;
+import org.molgenis.hadoop.pipeline.application.sequences.AlignedReadPair;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMRecord;
-import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Hadoop MapReduce Job mapper.
  */
-public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeatureWritable, SAMRecordWritable>
+public class HadoopPipelineMapper
+		extends Mapper<Text, BytesWritable, RegionWithSortableSamRecordWritable, SAMRecordWritable>
 {
 	/**
 	 * Logger to write information to.
@@ -37,13 +43,15 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	private String bwaTool;
 
 	/**
-	 * Alignment reference fasta file location (with index file having the same prefix and being in the same directory.
+	 * Alignment reference fasta file location (with the other required files for alignment by bwa having the same
+	 * prefix and being in the same directory).
 	 */
 	private String alignmentReferenceFastaFile;
 
 	/**
-	 * Allows retrieval of the groups to which a specific {@link SAMRecord} belongs to (based upon the area the
-	 * {@link SAMRecord} was aligned to on the reference data compared to a BED file stored start/end regions).
+	 * Allows retrieval of the {@link Region}{@code s} to which a specific {@link SAMRecord} belongs to (based upon the
+	 * area the {@link SAMRecord} was aligned to on the reference data compared to a BED file stored contig/start/end
+	 * data).
 	 */
 	private SamRecordGroupsRetriever groupsRetriever;
 
@@ -77,28 +85,53 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 			SamRecordSink sink = new SamRecordSink()
 			{
+				// Stores aligned records belonging to a single read pair.
+				ArrayList<SAMRecord> readItems = new ArrayList<>();
+
 				@Override
-				public void digestStreamItem(SAMRecord item) throws IOException
+				protected void digestStreamItem(SAMRecord item) throws IOException
 				{
-					try
+					// As long as the records retrieved belong to the same read pair (or none are currently stored),
+					// adds them to the readItems.
+					if (readItems.isEmpty() || item.getReadName().equals(readItems.get(0).getReadName()))
 					{
-						// Creates value.
-						SAMRecordWritable samWritable = new SAMRecordWritable();
-						samWritable.set(item);
-
-						// Retrieves all keys for the value.
-						List<BEDFeature> groups = groupsRetriever.retrieveGroupsWithinRange(item);
-
-						// Writes a key-value pair for each key found that matched with the SAMRecord alignment
-						// position.
-						for (BEDFeature key : groups)
+						readItems.add(item);
+					}
+					// If a different read name is found, digests records from the previous read pair, clears the stored
+					// records and starts new collection of records starting with the current record.
+					else
+					{
+						try
 						{
-							context.write(new BedFeatureWritable(key), samWritable);
+							digestBwaOutputReadPairAlignments(context, readItems);
+						}
+						catch (InterruptedException e)
+						{
+							throw new RuntimeException(e);
+						}
+						finally
+						{
+							readItems.clear();
+							readItems.add(item);
 						}
 					}
-					catch (InterruptedException e)
+				}
+
+				@Override
+				protected void finishStreamProcessing() throws IOException
+				{
+					// Checks if there are any records stored in readItems after processing the last record, and if so,
+					// digests these.
+					if (!readItems.isEmpty())
 					{
-						throw new RuntimeException(e);
+						try
+						{
+							digestBwaOutputReadPairAlignments(context, readItems);
+						}
+						catch (InterruptedException e)
+						{
+							throw new RuntimeException(e);
+						}
 					}
 				}
 			};
@@ -111,10 +144,162 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	}
 
 	/**
+	 * Digests all {@link SAMRecord}{@code s} generated by BWA for a single read pair and writes it to {@link Context}.
+	 * 
+	 * @param context
+	 *            {@link Context}
+	 * @param records
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >}
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void digestBwaOutputReadPairAlignments(Context context, List<SAMRecord> records)
+			throws IOException, InterruptedException
+	{
+		// Digests the BWA output SAMRecords from a single read pair.
+		AlignedReadPair readPair = new AlignedReadPair(records);
+
+		// Increments the Hadoop enum counter by 1 for this read pair type.
+		readPair.getType().increment(context);
+
+		// What is written to context depends on the read pair type.
+		switch (readPair.getType())
+		{
+			case BOTH_UNMAPPED:
+				// Only write records of read pair to unmapped Region key.
+				writeReadPairRecordsToContext(context, Region.unmapped(), readPair);
+				break;
+			case ONE_UNMAPPED_ONE_MAPPED:
+			case ONE_UNMAPPED_ONE_MULTIMAPPED:
+			case ONE_UNMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY:
+				// First write records of read pair to unmapped region key -> no break!
+				writeReadPairRecordsToContext(context, Region.unmapped(), readPair);
+			case BOTH_MAPPED:
+			case BOTH_MULTIMAPPED:
+			case BOTH_MULTIMAPPED_SUPPLEMENTARY_ONLY:
+			case ONE_MAPPED_ONE_MULTIMAPPED:
+			case ONE_MAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY:
+			case ONE_MULTIMAPPED_ONE_MULTIMAPPED_SUPPLEMENTARY_ONLY:
+				// Write each record to every region any of the records matched with.
+				Set<Region> regions = retrieveReadPairUniqueRegions(readPair);
+				for (Region region : regions)
+				{
+					writeReadPairRecordsToContext(context, region, readPair);
+				}
+				break;
+			case INVALID:
+				// Only write records of read pair to invalid Region key.
+				writeReadPairRecordsToContext(context, Region.invalid(), readPair);
+		}
+	}
+
+	/**
+	 * Retrieve all unique {@link Region}{@code s} the {@link SAMRecord}{@code s} from an {@link AlignedReadPair} match
+	 * with.
+	 * 
+	 * @param readPair
+	 *            {@link AlignedReadPair}
+	 * @return {@link Set}{@code <}{@link Region}{@code >}
+	 */
+	private Set<Region> retrieveReadPairUniqueRegions(AlignedReadPair readPair)
+	{
+		// Generates a set containing the unique regions only.
+		Set<Region> regionsPairSet = new HashSet<>();
+		regionsPairSet.addAll(retrieveReadUniqueRegions(readPair.getFirst()));
+		regionsPairSet.addAll(retrieveReadUniqueRegions(readPair.getSecond()));
+		return regionsPairSet;
+	}
+
+	/**
+	 * Retrieve all unique {@link Region}{@code s} the {@link SAMRecord}{@code s} from an {@link AlignedRead} match
+	 * with.
+	 * 
+	 * @param read
+	 *            {@link AlignedRead}
+	 * @return {@link Set}{@code <}{@link Region}{@code >}
+	 */
+	private Set<Region> retrieveReadUniqueRegions(AlignedRead read)
+	{
+		// Generates a set containing the unique regions only.
+		Set<Region> regionsSet = new HashSet<>();
+
+		for (SAMRecord record : read.getRecords())
+		{
+			regionsSet.addAll(groupsRetriever.retrieveGroupsWithinRange(record));
+		}
+
+		return regionsSet;
+	}
+
+	/**
+	 * Write all {@link SAMRecord}{@code s} from an {@link AlignedReadPair} to the {@link Context} using the
+	 * {@link Region} as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output
+	 * key.
+	 * 
+	 * @param context
+	 *            {@link Context}
+	 * @param region
+	 *            {@link Region}
+	 * @param readPair
+	 *            {@link AlignedReadPair}
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void writeReadPairRecordsToContext(Context context, Region region, AlignedReadPair readPair)
+			throws IOException, InterruptedException
+	{
+		writeReadRecordToContexts(context, region, readPair.getFirst());
+		writeReadRecordToContexts(context, region, readPair.getSecond());
+	}
+
+	/**
+	 * Write all {@link SAMRecord}{@code s} from an {@link AlignedRead} to the {@link Context} using the {@link Region}
+	 * as part of the {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
+	 * 
+	 * @param context
+	 *            {@link Context}
+	 * @param region
+	 *            {@link Region}
+	 * @param read
+	 *            {@link AlignedRead}
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void writeReadRecordToContexts(Context context, Region region, AlignedRead read)
+			throws IOException, InterruptedException
+	{
+		for (SAMRecord record : read.getRecords())
+		{
+			writeRecordToContext(context, region, record);
+		}
+	}
+
+	/**
+	 * Write a single {@link SAMRecord} to the {@link Context} using the {@link Region} as part of the
+	 * {@link RegionWithSortableSamRecordWritable} to be used as {@link Mapper} output key.
+	 * 
+	 * @param context
+	 *            {@link Context}
+	 * @param region
+	 *            {@link Region}
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void writeRecordToContext(Context context, Region region, SAMRecord record)
+			throws IOException, InterruptedException
+	{
+		SAMRecordWritable recordWritable = new SAMRecordWritable();
+		recordWritable.set(record);
+		context.write(new RegionWithSortableSamRecordWritable(region, record), recordWritable);
+	}
+
+	/**
 	 * Digests the cache files that are needed into the required formats.
 	 * 
-	 * IMPORTANT: Be sure the exact same array order is used as defined in {@link HadoopPipelineApplication}!
-	 * 
+	 * @param context
+	 *            {@link Context}
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
@@ -127,7 +312,7 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 		// Retrieves the groups stored in the bed-file which can be used for SAMRecord grouping.
 		String bedFile = cacheHandler.getBedFile();
-		List<BEDFeature> possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
+		ContigRegionsMap possibleGroups = new HadoopBedFormatFileReader().read(bedFile);
 		groupsRetriever = new SamRecordGroupsRetriever(possibleGroups);
 
 		// Retrieves the samples stored in the samples information file.
@@ -140,10 +325,10 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 	 * 
 	 * @param inputSplitPath
 	 *            {@link String}
-	 * @return {@code true} if input split is a file with a name that starts with "halvade_" and ends with ".fq.gz",
-	 *         false if it has a file extension different to ".fq.gz".
+	 * @return {@code boolean} If input split is a file with a name that starts with "halvade_" and ends with ".fq.gz"
+	 *         returns {@code true}. If the file extension is different to ".fq.gz" returns {@code false}.
 	 * @throws IOException
-	 *             if the given input split is a ".fq.gz" file but does not start with "halvade_", throws an
+	 *             If the given input split is a ".fq.gz" file but does not start with "halvade_", throws an
 	 *             {@link Exception) as safety measure as the to-be-digested could be invalid due to being wrongly
 	 *             uploaded (or some other reason that should result in the file not being processed).
 	 */
@@ -152,16 +337,16 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 		// Retrieves the file name.
 		String fileName = FilenameUtils.getName(inputSplitPath);
 
-		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
-		if (fileName.endsWith(".fq.gz") && !fileName.startsWith("halvade_"))
-		{
-			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
-		}
-
 		// Non-".fq.gz" files return false.
 		if (!fileName.endsWith(".fq.gz"))
 		{
 			return false;
+		}
+
+		// If a .fq.gz file is found that starts with a different name than expected, throws an Exception.
+		if (!fileName.startsWith("halvade_"))
+		{
+			throw new IOException("Invalid .fq.gz file found: " + inputSplitPath);
 		}
 
 		//  Otherwise returns true.
@@ -170,14 +355,13 @@ public class HadoopPipelineMapper extends Mapper<Text, BytesWritable, BedFeature
 
 	/**
 	 * Returns the first found {@link Sample} that matches to the current input split (only one match should be present
-	 * in {@code this.samples}).
+	 * in {@link #samples}).
 	 * 
 	 * @param inputSplitPath
 	 *            {@link String}
-	 * @return {@link Sample} the {@link Sample} that matches with the {@code inputSplitPath}.
+	 * @return {@link Sample} The {@link Sample} that matches with the {@code inputSplitPath}.
 	 * @throws IOException
-	 *             if no {@link Sample} could be found within {@code this.samples} that matches the
-	 *             {@code inputSplitPath}.
+	 *             If no {@link Sample} could be found within {@link #samples} that matches the {@code inputSplitPath}.
 	 */
 	private Sample retrieveCorrectSample(String inputSplitPath) throws IOException
 	{

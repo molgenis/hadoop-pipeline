@@ -1,33 +1,26 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
+/**
+ * Represents a required field of a {@link Sample}.
+ */
 public enum SamplesInfoFileField
 {
-	EXTERNALSAMPLEID
-	{
-		@Override
-		public String getName()
-		{
-			return "externalSampleID";
-		}
-	},
-	SEQUENCER, SEQUENCINGSTARTDATE
-	{
-		@Override
-		public String getName()
-		{
-			return "sequencingStartDate";
-		}
-	},
-	RUN, FLOWCELL, LANE;
+	EXTERNALSAMPLEID("externalSampleID"), SEQUENCER("sequencer"), SEQUENCINGSTARTDATE("sequencingStartDate"), RUN(
+			"run"), FLOWCELL("flowcell"), LANE("lane");
 
 	/**
-	 * Returns the name of the enum using the capitalization as expected to be used in the sample sheet files.
-	 * 
-	 * @return {@link String}
+	 * The name of a samples info field using capitalization.
 	 */
+	private String name;
+
 	public String getName()
 	{
-		return this.toString().toLowerCase();
+		return name;
+	}
+
+	private SamplesInfoFileField(String name)
+	{
+		this.name = name;
 	}
 
 	/**
@@ -52,15 +45,15 @@ public enum SamplesInfoFileField
 	}
 
 	/**
-	 * Compares the name of this {@link Enum} (excluding the {@link Enum} type name) to a {@link String}. Ignores
+	 * Compares the name of this {@link Enum} (excluding the {@link Enum} class name) to a {@link String}. Ignores
 	 * capitalization during the comparison!
 	 * 
 	 * @param fieldName
 	 *            {@link String}
-	 * @return {@code true} if the {@link String} equals the name of the {@link Enum} (ignoring the {@link Enum} type
+	 * @return {@code true} if the {@link String} equals the name of the {@link Enum} (ignoring the {@link Enum} class
 	 *         name), otherwise false.
 	 */
-	boolean nameEquals(String fieldName)
+	public boolean nameEquals(String fieldName)
 	{
 		return this.toString().equals(fieldName.toUpperCase());
 	}

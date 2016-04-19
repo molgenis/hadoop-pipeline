@@ -50,6 +50,23 @@ public class HadoopToolsXmlReaderTester extends Tester
 	}
 
 	/**
+	 * Tests when an xml is given that contains a single tool node with optional information, which is valid.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testSingleValidToolWithOptionalInfo() throws IOException
+	{
+		Map<String, SAMProgramRecord> tools = reader.read(getClassLoader()
+				.getResource("tools_archive_xml_files/single_valid_tool_with_optional_info.xml").getFile());
+
+		Assert.assertEquals(tools.containsKey("bwa"), true);
+		Assert.assertEquals(tools.get("bwa").getId(), "bwa");
+		Assert.assertEquals(tools.get("bwa").getProgramName(), "bwa");
+		Assert.assertEquals(tools.get("bwa").getProgramVersion(), "0.7.12-r1039");
+	}
+
+	/**
 	 * Tests when an xml is given that contains a multiple tool nodes, all of them being valid.
 	 * 
 	 * @throws IOException
@@ -123,6 +140,27 @@ public class HadoopToolsXmlReaderTester extends Tester
 		{
 			reader.read(getClassLoader().getResource("tools_archive_xml_files/single_tool_missing_attribute.xml")
 					.getFile());
+		}
+		catch (IOException e)
+		{
+			// Retrieve the underlying exception.
+			throw e.getCause();
+		}
+	}
+
+	/**
+	 * Tests when a xml is given that contains a single tool node, which is missing a required child node in an optional
+	 * child node (so this required subchild is only required when the optional child is present).
+	 * 
+	 * @throws Throwable
+	 */
+	@Test(expectedExceptions = SAXParseException.class)
+	public void testSingleToolMissingSubChild() throws Throwable
+	{
+		try
+		{
+			reader.read(
+					getClassLoader().getResource("tools_archive_xml_files/single_tool_missing_subchild.xml").getFile());
 		}
 		catch (IOException e)
 		{

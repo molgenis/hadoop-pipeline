@@ -14,16 +14,20 @@ import org.apache.commons.io.FileUtils;
 public abstract class HadoopFileReader<T>
 {
 	/**
-	 * Wrapper for {@link #read(InputStream)}.
+	 * Wrapper for {@link #read(InputStream)}. The created {@link InputStream} is closed as well.
 	 * 
 	 * @param file
 	 *            {@link File}
 	 * @return {@code T}
 	 * @throws IOException
+	 * @see {@link #read(InputStream)
 	 */
 	public T read(File file) throws IOException
 	{
-		return read(FileUtils.openInputStream(file));
+		InputStream inputStream = FileUtils.openInputStream(file);
+		T data = read(inputStream);
+		inputStream.close();
+		return data;
 	}
 
 	/**
@@ -33,6 +37,7 @@ public abstract class HadoopFileReader<T>
 	 *            {@link String}
 	 * @return {@code T}
 	 * @throws IOException
+	 * @see {@link #read(File)
 	 */
 	public T read(String path) throws IOException
 	{

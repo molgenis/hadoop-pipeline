@@ -14,9 +14,9 @@ import org.apache.hadoop.mrunit.mapreduce.MapDriver;
 @SuppressWarnings("deprecation")
 public final class FileCacheSymlinkMapDriver<K1, V1, K2, V2> extends MapDriver<K1, V1, K2, V2>
 {
-	public FileCacheSymlinkMapDriver(Mapper<K1, V1, K2, V2> m)
+	public FileCacheSymlinkMapDriver(Mapper<K1, V1, K2, V2> mapper)
 	{
-		super(m);
+		super(mapper);
 	}
 
 	@Override

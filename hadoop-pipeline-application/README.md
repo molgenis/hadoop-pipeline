@@ -67,7 +67,7 @@ __Problem:__
 I'm getting an error saying `java.io.IOException: Cannot run program "/path/to/target/test-classes/tools/<binary name>": error=13, Permission denied`.
 
 __Solution:__
-Assuming you added the needed files by hand instead of using `TestNGPreprocessing.sh`, be sure that step 3 is done for ALL binaries.
+Assuming you added the needed files by hand instead of using `TestNGPreprocessing.sh`, be sure that step 3 from the answer above is done for ALL binaries.
 
 ---
 

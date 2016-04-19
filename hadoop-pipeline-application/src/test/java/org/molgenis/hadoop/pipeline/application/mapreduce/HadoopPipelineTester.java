@@ -1,15 +1,18 @@
 package org.molgenis.hadoop.pipeline.application.mapreduce;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.hadoop.mrunit.TestDriver;
+import org.apache.hadoop.mrunit.types.Pair;
+import org.molgenis.hadoop.pipeline.application.DistributedCacheHandler;
 import org.molgenis.hadoop.pipeline.application.Tester;
-import org.molgenis.hadoop.pipeline.application.mapreduce.drivers.FileCacheSymlinkMapDriver;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.SamFileHeaderGenerator;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
+import org.seqdoop.hadoop_bam.SAMRecordWritable;
 
 import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
@@ -27,28 +30,22 @@ public class HadoopPipelineTester extends Tester
 	private TestDriver<?, ?, ?> driver;
 
 	/**
-	 * Expected results bwa when using readgroup example L2. Can be generated with a terminal using:
-	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:2\tPL:illumina\tLB:150616_SN163_648_AHKYLMADXX_L2\tSM:sample2"
-	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L2.sam}
+	 * SAMFileHeader to add to the reads for comparison as it is lost when the mapper results are written to the
+	 * context. Only adds the @SQ tag which is vital as otherwise exceptions are thrown during comparison.
 	 */
-	private ArrayList<SAMRecord> bwaResultsL2;
+	private static SAMFileHeader samFileHeader;
 
 	/**
-	 * Expected results bwa when using readgroup example L5. Can be generated with a terminal using:
-	 * {@code /path/to/bwa mem -p -M -R "@RG\tID:5\tPL:illumina\tLB:150702_SN163_649_BHJYNKADXX_L5\tSM:sample3"
-	 * hadoop-pipeline-application/src/test/resources/reference_data/chr1_20000000-21000000.fa - <
-	 * hadoop-pipeline-application/src/test/resources/input_fastq_mini/mini_halvade_0_0.fq.gz >
-	 * hadoop-pipeline-application/src/test/resources/expected_bwa_outputs_mini/output_mini_L5.sam}
+	 * Runs some initial vital code for static variables/methods.
 	 */
-	private ArrayList<SAMRecord> bwaResultsL5;
-
-	/**
-	 * {@link SAMFileHeader} for storing sequence information so that {@link SAMRecord#getSAMString()} can be used
-	 * (after {@link SAMRecord#setHeader(SAMFileHeader)} is used).
-	 */
-	private SAMFileHeader samFileHeader;
+	static
+	{
+		// Generates a basic SAMFileHeader used for comparing SAMRecords (as the mapper output SAMRecords do not contain
+		// any header information this needs to be manually added afterwards).
+		samFileHeader = new SAMFileHeader();
+		samFileHeader
+				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
+	}
 
 	TestDriver<?, ?, ?> getDriver()
 	{
@@ -60,70 +57,30 @@ public class HadoopPipelineTester extends Tester
 		this.driver = driver;
 	}
 
-	ArrayList<SAMRecord> getBwaResultsL2()
-	{
-		return bwaResultsL2;
-	}
-
-	ArrayList<SAMRecord> getBwaResultsL5()
-	{
-		return bwaResultsL5;
-	}
-
 	/**
-	 * Returns an {@link ArrayList} that stores the data from both {@link #getBwaResultsL2()} and
-	 * {@link #getBwaResultsL5()}.
-	 * 
-	 * @return {@link ArrayList}{@code <}{@link SAMRecord}{@code >}
+	 * Sets the header created in {@link #generateSamFileHeader()} for the {@link SAMRecord}. As
+	 * {@link SAMRecordWritable} removes the {@link SAMFileHeader} from each {@link SAMRecord} during serialization,
+	 * some vital information needs to be added again before {@link SAMRecord#getSAMString()} can be used again. In the
+	 * actual application this header information is generated using
+	 * {@link SamFileHeaderGenerator#retrieveSamFileHeader(org.apache.hadoop.mapreduce.TaskAttemptContext)}. The
+	 * {@link SAMRecord#getSAMString()} is the vital part that is used when generating the output files and I/O
+	 * PipeRunner processes, so is the most important part to be checked whether it is valid.
+	 *
+	 * @param record
+	 *            {@link SAMRecord}
 	 */
-	ArrayList<SAMRecord> getAllBwaResults()
+	void setHeaderForRecord(SAMRecord record)
 	{
-		ArrayList<SAMRecord> allResults = new ArrayList<SAMRecord>();
-		allResults.addAll(bwaResultsL2);
-		allResults.addAll(bwaResultsL5);
-		return allResults;
-	}
-
-	SAMFileHeader getSamFileHeader()
-	{
-		return samFileHeader;
+		record.setHeader(samFileHeader);
 	}
 
 	/**
-	 * Loads/generates general data needed for testing.
-	 * 
-	 * @throws IOException
-	 */
-	@BeforeClass
-	public void beforeClass() throws IOException
-	{
-		bwaResultsL2 = readSamFile("expected_bwa_outputs_mini/output_mini_L2.sam");
-		bwaResultsL5 = readSamFile("expected_bwa_outputs_mini/output_mini_L5.sam");
-
-		samFileHeader = new SAMFileHeader();
-		// Generates SAMRecordFileheader SequenceDictionary based upon a @SQ tag with:
-		// @SQ\tSN:1\tLN:1000001
-		samFileHeader
-				.setSequenceDictionary(new SAMSequenceDictionary(Arrays.asList(new SAMSequenceRecord("1", 1000001))));
-	}
-
-	/**
-	 * Generates a new {@link FileCacheSymlinkMapDriver} for testing the {@link HadoopPipelineMapper}.
+	 * Adds needed files to the {@link MapDriver} cache. Be sure the order is exactly the same as in
+	 * {@link DistributedCacheHandler}!
 	 * 
 	 * @throws URISyntaxException
 	 */
-	@BeforeMethod
-	public void beforeMethod() throws URISyntaxException
-	{
-		addCacheToDriver();
-	}
-
-	/**
-	 * Adds needed files to the {@link MapDriver} chache.
-	 * 
-	 * @throws URISyntaxException
-	 */
-	private void addCacheToDriver() throws URISyntaxException
+	void addCacheToDriver() throws URISyntaxException
 	{
 		// IMPORTANT: input order defines position in array for retrieval in mapper/reducer!!!
 		driver.addCacheArchive(getClassLoader().getResource("tools.tar.gz").toURI());
@@ -139,5 +96,236 @@ public class HadoopPipelineTester extends Tester
 		driver.addCacheFile(getClassLoader().getResource("reference_data/chr1_20000000-21000000.dict").toURI());
 		driver.addCacheFile(getClassLoader().getResource("bed_files/chr1_20000000-21000000.bed").toURI());
 		driver.addCacheFile(getClassLoader().getResource("samplesheets/samplesheet.csv").toURI());
+	}
+
+	/**
+	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
+	 * 
+	 * @param pairsList
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
+	 */
+	void printOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> pairsList)
+	{
+		printOutput(pairsList, pairsList.size());
+	}
+
+	/**
+	 * Writes key:value pairs representing the mapper output to stdout for manual validation.
+	 * 
+	 * @param pairsList
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *            {@link SAMRecordWritable}{@code >>}
+	 * @param limit
+	 *            {@code int} The number of pairs to write to stdout.
+	 */
+	void printOutput(List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> pairsList, int limit)
+	{
+		// If the limit is higher than the actual list size, resets the limit.
+		if (limit > pairsList.size()) limit = pairsList.size();
+
+		System.out.format("%-36s%s%n", "region", "SAMRecord");
+		System.out.format("%-8s %-8s %-8s%n", "contig", "start", "end");
+
+		// Prints the results.
+		for (int i = 0; i < limit; i++)
+		{
+			Region group = pairsList.get(i).getFirst().get();
+			SAMRecord record = pairsList.get(i).getSecond().get();
+			setHeaderForRecord(record);
+
+			System.out.format("%8s:%8d:%8d%10s%s%n", group.getContig(), group.getStart(), group.getEnd(), "",
+					record.getSAMString().trim());
+		}
+	}
+
+	/**
+	 * Generates the expected {@link HadoopPipelineMapper} output.
+	 * 
+	 * @param bwaOutput
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >} The bwa output used to base expected output on.
+	 * @param regions
+	 *            {@link List}{@code <}{@link Region}{@code >} The groups used for defining keys.
+	 * @return {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *         {@link SAMRecordWritable} {@code >>}
+	 */
+	List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> generateExpectedMapperOutput(
+			List<SAMRecord> bwaOutput, List<Region> regions)
+	{
+		// Stores the created expected output.
+		List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput = new ArrayList<>();
+
+		// Stores records of a single read and starts with the first record.
+		ArrayList<SAMRecord> regionRecords = new ArrayList<>();
+		regionRecords.add(bwaOutput.get(0));
+
+		// Iterates through the other records.
+		for (int i = 1; i < bwaOutput.size(); i++)
+		{
+			SAMRecord currentRecord = bwaOutput.get(i);
+
+			// If the record is from the same read, adds it to regionRecords.
+			if (currentRecord.getReadName().equals(regionRecords.get(0).getReadName()))
+			{
+				regionRecords.add(currentRecord);
+			}
+
+			// Otherwise, generate expected output from the currently stored records and start an empty regionRecords
+			// starting with the current record.
+			else
+			{
+				addRecordRegionsToExpectedMapperOutput(expectedMapperOutput, regions, regionRecords);
+				regionRecords.clear();
+				regionRecords.add(currentRecord);
+			}
+		}
+
+		// If after the last iteration the regionRecords is not empty, creates expected output from it.
+		if (!regionRecords.isEmpty())
+		{
+			addRecordRegionsToExpectedMapperOutput(expectedMapperOutput, regions, regionRecords);
+		}
+
+		return expectedMapperOutput;
+	}
+
+	/**
+	 * Processes the given {@code regionRecords} using the {@code regions} and adds expected output to
+	 * {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>} To which the expected output should be added to.
+	 * @param regions
+	 *            {@link List}{@code <}{@link Region}{@code >} Used for generating the expected output. Defines part of
+	 *            the key for each output key-value pair.
+	 * @param regionRecords
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >} The aligned records (from a single read pair) which
+	 *            should be used together with the {@link Region}{@code s} for generating the expected output. Defines
+	 *            the value value of a key-value pair and also a part of the key.
+	 */
+	private void addRecordRegionsToExpectedMapperOutput(
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput,
+			List<Region> regions, ArrayList<SAMRecord> regionRecords)
+	{
+		// Stores the two primary records from the algined reads from a read pair.
+		SAMRecord firstPrimaryRecord = null;
+		SAMRecord secondPrimaryRecord = null;
+
+		// Iterates through the records to look for the two primary records. Expected mapper output is assumed to be
+		// valid so should only contain 1 primary record for both reads of the read pair.
+		for (SAMRecord regionRecord : regionRecords)
+		{
+			if (!regionRecord.isSecondaryOrSupplementary())
+			{
+				if (regionRecord.getFirstOfPairFlag()) firstPrimaryRecord = regionRecord;
+				else secondPrimaryRecord = regionRecord;
+			}
+		}
+
+		// If either primary record is unmapped, generates expected output with an unmapped region.
+		if (firstPrimaryRecord.getReadUnmappedFlag() || secondPrimaryRecord.getReadUnmappedFlag())
+		{
+			addRecordsListToExpectedMapperOutput(expectedMapperOutput, regionRecords, Region.unmapped());
+		}
+
+		// If either record is mapped, retrieve all regions any of the records map to and generate expected output.
+		if (!firstPrimaryRecord.getReadUnmappedFlag() || !secondPrimaryRecord.getReadUnmappedFlag())
+		{
+			List<Region> outputRegions = new ArrayList<>();
+
+			// Look for regions any of the records match with.
+			for (Region region : regions)
+			{
+				for (SAMRecord regionRecord : regionRecords)
+				{
+					// If a single record matches, adds it to the outputRegions and continue to the next Region.
+					if (checkIfRecordIsInRegionRange(regionRecord, region))
+					{
+						outputRegions.add(region);
+						break;
+					}
+				}
+			}
+
+			// Add the records with the regions to the expected output.
+			for (Region outputRegion : outputRegions)
+			{
+				addRecordsListToExpectedMapperOutput(expectedMapperOutput, regionRecords, outputRegion);
+			}
+
+		}
+	}
+
+	/**
+	 * Checks whether the given {@code record} is in range of the {@code region}.
+	 * 
+	 * @param outputRegions
+	 *            {@link List}{@code <}{@link Region}{@code >}
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @param region
+	 *            {@link Region}
+	 * @return {@code boolean} If a {@code record} is in range of the {@code region} returns {@code true}. Returns
+	 *         {@code false} if a {@code record} is unmapped, mapped to a different contig or mapped on the same contig
+	 *         but not within range.
+	 */
+	private boolean checkIfRecordIsInRegionRange(SAMRecord record, Region region)
+	{
+		// If comparison is done with a record from a read pair that is not mapped, returns false.
+		if (record.getContig() == null) return false;
+
+		// If region is from a different contig, they do not match.
+		if (!record.getContig().equals(region.getContig())) return false;
+
+		// Checks positions If within range range returns true, otherwise returns false.
+		if ((record.getStart() >= region.getStart() && record.getStart() <= region.getEnd())
+				|| (record.getEnd() >= region.getStart() && record.getEnd() <= region.getEnd()))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Adds all {@code records} to the {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>}
+	 * @param records
+	 *            {@link List}{@code <}{@link SAMRecord}{@code >}
+	 * @param region
+	 *            {@link Region}
+	 */
+	private void addRecordsListToExpectedMapperOutput(
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput,
+			List<SAMRecord> records, Region region)
+	{
+		for (SAMRecord record : records)
+		{
+			addRecordToExpectedMapperOutput(expectedMapperOutput, record, region);
+		}
+	}
+
+	/**
+	 * Adds the {code record} to the {@code expectedMapperOutput}.
+	 * 
+	 * @param expectedMapperOutput
+	 *            {@link List}{@code <}{@link Pair}{@code <}{@link RegionWithSortableSamRecordWritable}{@code , }
+	 *            {@link SAMRecordWritable} {@code >>}
+	 * @param record
+	 *            {@link SAMRecord}
+	 * @param region
+	 *            {@link Region}
+	 */
+	private void addRecordToExpectedMapperOutput(
+			List<Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>> expectedMapperOutput, SAMRecord record,
+			Region region)
+	{
+		SAMRecordWritable writable = new SAMRecordWritable();
+		writable.set(record);
+		expectedMapperOutput.add(new Pair<RegionWithSortableSamRecordWritable, SAMRecordWritable>(
+				new RegionWithSortableSamRecordWritable(region, record), writable));
 	}
 }

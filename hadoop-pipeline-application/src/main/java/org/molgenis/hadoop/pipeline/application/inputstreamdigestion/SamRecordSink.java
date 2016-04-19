@@ -35,6 +35,7 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 			{
 				digestStreamItem(samIterator.next());
 			}
+			finishStreamProcessing();
 		}
 		finally
 		{
@@ -51,4 +52,11 @@ public abstract class SamRecordSink extends Sink<SAMRecord>
 	 */
 	@Override
 	protected abstract void digestStreamItem(SAMRecord item) throws IOException;
+
+	/**
+	 * Allows for some final processes after the last {@link SAMRecord} is digested. Defaults to no behavior.
+	 */
+	protected void finishStreamProcessing() throws IOException
+	{
+	}
 }

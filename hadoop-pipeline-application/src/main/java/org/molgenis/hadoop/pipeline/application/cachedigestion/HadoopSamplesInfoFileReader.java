@@ -58,7 +58,7 @@ public class HadoopSamplesInfoFileReader extends HadoopFileReader<List<Sample>>
 			Integer lanePos;
 
 			@Override
-			public void digestStreamItem(String item) throws IOException
+			protected void digestStreamItem(String item) throws IOException
 			{
 				try
 				{

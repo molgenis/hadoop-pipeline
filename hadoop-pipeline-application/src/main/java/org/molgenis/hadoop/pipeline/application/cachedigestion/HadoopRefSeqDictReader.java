@@ -64,12 +64,6 @@ public class HadoopRefSeqDictReader extends HadoopFileReader<SAMSequenceDictiona
 							}
 							sqLen = Integer.parseInt(split.substring(3));
 						}
-
-						// Skips any further elements if sequence name and length are retrieved.
-						if (sqName != null && sqLen != -1)
-						{
-							break;
-						}
 					}
 
 					// Throws exception if no sequence name or length was found (or if length < 1).

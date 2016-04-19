@@ -21,9 +21,24 @@ import org.testng.annotations.Test;
  */
 public class WorkDirSymlinkManagerTester extends Tester
 {
+	/**
+	 * The file system.
+	 */
 	private FileSystem fileSys;
+
+	/**
+	 * A test file to create a symlink to.
+	 */
 	private Path bwaRefFasta;
+
+	/**
+	 * A test file to create a symlink to.
+	 */
 	private Path bwaRefFastaAmb;
+
+	/**
+	 * A test file to create a symlink to.
+	 */
 	private Path bwaRefFastaAnn;
 
 	@BeforeClass
@@ -119,5 +134,4 @@ public class WorkDirSymlinkManagerTester extends Tester
 			file.delete();
 		}
 	}
-
 }

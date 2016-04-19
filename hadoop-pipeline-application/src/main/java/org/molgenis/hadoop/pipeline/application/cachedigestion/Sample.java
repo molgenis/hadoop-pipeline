@@ -1,20 +1,51 @@
 package org.molgenis.hadoop.pipeline.application.cachedigestion;
 
+import static java.util.Objects.requireNonNull;
+
 import htsjdk.samtools.SAMReadGroupRecord;
 
 /**
- * Information about the data that represents a single {@link Sample}.
+ * Information about the data that represents a single {@link Sample}. Can be used to find which data belongs to which
+ * sample and to add identifying information to this data. IMPORTANT: {@link SAMReadGroupRecord#setPlatform(String)} is
+ * defined hardcoded!!!
  */
 public class Sample
 {
-	// Retrieved sample information fields that can be used to find which data belongs to which sample and to add
-	// identifying information to this data within the application/created output.
+	/**
+	 * The platform used to generate the samples. Currently hardcoded as illumina sequence outputs are expected in
+	 * current pipeline.
+	 */
+	private static final String PLATFORM = "illumina";
+
+	/**
+	 * The sample external sample ID.
+	 */
 	private String externalSampleId;
+
+	/**
+	 * The used sequencer of the sample.
+	 */
 	private String sequencer;
+
+	/**
+	 * The sequencing start date.
+	 */
 	private int sequencingStartDate;
+
+	/**
+	 * The run number.
+	 */
 	private int run;
+
+	/**
+	 * The sample flowcell.
+	 */
 	private String flowcell;
-	private int lane; // is the @RG ID
+
+	/**
+	 * The lane number.
+	 */
+	private int lane; // Is the @RG ID.
 
 	public String getExternalSampleId()
 	{
@@ -89,7 +120,7 @@ public class Sample
 	public SAMReadGroupRecord getAsReadGroupRecord()
 	{
 		SAMReadGroupRecord record = new SAMReadGroupRecord(Integer.toString(lane));
-		record.setPlatform("illumina");
+		record.setPlatform(PLATFORM);
 		record.setLibrary(
 				String.format("%1$s_%2$s_%3$s_%4$s_L%5$s", sequencingStartDate, sequencer, run, flowcell, lane));
 		record.setSample(externalSampleId);
@@ -112,8 +143,13 @@ public class Sample
 	 * @param lane
 	 *            {@code int}
 	 */
-	Sample(String externalSampleId, String sequencer, int sequencingStartDate, int run, String flowcell, int lane)
+	public Sample(String externalSampleId, String sequencer, int sequencingStartDate, int run, String flowcell,
+			int lane)
 	{
+		requireNonNull(externalSampleId);
+		requireNonNull(sequencer);
+		requireNonNull(flowcell);
+
 		this.externalSampleId = externalSampleId;
 		this.sequencer = sequencer;
 		this.sequencingStartDate = sequencingStartDate;

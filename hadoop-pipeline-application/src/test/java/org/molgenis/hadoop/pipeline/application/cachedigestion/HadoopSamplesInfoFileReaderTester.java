@@ -22,7 +22,7 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	/**
 	 * The expected valid samples.
 	 */
-	ArrayList<Sample> expectedValidSamples;
+	private ArrayList<Sample> expectedValidSamples;
 
 	/**
 	 * Creates a {@link HadoopToolsXmlReader} needed for testing.
@@ -88,6 +88,17 @@ public class HadoopSamplesInfoFileReaderTester extends Tester
 	public void testHeaderIsAnEmptyLine() throws IOException
 	{
 		reader.read(getClassLoader().getResource("samplesheets/header_empty_line.csv").getFile());
+	}
+
+	/**
+	 * Test when the header of the csv file is missing.
+	 * 
+	 * @throws IOException
+	 */
+	@Test(expectedExceptions = IOException.class)
+	public void testHeaderLineIsMissing() throws IOException
+	{
+		reader.read(getClassLoader().getResource("samplesheets/missing_header_line.csv").getFile());
 	}
 
 	/**

@@ -6,16 +6,15 @@ import java.util.Iterator;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.molgenis.hadoop.pipeline.application.writables.BedFeatureWritable;
+import org.molgenis.hadoop.pipeline.application.cachedigestion.Region;
+import org.molgenis.hadoop.pipeline.application.writables.RegionWithSortableSamRecordWritable;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
-
-import htsjdk.tribble.bed.BEDFeature;
 
 /**
  * Hadoop MapReduce Job reducer.
  */
 public class HadoopPipelineReducer
-		extends Reducer<BedFeatureWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
+		extends Reducer<RegionWithSortableSamRecordWritable, SAMRecordWritable, NullWritable, SAMRecordWritable>
 {
 	/**
 	 * Collector for reducer output.
@@ -36,17 +35,18 @@ public class HadoopPipelineReducer
 	 * Function run on a key with an {@link Iterable} containing the values belonging to that key.
 	 */
 	@Override
-	protected void reduce(BedFeatureWritable key, Iterable<SAMRecordWritable> values, Context context)
+	protected void reduce(RegionWithSortableSamRecordWritable key, Iterable<SAMRecordWritable> values, Context context)
 			throws IOException, InterruptedException
 	{
-		// Retrieve the BEDFeature from the Writable.
-		BEDFeature bedFeature = key.get();
+		// Retrieve the Region from the Writable.
+		Region region = key.get();
 
 		// Writes the aligned SAMRecord data.
 		Iterator<SAMRecordWritable> iterator = values.iterator();
 		while (iterator.hasNext())
 		{
-			outputCollector.write(NullWritable.get(), iterator.next(), generateOutputFileName(bedFeature));
+			outputCollector.write("recordsPerRegion", NullWritable.get(), iterator.next(),
+					generateOutputFileName(region));
 		}
 	}
 
@@ -62,14 +62,14 @@ public class HadoopPipelineReducer
 	/**
 	 * Generates a {@link String} containing the start of the file name prefix to where the output should be written to
 	 * (inside the output directory). The actual output file name might slightly differ however (for example by having
-	 * something like {@code -r-<reducer number>} appended after the given name).
+	 * something like {@code -r-<reducer number>} appended behind the given name).
 	 * 
-	 * @param bedFeature
-	 *            {@link BEDFeature} used to define the file name.
-	 * @return {@link String} file name to be used.
+	 * @param region
+	 *            {@link Region} Used to define the file name.
+	 * @return {@link String} File name to be used.
 	 */
-	private String generateOutputFileName(BEDFeature bedFeature)
+	private String generateOutputFileName(Region region)
 	{
-		return bedFeature.getContig() + "-" + bedFeature.getStart() + "-" + bedFeature.getEnd();
+		return region.getContig() + "-" + region.getStart() + "-" + region.getEnd();
 	}
 }

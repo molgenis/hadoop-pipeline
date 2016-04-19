@@ -3,12 +3,12 @@ package org.molgenis.hadoop.pipeline.application;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.net.URI;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputParser;
+import org.molgenis.hadoop.pipeline.application.inputdigestion.InputParser;
 
 /**
  * Class for adding archives/files to the distributed cache from a Hadoop MapReduce Job and retrieval of these
@@ -16,15 +16,32 @@ import org.molgenis.hadoop.pipeline.application.inputdigestion.CommandLineInputP
  */
 public class DistributedCacheHandler
 {
+	// Static instance variables for storing the archive positions stored in the distributed cache using
+	// addCacheToJob() from this class. Be sure the position numbers stored here reflect the order that
+	// the archives are added to the distributed cache in addCacheToJob().
+	private static final int TOOLS_ARCHIVE = 0;
+
+	// Static instance variables for storing the file positions stored in the distributed cache using
+	// addCacheToJob() from this class. Be sure the position numbers stored here reflect the order that
+	// the files are added to the distributed cache in addCacheToJob().
+	private static final int REFERENCE_FASTA_FILE = 0;
+	private static final int REFERENCE_DICT_FILE = 7;
+	private static final int BED_FILE = 8;
+	private static final int SAMPLES_INFO__FILE = 9;
+
 	/**
 	 * The object storing the files added to the distributed cache.
 	 */
-	JobContext context;
-	boolean isJob = false;
+	private JobContext context;
 
 	/**
-	 * Creates a new {@link DistributedCacheHandler} for handling the distributed cache of a Hadoop MapReduce Job. Using
-	 * this initialization, files can be added and retrieved from the distributed cache.
+	 * Stores whether the instance is created using a {@link Job} or not.
+	 */
+	private boolean isJob = false;
+
+	/**
+	 * Creates a new {@link DistributedCacheHandler} for handling the distributed cache of a Hadoop MapReduce
+	 * {@link Job}. Using this initialization, files can be added and retrieved from the distributed cache.
 	 * 
 	 * @param context
 	 *            {@link Job}
@@ -61,9 +78,9 @@ public class DistributedCacheHandler
 	 * archives/files.
 	 * 
 	 * @param parser
-	 *            {@link CommandLineInputParser}
+	 *            {@link InputParser}
 	 */
-	public void addCacheToJob(CommandLineInputParser parser)
+	public void addCacheToJob(InputParser parser)
 	{
 		// Quick validation if the JobContext is a Job.
 		if (!isJob) return;
@@ -72,9 +89,11 @@ public class DistributedCacheHandler
 		Job job = (Job) context;
 
 		// IMPORTANT: input order defines position in array for retrieval!!!
+		// Make sure the correct position number is stored in the static instance variables!
 		job.addCacheArchive(parser.getToolsArchiveLocation().toUri()); // [0]
 
 		// IMPORTANT: input order defines position in array for retrieval!!!
+		// Make sure the correct position number is stored in the static instance variables!
 		job.addCacheFile(parser.getAlignmentReferenceFastaFile().toUri()); // [0]
 		job.addCacheFile(parser.getAlignmentReferenceFastaAmbFile().toUri()); // [1]
 		job.addCacheFile(parser.getAlignmentReferenceFastaAnnFile().toUri()); // [2]
@@ -88,22 +107,22 @@ public class DistributedCacheHandler
 	}
 
 	/**
-	 * {@link URI} of the tools archive stored in {@link JobContext#getCacheArchives()}.
+	 * {@link String} of the tools archive stored in {@link JobContext#getCacheArchives()}.
 	 * 
 	 * @return {@link String}
 	 * @throws IOException
 	 */
 	public String getToolsArchive() throws IOException
 	{
-		return FilenameUtils.getName(context.getCacheArchives()[0].toString());
+		return getArchiveFromCache(TOOLS_ARCHIVE);
 	}
 
 	/**
-	 * {@link String} of the information xml file from the tools archive stored in {@link JobContext#getCacheArchives()}
-	 * .
+	 * {@link String} of the information xml file from the tools archive stored in {@link #getToolsArchive()}.
 	 * 
 	 * @return {@link String}
 	 * @throws IOException
+	 * @see {@link #getToolsArchive()}
 	 */
 	public String getInfoXmlFileFromToolsArchive() throws IOException
 	{
@@ -111,10 +130,11 @@ public class DistributedCacheHandler
 	}
 
 	/**
-	 * {@link String} of the bwa tool from the tools archive stored in {@link JobContext#getCacheArchives()}.
+	 * {@link String} of the bwa tool from the tools archive stored in {@link #getToolsArchive()}.
 	 * 
 	 * @return {@link String}
 	 * @throws IOException
+	 * @see {@link #getToolsArchive()}
 	 */
 	public String getBwaToolFromToolsArchive() throws IOException
 	{
@@ -129,7 +149,7 @@ public class DistributedCacheHandler
 	 */
 	public String getReferenceFastaFile() throws IOException
 	{
-		return FilenameUtils.getName(context.getCacheFiles()[0].toString());
+		return getFileFromCache(REFERENCE_FASTA_FILE);
 	}
 
 	/**
@@ -140,7 +160,7 @@ public class DistributedCacheHandler
 	 */
 	public String getReferenceDictFile() throws IOException
 	{
-		return FilenameUtils.getName(context.getCacheFiles()[7].toString());
+		return getFileFromCache(REFERENCE_DICT_FILE);
 	}
 
 	/**
@@ -151,7 +171,7 @@ public class DistributedCacheHandler
 	 */
 	public String getBedFile() throws IOException
 	{
-		return FilenameUtils.getName(context.getCacheFiles()[8].toString());
+		return getFileFromCache(BED_FILE);
 	}
 
 	/**
@@ -162,6 +182,32 @@ public class DistributedCacheHandler
 	 */
 	public String getSamplesInfoFile() throws IOException
 	{
-		return FilenameUtils.getName(context.getCacheFiles()[9].toString());
+		return getFileFromCache(SAMPLES_INFO__FILE);
+	}
+
+	/**
+	 * Get the location of the archive added to the distributed cache on position {@code pos}.
+	 * 
+	 * @param pos
+	 *            {@code int}
+	 * @return {@link String} Archive path.
+	 * @throws IOException
+	 */
+	private String getArchiveFromCache(int pos) throws IOException
+	{
+		return FilenameUtils.getName(context.getCacheArchives()[pos].toString());
+	}
+
+	/**
+	 * Get the location of the file added to the distributed file on position {@code pos}.
+	 * 
+	 * @param pos
+	 *            {@code int}
+	 * @return {@link String} File path.
+	 * @throws IOException
+	 */
+	private String getFileFromCache(int pos) throws IOException
+	{
+		return FilenameUtils.getName(context.getCacheFiles()[pos].toString());
 	}
 }

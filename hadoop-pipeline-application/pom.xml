@@ -57,8 +57,10 @@
 									<mainClass>org.molgenis.hadoop.pipeline.application.HadoopPipelineApplication</mainClass>
 								</transformer>
 								<!-- prevent license duplications -->
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer">
-								</transformer>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+								<!-- fix for Error: java.io.IOException: No FileSystem for scheme: hdfs,
+									 see http://stackoverflow.com/questions/17265002/hadoop-no-filesystem-for-scheme-file -->
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
 							</transformers>
 							<!-- file name of shaded jar -->
 							<finalName>HadoopPipelineApplicationWithDependencies</finalName>
@@ -82,11 +84,23 @@
 			<artifactId>hadoop-bam</artifactId>
 			<version>7.3.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
+		
 
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>6.9.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -96,11 +110,5 @@
 			<classifier>hadoop2</classifier>
 			<scope>test</scope>
 		</dependency>
-		<!-- Possibly for TestNG MRUnit MultipleOutputs testing, though currently bugged: https://issues.apache.org/jira/browse/MRUNIT-213 -->
-		<!-- <dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-testng</artifactId>
-			<version>1.6.3</version>
-		</dependency> -->
 	</dependencies>
 </project>

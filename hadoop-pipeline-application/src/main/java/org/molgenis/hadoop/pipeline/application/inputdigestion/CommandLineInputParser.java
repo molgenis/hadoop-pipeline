@@ -32,9 +32,9 @@ public class CommandLineInputParser extends InputParser
 	 * Initiates parsing of the command line.
 	 * 
 	 * @param fileSys
-	 *            {@link FileSystem} current {@link FileSystem}.
+	 *            {@link FileSystem} The current {@link FileSystem}.
 	 * @param args
-	 *            {@link String}{@code []} user input.
+	 *            {@link String}{@code []} User input.
 	 * @throws ParseException
 	 * @throws IOException
 	 */

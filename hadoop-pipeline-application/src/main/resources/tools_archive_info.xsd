@@ -4,17 +4,32 @@
 	<xs:element name="id" type="xs:string" />
 	<xs:element name="name" type="xs:string" />
 	<xs:element name="version" type="xs:string" />
+	<xs:element name="website" type="xs:string" />
+	<xs:element name="type" type="xs:string" />
+	<xs:element name="link" type="xs:string" />
 	
 	<!-- definition of attributes -->
 	<xs:attribute name="fileName" type="xs:string"/>
 	
 	<!-- definition of complex elements -->
+	<xs:element name="license">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="type" maxOccurs="unbounded" />
+				<xs:element ref="link" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	
 	<xs:element name="tool">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="id" />
 				<xs:element ref="name" />
 				<xs:element ref="version" />
+				<xs:element ref="website" minOccurs="0" />
+				<xs:element ref="license" minOccurs="0" />
 			</xs:sequence>
 			<xs:attribute ref="fileName" use="required" />
 		</xs:complexType>

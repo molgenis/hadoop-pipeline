@@ -1,10 +1,11 @@
-bin/
-target/
-test-output/
-src/test/resources/*
-!src/test/resources/character_replacer/
-.classpath
-.project
+# ignore all files/directories except the explicitly mentioned ones. Should protect against trying to commit while running TestNG tests using the FileCacheSymlinkDrivers.
+/*
+!pom.xml
+!README.md
+!testng.xml
+!TestNGPreprocessing.sh
+!/src/
 
-#directory name that can be used to locally create UML diagrams
-uml-diagrams/
+# Ignores the resources except written tests scripts.
+/src/test/resources/*
+!/src/test/resources/character_replacer/
